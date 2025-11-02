@@ -247,7 +247,6 @@ func dragComponent() -> bool: # returns whether or not an object is being dragge
 	# clamp to bounds
 	if dragMode == DRAG_MODE.POSITION: dragPosition += Vector2(dragOffset)
 	else: dragPosition -= parentPosition
-	print(dragPosition)
 	if componentDragged is Lock:
 		var topLeft:Vector2 = componentDragged.getOffset()
 		var bottomRight:Vector2 = componentDragged.getOffset()+componentDragged.parent.size-Vector2.ONE

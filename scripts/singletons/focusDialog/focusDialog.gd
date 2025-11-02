@@ -153,8 +153,25 @@ func _process(_delta) -> void:
 		visible = true
 		if above: position = editor.worldspaceToScreenspace(focused.position + Vector2(focused.size.x/2,0)) + Vector2(0,-8)
 		else: position = editor.worldspaceToScreenspace(focused.position + Vector2(focused.size.x/2,focused.size.y)) + Vector2(0,8)
+		var halfWidth:float = getWidth()/2
+		%speechBubbler.position.x = 0
+		if position.x < halfWidth:
+			%speechBubbler.position.x = max(position.x-halfWidth,10-halfWidth)
+			position.x = halfWidth
+		if position.x + halfWidth > editor.gameViewportCont.size.x:
+			%speechBubbler.position.x = min(position.x+halfWidth-editor.gameViewportCont.size.x,halfWidth-10)
+			position.x = editor.gameViewportCont.size.x - halfWidth
 	else:
 		visible = false
+
+func getWidth() -> float:
+	match focused.get_script():
+		KeyBulk: return keyDialog.get_child(0).size.x
+		Door: return doorDialog.get_child(0).size.x
+		Player: return playerDialog.get_child(0).size.x
+		KeyCounter: return keyCounterDialog.get_child(0).size.x
+		Goal: return goalDialog.get_child(0).size.x
+		_: return 0
 
 func focusComponentAdded(type:GDScript, index:int) -> void:
 	if type == Lock:

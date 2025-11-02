@@ -133,6 +133,7 @@ stretch_mode = 0
 
 [node name="doorDialog" type="Control" parent="." groups=["modUI"]]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 0
 script = ExtResource("11_drywk")
 
