@@ -67,7 +67,6 @@ func focusComponent(component:Lock, _new:bool) -> void:
 	if %doorAxialNumberEdit.visible:
 		if !main.interacted: main.interact(%doorAxialNumberEdit)
 	elif %partialBlastSettings.visible:
-		print("here")
 		if !main.interacted: main.interact(%partialBlastNumeratorEdit.realEdit)
 	else: main.deinteract()
 

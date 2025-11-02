@@ -316,6 +316,7 @@ class PropertyChange extends Change:
 		component.queue_redraw()
 		if game.editor.focusDialog.focused == component: game.editor.focusDialog.focus(component)
 		elif game.editor.focusDialog.componentFocused == component: game.editor.focusDialog.focusComponent(component)
+		if game.editor.findProblems: game.editor.findProblems.findProblems(component)
 	
 	func _to_string() -> String:
 		return "<PropetyChange:"+str(id)+"."+str(property)+"->"+str(after)+">"
