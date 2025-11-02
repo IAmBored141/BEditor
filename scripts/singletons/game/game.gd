@@ -314,7 +314,9 @@ func fasterAnims() -> void:
 	fastAnimSpeed = min(fastAnimSpeed+0.05, 1)
 
 func playTest(spawn:PlayerSpawn) -> void:
+	var starting:bool = false
 	if playState == PLAY_STATE.EDIT:
+		starting = true
 		player = preload("res://scenes/player.tscn").instantiate()
 		player.game = self
 		add_child(player)
@@ -330,12 +332,12 @@ func playTest(spawn:PlayerSpawn) -> void:
 	editor.componentDragged = null
 	changes.bufferSave()
 
-	gameChanges.start()
+	if starting: gameChanges.start()
 	for object in objects.values():
-		object.start()
+		if starting: object.start()
 		object.queue_redraw()
 	for component in components.values():
-		component.start()
+		if starting: component.start()
 		component.queue_redraw()
 
 func pauseTest() -> void:

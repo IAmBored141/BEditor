@@ -246,6 +246,7 @@ func dragComponent() -> bool: # returns whether or not an object is being dragge
 	if componentDragged is not GameObject: parentPosition = componentDragged.parent.position
 	# clamp to bounds
 	dragPosition += Vector2(dragOffset)
+	if dragMode != DRAG_MODE.POSITION: dragPosition += dragPivotRect.size
 	if componentDragged is Lock:
 		var topLeft:Vector2 = componentDragged.getOffset()
 		var bottomRight:Vector2 = componentDragged.getOffset()+componentDragged.parent.size-Vector2.ONE
@@ -263,6 +264,7 @@ func dragComponent() -> bool: # returns whether or not an object is being dragge
 		if dragPosition.x < topLeft.x or dragPosition.y < topLeft.y: dragPosition += ceil(Vector2.ZERO.max(topLeft-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
 		if dragMode == DRAG_MODE.POSITION and (dragPosition.x > bottomRight.x or dragPosition.y > bottomRight.y): dragPosition += floor(Vector2.ZERO.min(bottomRight-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
 	dragPosition -= Vector2(dragOffset)
+	if dragMode != DRAG_MODE.POSITION: dragPosition -= dragPivotRect.size
 	match dragMode:
 		DRAG_MODE.POSITION:
 			if componentDragged is KeyCounterElement:

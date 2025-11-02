@@ -357,6 +357,7 @@ func start() -> void:
 	animPart = 0
 	propertyGameChangedDo(&"gateOpen")
 	complexCheck()
+	if type == TYPE.GATE: gateCheck(game.player)
 	super()
 
 func stop() -> void:
@@ -638,6 +639,7 @@ func setGlitch(setColor:Game.COLOR) -> void:
 			gameChanges.addChange(GameChanges.PropertyChange.new(game, lock, &"curseGlitchMimic", setColor))
 			lock.queue_redraw()
 		queue_redraw()
+	if type == TYPE.GATE: gateCheck(game.player)
 
 class Debris extends Node2D:
 	const FRAME:Texture2D = preload("res://assets/game/door/debris/frame.png")
