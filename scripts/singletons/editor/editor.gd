@@ -33,6 +33,7 @@ var dragOffset:Vector2 # the offset for position dragging
 var dragPivotRect:Rect2 # the pivot for size dragging
 var previousDragPosition:Vector2i # to check whether or not a drag would do anything
 
+var lockBufferConvert:bool = false
 var connectionSource:GameObject # for pulling connections between remote locks and doors
 
 var tileSize:Vector2i = Vector2i(32,32)
@@ -95,12 +96,24 @@ func _gui_input(event:InputEvent) -> void:
 					MOUSE_BUTTON_WHEEL_UP: zoomCamera(1.25)
 					MOUSE_BUTTON_WHEEL_DOWN: zoomCamera(0.8)
 			# modes
+			#print(lockBufferConvert)
 			if isLeftUnclick(event) or isRightUnclick(event):
-				if componentDragged and sizeDragging():
-					if !mods.active(&"NstdLockSize") and componentDragged is Lock and componentDragged.parent.type != Door.TYPE.SIMPLE:
-						componentDragged._coerceSize()
-					if componentDragged is GameObject: focusDialog.focus(componentDragged)
-					else: focusDialog.focusComponent(componentDragged)
+				if componentDragged:
+					if sizeDragging():
+						if !mods.active(&"NstdLockSize") and componentDragged is Lock and componentDragged.parent.type != Door.TYPE.SIMPLE:
+							componentDragged._coerceSize()
+						if componentDragged is GameObject: focusDialog.focus(componentDragged)
+						else: focusDialog.focusComponent(componentDragged)
+					elif dragMode == DRAG_MODE.POSITION:
+						if lockBufferConvert:
+							lockBufferConvert = false
+							var remoteLock = changes.addChange(Changes.CreateComponentChange.new(game,RemoteLock,{&"position":componentDragged.position+componentDragged.parent.position})).result
+							for property in Lock.PROPERTIES:
+								if property not in [&"id", &"position", &"parentId", &"index"]:
+									changes.addChange(Changes.PropertyChange.new(game,remoteLock,property,componentDragged.get(property)))
+							focusDialog.focus(remoteLock)
+							remoteLock._connectTo(componentDragged.parent)
+							changes.addChange(Changes.DeleteComponentChange.new(game,componentDragged))
 				changes.bufferSave()
 				componentDragged = null
 			# set mouse cursor
@@ -250,6 +263,7 @@ func startSizeDrag(component:GameComponent, pivot:SIZE_DRAG_PIVOT=SIZE_DRAG_PIVO
 func dragComponent() -> bool: # returns whether or not an object is being dragged, for laziness
 	if !componentDragged: return false
 	if mouseTilePosition == previousDragPosition and componentDragged is not KeyCounterElement: return true
+	lockBufferConvert = false
 	previousDragPosition = mouseTilePosition
 	var dragPosition:Vector2 = mouseTilePosition
 	var parentPosition:Vector2 = Vector2.ZERO
@@ -262,10 +276,10 @@ func dragComponent() -> bool: # returns whether or not an object is being dragge
 		var bottomRight:Vector2 = componentDragged.getOffset()+componentDragged.parent.size-Vector2.ONE
 		# this shit sucks
 		if dragPosition.x < topLeft.x or dragPosition.y < topLeft.y:
-			if mods.active(&"C1"): pass
+			if mods.active(&"C1"): lockBufferConvert = true
 			elif !mods.active(&"DisconnectedLock"): dragPosition += ceil(Vector2.ZERO.max(topLeft-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
 		if dragMode == DRAG_MODE.POSITION and (dragPosition.x > bottomRight.x or dragPosition.y > bottomRight.y):
-			if mods.active(&"C1"): pass
+			if mods.active(&"C1"): lockBufferConvert = true
 			elif !mods.active(&"DisconnectedLock"): dragPosition += floor(Vector2.ZERO.min(bottomRight-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
 	elif componentDragged is not KeyCounterElement and !mods.active(&"OutOfBounds"):
 		var topLeft:Vector2 = game.levelBounds.position

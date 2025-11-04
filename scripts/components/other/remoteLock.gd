@@ -209,6 +209,7 @@ func checkDoors() -> void:
 	for door in doors:
 		if door.active: any = true
 	gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"active",any))
+	queue_redraw()
 
 func propertyGameChangedDo(property:StringName) -> void:
 	if property == &"active":
