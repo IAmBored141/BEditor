@@ -24,6 +24,7 @@ func _updateSearch() -> void:
 	var search:String = objectSearch.text.to_lower()
 	var resultCount:int = 0
 	for object in objects:
+		if !mods.objectAvailable(object): continue
 		if search == "" or matchesSearch(object, search):
 			var result = preload("res://scenes/searchResult.tscn").instantiate()
 			result.setResult(object)
@@ -39,10 +40,10 @@ func matchesSearch(object:GDScript, search:String) -> bool:
 		if keyword.to_lower().find(search) != -1: return true
 	return false
 
-func objectSelected(object:GDScript) -> void:
+func objectSelected(object:GDScript, quiet:bool=false) -> void:
 	%other.icon = object.SEARCH_ICON
 	selected = object
-	editor.modes.setMode(Editor.MODE.OTHER)
+	if !quiet: editor.modes.setMode(Editor.MODE.OTHER)
 
 func _searchSubmitted():
 	if firstResult: objectSelected(firstResult)

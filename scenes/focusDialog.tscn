@@ -388,12 +388,21 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="remoteLock" type="PanelContainer" parent="doorDialog/c"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"DialogPanelContainer"
 
-[node name="doorsHandler" type="HFlowContainer" parent="doorDialog/c/remoteLock"]
+[node name="c" type="MarginContainer" parent="doorDialog/c/remoteLock"]
+layout_mode = 2
+
+[node name="scroll" type="ScrollContainer" parent="doorDialog/c/remoteLock/c"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="doorsHandler" type="HFlowContainer" parent="doorDialog/c/remoteLock/c/scroll"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 script = ExtResource("31_xwnfa")
 buttonGroup = SubResource("ButtonGroup_xwnfa")
 metadata/_custom_type_script = "uid://2iqmgcrc5wpq"

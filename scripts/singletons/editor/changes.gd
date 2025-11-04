@@ -154,7 +154,7 @@ class CreateComponentChange extends Change:
 		if parent is Door: parent.locksParent.add_child(component)
 		else: parent.add_child(component)
 
-		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusComponentAdded(type, prop[&"index"])
+		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])
 
 		await component.ready
 		component.isReady = true
@@ -180,12 +180,12 @@ class CreateComponentChange extends Change:
 				parent.elements[elementIndex].index -= 1
 
 		if game.editor.findProblems: game.editor.findProblems.componentRemoved(dictionary[id])
-		dictionary[prop[&"id"]].deleted()
+		dictionary[id].deleted()
 
 		dictionary[id].queue_free()
 		dictionary.erase(id)
 
-		if parent and parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusComponentRemoved(type, prop[&"index"])
+		if parent and parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerRemoved(type, prop[&"index"])
 	
 	func _to_string() -> String:
 		return "<CreateComponentChange:"+str(id)+">"
@@ -242,7 +242,7 @@ class DeleteComponentChange extends Change:
 		dictionary[prop[&"id"]].queue_free()
 		dictionary.erase(prop[&"id"])
 
-		if parent and parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusComponentRemoved(type, prop[&"index"])
+		if parent and parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerRemoved(type, prop[&"index"])
 	
 	func undo() -> void:
 		var component:Variant
@@ -276,7 +276,7 @@ class DeleteComponentChange extends Change:
 		if parent is Door: parent.locksParent.add_child(component)
 		else: parent.add_child(component)
 
-		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusComponentAdded(type, prop[&"index"])
+		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])
 
 		await component.ready
 		component.isReady = true
@@ -390,8 +390,8 @@ class ArrayAppendChange extends Change:
 		else: dictionary = game.objects
 		do()
 
-	func do() -> void: dictionary[id].get(array).append(after)
-	func undo() -> void: dictionary[id].get(array).pop_back()
+	func do() -> void: dictionary[id].get(array).append(after); dictionary[id].queue_redraw()
+	func undo() -> void: dictionary[id].get(array).pop_back(); dictionary[id].queue_redraw()
 
 class ArrayElementChange extends Change:
 	# changes element of array
@@ -413,8 +413,8 @@ class ArrayElementChange extends Change:
 		else: dictionary = game.objects
 		do()
 
-	func do() -> void: dictionary[id].get(array)[index] = Changes.copy(after)
-	func undo() -> void: dictionary[id].get(array)[index] = Changes.copy(before)
+	func do() -> void: dictionary[id].get(array)[index] = Changes.copy(after); dictionary[id].queue_redraw()
+	func undo() -> void: dictionary[id].get(array)[index] = Changes.copy(before); dictionary[id].queue_redraw()
 
 class ArrayPopAtChange extends Change:
 	# pops at array index
@@ -423,7 +423,6 @@ class ArrayPopAtChange extends Change:
 	var index:int
 	var before:Variant
 	var dictionary:Dictionary
-
 
 	func _init(_game:Game,component:GameComponent,_array:StringName,_index:int) -> void:
 		game = _game
@@ -435,8 +434,8 @@ class ArrayPopAtChange extends Change:
 		else: dictionary = game.objects
 		do()
 
-	func do() -> void: dictionary[id].get(array).pop_at(index)
-	func undo() -> void: dictionary[id].get(array).insert(index,Changes.copy(before))
+	func do() -> void: dictionary[id].get(array).pop_at(index); dictionary[id].queue_redraw()
+	func undo() -> void: dictionary[id].get(array).insert(index,Changes.copy(before)); dictionary[id].queue_redraw()
 
 class ComponentArrayAppendChange extends Change:
 	# appends to array of components
@@ -445,20 +444,30 @@ class ComponentArrayAppendChange extends Change:
 	var afterId:int
 	var dictionary:Dictionary
 	var elementDictionary:Dictionary
+	var elementType:GDScript
+	var index:int
 
 	func _init(_game:Game,component:GameComponent,_array:StringName,after:GameComponent) -> void:
 		game = _game
 		id = component.id
 		afterId = after.id
 		array = _array
+		elementType = after.get_script()
 		if component.get_script() in Changes.NON_OBJECT_COMPONENTS: dictionary = game.components
 		else: dictionary = game.objects
-		if after.get_script() in Changes.NON_OBJECT_COMPONENTS: elementDictionary = game.components
+		if elementType in Changes.NON_OBJECT_COMPONENTS: elementDictionary = game.components
 		else: elementDictionary = game.objects
+		index = len(component.get(array))
 		do()
 
-	func do() -> void: dictionary[id].get(array).append(elementDictionary[afterId])
-	func undo() -> void: dictionary[id].get(array).pop_back()
+	func do() -> void:
+		dictionary[id].get(array).append(elementDictionary[afterId])
+		game.editor.focusDialog.focusHandlerAdded(elementType, index)
+		dictionary[id].queue_redraw()
+	func undo() -> void:
+		dictionary[id].get(array).pop_back()
+		game.editor.focusDialog.focusHandlerRemoved(elementType, index)
+		dictionary[id].queue_redraw()
 
 class ComponentArrayElementChange extends Change:
 	# changes element of array of components
@@ -483,8 +492,8 @@ class ComponentArrayElementChange extends Change:
 		else: elementDictionary = game.objects
 		do()
 
-	func do() -> void: dictionary[id].get(array)[index] = elementDictionary[afterId]
-	func undo() -> void: dictionary[id].get(array)[index] = elementDictionary[beforeId]
+	func do() -> void: dictionary[id].get(array)[index] = elementDictionary[afterId]; dictionary[id].queue_redraw()
+	func undo() -> void: dictionary[id].get(array)[index] = elementDictionary[beforeId]; dictionary[id].queue_redraw()
 
 class ComponentArrayPopAtChange extends Change:
 	# pops at array of components index
@@ -494,6 +503,7 @@ class ComponentArrayPopAtChange extends Change:
 	var beforeId:int
 	var dictionary:Dictionary
 	var elementDictionary:Dictionary
+	var elementType:GDScript
 
 	func _init(_game:Game,component:GameComponent,_array:StringName,_index:int) -> void:
 		game = _game
@@ -501,11 +511,19 @@ class ComponentArrayPopAtChange extends Change:
 		array = _array
 		index = _index
 		beforeId = component.get(array)[index].id
+		elementType = component.get(array)[index].get_script()
 		if component.get_script() in Changes.NON_OBJECT_COMPONENTS: dictionary = game.components
 		else: dictionary = game.objects
-		if component.get(array)[index].get_script() in Changes.NON_OBJECT_COMPONENTS: elementDictionary = game.components
+		if elementType in Changes.NON_OBJECT_COMPONENTS: elementDictionary = game.components
 		else: elementDictionary = game.objects
 		do()
 
-	func do() -> void: dictionary[id].get(array).pop_at(index)
-	func undo() -> void: dictionary[id].get(array).insert(index,elementDictionary[beforeId])
+	func do() -> void:
+		dictionary[id].get(array).pop_at(index)
+		game.editor.focusDialog.focusHandlerRemoved(elementType, index)
+		dictionary[id].queue_redraw()
+	
+	func undo() -> void:
+		dictionary[id].get(array).insert(index,elementDictionary[beforeId])
+		game.editor.focusDialog.focusHandlerAdded(elementType, index)
+		dictionary[id].queue_redraw()

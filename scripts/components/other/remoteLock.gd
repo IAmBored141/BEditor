@@ -68,10 +68,17 @@ func _draw() -> void:
 		Lock.getFrameDarkColor(isNegative(), negated).blend(Color(animColor,animAlpha)),
 		isNegative()
 	)
+	# figure this out
+	#if color == Game.COLOR.GLITCH: RenderingServer.canvas_item_set_material(drawConnections, Game.UNSCALED_GLITCH_MATERIAL)
+	#else: RenderingServer.canvas_item_set_material(drawConnections, Game.NO_MATERIAL)
 	var from:Vector2 = size/2-getOffset()
 	for door in doors:
 		if !door.active and game.playState == Game.PLAY_STATE.PLAY: continue
 		var to:Vector2 = door.position+door.size/2 - position
+		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.darkTone[color] if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,4)
+		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.mainTone[color] if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,2)
+	if self == editor.connectionSource:
+		var to:Vector2 = editor.mouseWorldPosition - position
 		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.darkTone[color] if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,4)
 		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.mainTone[color] if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,2)
 
@@ -109,6 +116,10 @@ func _connectTo(door:Door) -> void:
 	changes.addChange(Changes.ComponentArrayAppendChange.new(game,self,&"doors",door))
 	changes.addChange(Changes.ComponentArrayAppendChange.new(game,door,&"remoteLocks",self))
 
+func _disconnectTo(door:Door) -> void:
+	changes.addChange(Changes.ComponentArrayPopAtChange.new(game,self,&"doors",doors.find(door)))
+	changes.addChange(Changes.ComponentArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
+
 func deleted() -> void:
 	for door in doors:
 		changes.addChange(Changes.ArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
@@ -128,6 +139,7 @@ var animColor:Color
 var animAlpha:float = 0
 
 func _process(delta:float) -> void:
+	if self == editor.connectionSource: queue_redraw()
 	if animAlpha > 0:
 		animAlpha -= delta*3
 		queue_redraw()

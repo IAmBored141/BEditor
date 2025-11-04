@@ -18,6 +18,7 @@ func _ready() -> void:
 	for mod in mods.mods.values():
 		mod.tempActive = mod.active
 	%selectMods.setup()
+	editor.modsWindow = self
 
 func _input(event:InputEvent) -> void:
 	if event is InputEventKey and event.is_pressed():
@@ -46,6 +47,7 @@ func _saveChanges():
 		changes.addChange(Changes.GlobalPropertyChange.new(mod,&"active",mod.tempActive))
 	for mod in modsAdded: addMod(mod)
 	for mod in modsRemoved: removeMod(mod)
+	if !mods.objectAvailable(editor.otherObjects.selected): editor.otherObjects.objectSelected(PlayerSpawn, true)
 	changes.bufferSave()
 	get_tree().call_group("modUI", "changedMods")
 	queue_free()

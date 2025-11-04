@@ -138,7 +138,7 @@ func tabbed(numberEdit:PanelContainer) -> void:
 
 func receiveKey(event:InputEvent) -> bool:
 	if focused is KeyBulk: return keyDialog.receiveKey(event)
-	elif focused is Door: return doorDialog.receiveKey(event)
+	elif focused is Door or focused is RemoteLock: return doorDialog.receiveKey(event)
 	elif focused is KeyCounter: return keyCounterDialog.receiveKey(event)
 	else:
 		match event.keycode:
@@ -173,18 +173,22 @@ func getWidth() -> float:
 		Goal: return goalDialog.get_child(0).size.x
 		_: return 0
 
-func focusComponentAdded(type:GDScript, index:int) -> void:
-	if type == Lock:
-		%lockHandler.addButton(index)
-		focusComponent(focused.locks[index])
-	elif type == KeyCounterElement:
-		%keyCounterHandler.addButton(index)
-		focusComponent(focused.elements[index])
+func focusHandlerAdded(type:GDScript, index:int) -> void:
+	match type:
+		Lock:
+			%lockHandler.addButton(index)
+			focusComponent(focused.locks[index])
+		KeyCounterElement:
+			%keyCounterHandler.addButton(index)
+			focusComponent(focused.elements[index])
+		Door: %doorsHandler.addButton(index)
 
-func focusComponentRemoved(type:GDScript, index:int) -> void:
-	if type == Lock:
-		%lockHandler.removeButton(index)
-		if index != 0: focusComponent(focused.locks[index-1])
-	elif type == KeyCounterElement:
-		%keyCounterHandler.removeButton(index)
-		if index != 0: focusComponent(focused.elements[index-1])
+func focusHandlerRemoved(type:GDScript, index:int) -> void:
+	match type:
+		Lock:
+			%lockHandler.removeButton(index)
+			if index != 0: focusComponent(focused.locks[index-1])
+		KeyCounterElement:
+			%keyCounterHandler.removeButton(index)
+			if index != 0: focusComponent(focused.elements[index-1])
+		Door: %doorsHandler.removeButton(index)

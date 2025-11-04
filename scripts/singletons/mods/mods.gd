@@ -122,6 +122,7 @@ func getTempActiveMods() -> Array[StringName]:
 
 
 func openModsWindow() -> void:
+	if editor.modsWindow: editor.modsWindow.queue_free()
 	var window:Window = preload("res://scenes/modsWindow.tscn").instantiate()
 	editor.add_child(window)
 	window.position = get_window().position+(get_window().size-window.size)/2
@@ -173,6 +174,11 @@ func lockTypes() -> Array[Lock.TYPE]:
 	]
 	if active(&"C3"): array.append(Lock.TYPE.EXACT)
 	return array
+
+func objectAvailable(object:GDScript) -> bool:
+	match object:
+		RemoteLock: return active(&"C1")
+		_: return true
 
 class Mod extends RefCounted:
 	var active:bool = false

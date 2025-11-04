@@ -84,6 +84,9 @@ func findProblems(component:GameComponent) -> void:
 				noteProblem(&"C3", &"ExactLock", component, component.type == Lock.TYPE.EXACT)
 				noteProblem(&"C3", &"PartialBlastLock", component, component.type == Lock.TYPE.BLAST and (component.isPartial or component.count.neq(component.denominator)))
 				noteProblem(&"C3", &"PartialBlastLock", component, component.type == Lock.TYPE.ALL and (component.isPartial or component.count.neq(1) or component.denominator.neq(1)))
+		RemoteLock:
+			if &"C1" in modsWindow.modsRemoved:
+				noteProblem(&"C1", &"RemoteLock", component, true)
 		Door:
 			findColorProblems(component, component.colorSpend)
 			if &"ZeroCopies" in modsWindow.modsRemoved:

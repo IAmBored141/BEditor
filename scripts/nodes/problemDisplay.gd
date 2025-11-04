@@ -31,6 +31,7 @@ func getProblemName() -> String:
 		[&"ZeroCopies",&"ZeroCopies"]: return "Zero Copies"
 		[&"ZeroCostLock",&"ZeroCostLock"]: return "Zero Cost Lock"
 
+		[&"C1", &"RemoteLock"]: return "Remote Lock"
 		[&"C1", &"NegatedLock"]: return "Negated Lock"
 		[&"C2", &"DynamiteColor"]: return "Dynamite Color"
 		[&"C2", &"QuicksilverColor"]: return "Quicksilver Color"

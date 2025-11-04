@@ -9,6 +9,7 @@ class_name DoorDialog
 func focus(focused:GameObject, new:bool, dontRedirect:bool) -> void: # Door or RemoteLock
 	if focused is Door:
 		%door.visible = true
+		%remoteLock.visible = false
 		%doorTypes.get_child(focused.type).button_pressed = true
 		%lockHandler.colorLink.visible = focused.type == Door.TYPE.SIMPLE
 		%spend.queue_redraw()
@@ -39,6 +40,7 @@ func focus(focused:GameObject, new:bool, dontRedirect:bool) -> void: # Door or R
 			if focused.type == Door.TYPE.SIMPLE and !dontRedirect: main.focusComponent(focused.locks[0])
 	elif focused is RemoteLock:
 		%door.visible = false
+		%remoteLock.visible = true
 		%doorsHandler.setup(focused)
 		focusComponent(focused, new)
 
@@ -90,6 +92,7 @@ func receiveKey(event:InputEvent) -> bool:
 			if main.componentFocused: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.componentFocused)
 			else: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.focused)
 		KEY_L: if Input.is_key_pressed(KEY_CTRL): main.focused.addLock()
+		KEY_F: if main.focused is RemoteLock: %doorsHandler.addComponent()
 		KEY_DELETE:
 			if main.componentFocused:
 				main.focused.removeLock(main.componentFocused.index)

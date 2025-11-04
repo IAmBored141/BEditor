@@ -10,6 +10,7 @@ class_name Editor
 @onready var paste:Button = %paste
 @onready var otherObjects:OtherObjects = %otherObjects
 @onready var topBar:TopBar = %topBar
+var modsWindow:ModsWindow
 var findProblems:FindProblems
 
 enum MODE {SELECT, TILE, KEY, DOOR, OTHER, PASTE}
@@ -122,6 +123,7 @@ func _gui_input(event:InputEvent) -> void:
 			if connectionSource and isLeftClick(event):
 				if connectionSource is RemoteLock and objectHovered is Door: connectionSource._connectTo(objectHovered)
 				if connectionSource is Door and objectHovered is RemoteLock: objectHovered._connectTo(connectionSource)
+				focusDialog.focus(connectionSource)
 				connectionSource = null
 				return
 			# multiselect
