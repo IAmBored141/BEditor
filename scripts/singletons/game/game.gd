@@ -243,8 +243,8 @@ var level:Level = Level.new()
 var anyChanges:bool = false:
 	set(value):
 		anyChanges = value
-		if anyChanges: get_window().title = level.name + "*" + " - IWLCEDitor"
-		else: get_window().title = level.name + " - IWLCEDitor"
+		if anyChanges: get_window().title = level.name + "*" + " - IWLCEditor"
+		else: get_window().title = level.name + " - IWLCEditor"
 
 var objectIdIter:int = 0 # for creating objects
 var componentIdIter:int = 0 # for creating components
