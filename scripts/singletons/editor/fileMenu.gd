@@ -21,6 +21,6 @@ func optionPressed(id:int) -> void:
 		2: Saving.save()
 		3: Saving.saveAs()
 		4: pass # export
-		5: OS.shell_open(ProjectSettings.globalize_path("user://levels"))
+		5: OS.shell_open(ProjectSettings.globalize_path("user://projects"))
 		# CONFIG
 		7: Mods.openModsWindow()

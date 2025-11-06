@@ -31,9 +31,11 @@ const FILE_FORMAT_VERSION:int = 0
 
 func _ready() -> void:
 	await editor.ready
-	DirAccess.make_dir_absolute("user://levels")
+	DirAccess.make_dir_absolute("user://projects")
 	editor.saveAsDialog.file_selected.connect(save)
+	editor.saveAsDialog.add_filter("*.cedit", "IWLCEditor Project File")
 	editor.openDialog.file_selected.connect(load)
+	editor.openDialog.add_filter("*.cedit", "IWLCEditor Project File")
 	editor.unsavedChangesPopup.get_ok_button().theme_type_variation = &"RadioButtonText"
 	editor.unsavedChangesPopup.get_cancel_button().theme_type_variation = &"RadioButtonText"
 	editor.unsavedChangesPopup.get_ok_button().pressed.connect(confirmed)
@@ -48,7 +50,7 @@ func open() -> void:
 	else: confirmed()
 
 func saveAs() -> void:
-	editor.saveAsDialog.current_dir = "levels"
+	editor.saveAsDialog.current_dir = "projects"
 	editor.saveAsDialog.visible = true
 	editor.saveAsDialog.grab_focus()
 
@@ -64,7 +66,7 @@ func confirmed() -> void:
 	match confirmAction:
 		ACTION.NEW: clear()
 		ACTION.OPEN:
-			editor.openDialog.current_dir = "levels"
+			editor.openDialog.current_dir = "projects"
 			editor.openDialog.visible = true
 			editor.openDialog.grab_focus()
 
@@ -117,7 +119,7 @@ func save(path:String="") -> void:
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.WRITE)
 
 	# HEADER
-	file.store_pascal_string("IWLCLevelSave")
+	file.store_pascal_string("IWLCEditorProject")
 	file.store_32(FILE_FORMAT_VERSION)
 	# LEVEL METADATA
 	file.store_pascal_string(game.level.name)
@@ -166,7 +168,7 @@ func load(path:String) -> void:
 
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.READ)
 
-	if file.get_pascal_string() != "IWLCLevelSave": return loadError("Unrecognised file format")
+	if file.get_pascal_string() != "IWLCEditorProject": return loadError("Unrecognised file format")
 	match file.get_32():
 		0: LoadV0.load(file, game)
 		_: return loadError("Unrecognised version")
