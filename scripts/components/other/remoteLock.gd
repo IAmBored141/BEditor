@@ -15,7 +15,7 @@ const CREATE_PARAMETERS:Array[StringName] = [
 ]
 const PROPERTIES:Array[StringName] = [
 	&"id", &"position", &"size",
-	&"color", &"type", &"configuration", &"sizeType", &"count", &"isPartial", &"denominator", &"negated",
+	&"color", &"type", &"configuration", &"sizeType", &"count", &"isPartial", &"denominator", &"negated", &"armament",
 	&"frozen", &"crumbled", &"painted"
 ]
 static var ARRAYS:Dictionary[StringName,GDScript] = {
@@ -30,6 +30,7 @@ var count:C = C.ONE
 var isPartial:bool = false # for partial blast
 var denominator:C = C.ONE # for partial blast
 var negated:bool = false
+var armament:bool = false
 var frozen:bool = false
 var crumbled:bool = false
 var painted:bool = false
@@ -78,7 +79,7 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawFrozen)
 	if !active and game.playState == Game.PLAY_STATE.PLAY: return
 	Lock.drawLock(game,drawGlitch,drawScaled,drawMain,drawConfiguration,
-		size,colorAfterCurse(),colorAfterGlitch(),type,configuration,sizeType,count,isPartial,denominator,negated,
+		size,colorAfterCurse(),colorAfterGlitch(),type,configuration,sizeType,count,isPartial,denominator,negated,armament,
 		Lock.getFrameHighColor(isNegative(), negated).blend(Color(animColor,animAlpha)),
 		Lock.getFrameMainColor(isNegative(), negated).blend(Color(animColor,animAlpha)),
 		Lock.getFrameDarkColor(isNegative(), negated).blend(Color(animColor,animAlpha)),
@@ -248,7 +249,7 @@ func colorAfterGlitch() -> Game.COLOR:
 	return base
 
 func colorAfterAurabreaker() -> Game.COLOR:
-	if int(gameFrozen) + int(gameCrumbled) + int(gamePainted) > 1: return colorAfterGlitch()
+	if int(gameFrozen) + int(gameCrumbled) + int(gamePainted) > 1 or armament: return colorAfterGlitch()
 	if gameFrozen: return Game.COLOR.ICE
 	if gameCrumbled: return Game.COLOR.MUD
 	if gamePainted: return Game.COLOR.GRAFFITI
@@ -273,7 +274,7 @@ func setGlitch(setColor:Game.COLOR) -> void:
 	queue_redraw()
 
 func curseCheck(player:Player) -> void:
-	if colorAfterGlitch() == Game.COLOR.PURE: return
+	if colorAfterGlitch() == Game.COLOR.PURE or armament: return
 	if player.curseMode > 0 and colorAfterGlitch() != player.curseColor and (!cursed or curseColor != player.curseColor):
 		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cursed",true))
 		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"curseColor",player.curseColor))

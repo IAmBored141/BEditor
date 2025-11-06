@@ -144,17 +144,16 @@ class CreateComponentChange extends Change:
 		
 		if type == Lock:
 			parent.locks.insert(prop[&"index"], component)
-			for lockIndex in range(prop[&"index"]+1, len(game.objects[prop[&"parentId"]].locks)):
-				game.objects[prop[&"parentId"]].locks[lockIndex].index += 1
+			parent.add_child(component)
+			parent.reindexLocks()
 		elif type == KeyCounterElement:
 			parent.elements.insert(prop[&"index"], component)
+			parent.add_child(component)
 			for elementIndex in range(prop[&"index"]+1, len(game.objects[prop[&"parentId"]].elements)):
 				game.objects[prop[&"parentId"]].elements[elementIndex].index += 1
-		
-		result = component
-		if parent is Door: parent.locksParent.add_child(component)
 		else: parent.add_child(component)
 
+		result = component
 		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])
 
 		await component.ready
@@ -172,8 +171,7 @@ class CreateComponentChange extends Change:
 		if type == Lock:
 			parent = game.objects[prop[&"parentId"]]
 			parent.locks.pop_at(prop[&"index"])
-			for lockIndex in range(prop[&"index"], len(parent.locks)):
-				parent.locks[lockIndex].index -= 1
+			parent.reindexLocks()
 		elif type == KeyCounterElement:
 			parent = game.objects[prop[&"parentId"]]
 			parent.elements.pop_at(prop[&"index"])
@@ -237,8 +235,7 @@ class DeleteComponentChange extends Change:
 		if type == Lock:
 			parent = game.objects[prop[&"parentId"]]
 			parent.locks.pop_at(prop[&"index"])
-			for lockIndex in range(prop[&"index"], len(parent.locks)):
-				parent.locks[lockIndex].index -= 1
+			parent.reindexLocks()
 		elif type == KeyCounterElement:
 			parent = game.objects[prop[&"parentId"]]
 			game.objects[prop[&"parentId"]].elements.pop_at(prop[&"index"])
@@ -284,14 +281,13 @@ class DeleteComponentChange extends Change:
 		
 		if type == Lock:
 			parent.locks.insert(prop[&"index"], component)
-			for lockIndex in range(prop[&"index"]+1, len(parent.locks)):
-				parent.locks[lockIndex].index += 1
+			parent.add_child(component)
+			parent.reindexLocks()
 		elif type == KeyCounterElement:
 			parent.elements.insert(prop[&"index"], component)
+			parent.add_child(component)
 			for elementIndex in range(prop[&"index"]+1, len(game.objects[prop[&"parentId"]].elements)):
 				game.objects[prop[&"parentId"]].elements[elementIndex].index += 1
-		
-		if parent is Door: parent.locksParent.add_child(component)
 		else: parent.add_child(component)
 
 		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])

@@ -264,8 +264,8 @@ func propertyChangedDo(property:StringName) -> void:
 		%shape.position = size/2
 		%interactShape.shape.size = size
 		%interactShape.position = size/2
-		if type == TYPE.SIMPLE: %shape.shape.size -= Vector2(2,2)
-		else: %interactShape.shape.size += Vector2(2,2)
+		if type == TYPE.COMBO: %interactShape.shape.size += Vector2(2,2)
+		elif type == TYPE.SIMPLE: %shape.shape.size -= Vector2(2,2)
 	if property in [&"size", &"position"]:
 		for remoteLock in remoteLocks: remoteLock.queue_redraw()
 
@@ -298,6 +298,28 @@ func removeLock(index:int) -> void:
 func deletedInit() -> void:
 	for remoteLock in remoteLocks:
 		changes.addChange(Changes.ComponentArrayPopAtChange.new(game,remoteLock,&"doors",remoteLock.doors.find(self)))
+
+func reindexLocks() -> void:
+	var iter:int = 0
+	var nonArmamentIter:int = 0
+	var armamentIter:int = 0
+	for lock in locks:
+		lock.index = iter
+		if lock.armament:
+			lock.displayIndex = armamentIter
+			if lock.get_parent() != %armamentLocksParent:
+				lock.get_parent().remove_child(lock)
+				%armamentLocksParent.add_child(lock)
+				%armamentLocksParent.move_child(lock,armamentIter)
+			armamentIter += 1
+		else:
+			lock.displayIndex = nonArmamentIter
+			if lock.get_parent() != %locksParent:
+				lock.get_parent().remove_child(lock)
+				%locksParent.add_child(lock)
+				%locksParent.move_child(lock,armamentIter)
+			nonArmamentIter += 1
+		iter += 1
 
 # ==== PLAY ==== #
 var gameCopies:C = C.ONE

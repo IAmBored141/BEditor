@@ -160,6 +160,15 @@ const GLITCH_FILL_QUICKSILVER:Array[Texture2D] = [
 	preload("res://assets/game/lock/fill/ANYglitchQuicksilver.png")
 ]
 
+const ARMAMENT:Array[Texture2D] = [
+	preload("res://assets/game/lock/armament/0.png"),
+	preload("res://assets/game/lock/armament/1.png"),
+	preload("res://assets/game/lock/armament/2.png"),
+	preload("res://assets/game/lock/armament/3.png")
+]
+const ARMAMENT_RECT:Rect2 = Rect2(Vector2.ZERO, Vector2(18,18))
+const ARMAMENT_CORNER_SIZE:Vector2 = Vector2(5,5)
+
 static func offsetFromType(getSizeType:SIZE_TYPE) -> Vector2:
 	match getSizeType:
 		SIZE_TYPE.AnyM: return Vector2(3, 3)
@@ -172,8 +181,8 @@ const CREATE_PARAMETERS:Array[StringName] = [
 ]
 const PROPERTIES:Array[StringName] = [
 	&"id", &"position", &"size",
-	&"parentId", &"color", &"type", &"configuration", &"sizeType", &"count", &"isPartial", &"denominator", &"negated",
-	&"index" # implcit
+	&"parentId", &"color", &"type", &"configuration", &"sizeType", &"count", &"isPartial", &"denominator", &"negated", &"armament",
+	&"index", &"displayIndex" # implcit
 ]
 static var ARRAYS:Dictionary[StringName,GDScript] = {}
 
@@ -187,7 +196,9 @@ var count:C = C.ONE
 var isPartial:bool = false # for partial blast
 var denominator:C = C.ONE # for partial blast
 var negated:bool = false
+var armament:bool = false
 var index:int
+var displayIndex:int # split into armaments and nonarmaments
 
 var drawGlitch:RID
 var drawScaled:RID
@@ -221,7 +232,7 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawConfiguration)
 	if !parent.active and game.playState == Game.PLAY_STATE.PLAY: return
 	drawLock(game,drawGlitch,drawScaled,drawMain,drawConfiguration,
-		size,colorAfterCurse(),colorAfterGlitch(),type,effectiveConfiguration(),sizeType,effectiveCount(),isPartial,denominator,negated,
+		size,colorAfterCurse(),colorAfterGlitch(),type,effectiveConfiguration(),sizeType,effectiveCount(),isPartial,denominator,negated,armament,
 		getFrameHighColor(isNegative(), negated),
 		getFrameMainColor(isNegative(), negated),
 		getFrameDarkColor(isNegative(), negated),
@@ -239,6 +250,7 @@ static func drawLock(_game:Game, lockDrawGlitch:RID, lockDrawScaled:RID, lockDra
 	lockIsPartial:bool,
 	lockDenominator,
 	lockNegated:bool,
+	lockArmament:bool,
 	frameHigh:Color,frameMain:Color,frameDark:Color,
 	negative:bool, drawFill:bool=true, noCopies:bool=false
 ) -> void:
@@ -288,6 +300,7 @@ static func drawLock(_game:Game, lockDrawGlitch:RID, lockDrawScaled:RID, lockDra
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_HIGH,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameHigh)
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_MAIN,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameMain)
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_DARK,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameDark)
+	if lockArmament: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ARMAMENT_RECT,ARMAMENT[_game.goldIndex%4],ARMAMENT_CORNER_SIZE,ARMAMENT_CORNER_SIZE,TILE,TILE,false)
 	# configuration
 	if lockConfiguration == CONFIGURATION.NONE:
 		match lockType:
@@ -479,6 +492,7 @@ func propertyChangedInit(property:StringName) -> void:
 
 func propertyChangedDo(property:StringName) -> void:
 	if property in [&"count", &"denominator"]: parent.queue_redraw()
+	if property == &"armament": parent.reindexLocks()
 
 # ==== PLAY ==== #
 var glitchMimic:Game.COLOR = Game.COLOR.GLITCH
@@ -489,7 +503,7 @@ func stop() -> void:
 	curseGlitchMimic = Game.COLOR.GLITCH
 
 func colorAfterCurse() -> Game.COLOR:
-	if parent.cursed and parent.curseColor != Game.COLOR.PURE: return parent.curseColor
+	if parent.cursed and parent.curseColor != Game.COLOR.PURE and !armament: return parent.curseColor
 	return color
 
 func colorAfterGlitch() -> Game.COLOR:
@@ -498,7 +512,7 @@ func colorAfterGlitch() -> Game.COLOR:
 	return base
 
 func colorAfterAurabreaker() -> Game.COLOR:
-	if int(parent.gameFrozen) + int(parent.gameCrumbled) + int(parent.gamePainted) > 1: return colorAfterGlitch()
+	if int(parent.gameFrozen) + int(parent.gameCrumbled) + int(parent.gamePainted) > 1 or armament: return colorAfterGlitch()
 	if parent.gameFrozen: return Game.COLOR.ICE
 	if parent.gameCrumbled: return Game.COLOR.MUD
 	if parent.gamePainted: return Game.COLOR.GRAFFITI

@@ -77,6 +77,7 @@ func focusComponent(component:GameComponent, _new:bool) -> void: # Lock or Remot
 
 	if component is Lock: %lockHandler.redrawButton(component.index)
 	%lockNegated.button_pressed = component.negated
+	%lockArmament.button_pressed = component.armament
 	if main.interacted and !main.interacted.is_visible_in_tree(): main.deinteract()
 	if %doorAxialNumberEdit.visible:
 		if !main.interacted: main.interact(%doorAxialNumberEdit)
@@ -118,6 +119,7 @@ func receiveKey(event:InputEvent) -> bool:
 func changedMods() -> void:
 	%lockSettingsSep.visible = mods.active(&"C1")
 	%lockNegated.visible = mods.active(&"C1")
+	%lockArmament.visible = mods.active(&"C5")
 	%realInfiniteCopy.visible = mods.active(&"InfCopies")
 	%imaginaryInfiniteCopy.visible = mods.active(&"InfCopies")
 	if main.componentFocused and main.componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]:
@@ -242,4 +244,10 @@ func _doorRealInfiniteSet(value:bool) -> void:
 func _doorImaginaryInfiniteSet(value:bool) -> void:
 	if main.focused is not Door: return
 	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infCopies",C.new(main.focused.infCopies.r, int(value))))
+	changes.bufferSave()
+
+func _lockArmamentSet(value:bool) -> void:
+	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
+	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
+	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"armament",value))
 	changes.bufferSave()
