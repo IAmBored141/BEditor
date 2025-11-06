@@ -17,7 +17,7 @@ func _ready() -> void:
 	super()
 
 func changedMods() -> void:
-	var lockTypes:Array[Lock.TYPE] = mods.lockTypes()
+	var lockTypes:Array[Lock.TYPE] = Mods.lockTypes()
 	for button in buttons: button.visible = false
 	for lockType in lockTypes: buttons[lockType].visible = true
 	columns = len(lockTypes)

@@ -1,5 +1,4 @@
 extends Node
-class_name Changes
 
 static var NON_OBJECT_COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement]
 static var COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement, KeyBulk, Door, Goal, KeyCounter, PlayerSpawn, RemoteLock]
@@ -32,7 +31,7 @@ func undo() -> void:
 	if stackPosition == 0: return
 	if undoStack[stackPosition] is UndoSeparator: stackPosition -= 1
 	else:
-		assert(stackPosition == len(undoStack)-1) # new changes havent been saved yet
+		assert(stackPosition == len(undoStack)-1) # new Changes havent been saved yet
 		undoStack.append(UndoSeparator.new()) # [sep] [chg] <[chg]> -> [sep] [chg] <[chg]> [sep]
 	saveBuffered = false
 	while true:
@@ -50,7 +49,7 @@ func redo() -> void:
 		change.do()
 		stackPosition += 1
 
-static func copy(value:Variant) -> Variant:
+func copy(value:Variant) -> Variant:
 	if value is C || value is Q: return value.copy()
 	elif value is Array: return value.duplicate()
 	else: return value
@@ -115,7 +114,7 @@ class CreateComponentChange extends Change:
 
 		do()
 		if type == PlayerSpawn and !game.levelStart:
-			changes.addChange(GlobalObjectChange.new(game,game,&"levelStart",result))
+			Changes.addChange(GlobalObjectChange.new(game,game,&"levelStart",result))
 		elif type == KeyCounterElement:
 			game.objects[prop[&"parentId"]]._elementsChanged()
 
@@ -211,13 +210,13 @@ class DeleteComponentChange extends Change:
 		
 		if type == Door:
 			for lock in component.locks.duplicate():
-				changes.addChange(DeleteComponentChange.new(game,lock))
+				Changes.addChange(DeleteComponentChange.new(game,lock))
 		elif type == KeyCounter:
 			for element in component.elements.duplicate():
-				changes.addChange(DeleteComponentChange.new(game,element))
+				Changes.addChange(DeleteComponentChange.new(game,element))
 		
 		if type == PlayerSpawn and component == game.levelStart:
-			changes.addChange(GlobalObjectChange.new(game,game,&"levelStart",null))
+			Changes.addChange(GlobalObjectChange.new(game,game,&"levelStart",null))
 		
 		component.deletedInit()
 		do()
@@ -337,7 +336,7 @@ class PropertyChange extends Change:
 		return "<PropertyChange:"+str(id)+"."+str(property)+"->"+str(after)+">"
 
 class GlobalObjectChange extends Change:
-	# changes a property that points to a gameobject in some singleton; -1 for null
+	# Changes a property that points to a gameobject in some singleton; -1 for null
 
 	var singleton:Node
 	var property:StringName
@@ -371,7 +370,7 @@ class GlobalObjectChange extends Change:
 		return "<GlobalObjectChange:"+str(singleton)+"."+str(property)+"->"+str(afterId)+">"
 
 class GlobalPropertyChange extends Change:
-	# changes a property in some singleton
+	# Changes a property in some singleton
 
 	var singleton:Variant
 	var property:StringName
@@ -417,7 +416,7 @@ class ArrayAppendChange extends Change:
 		return "<ArrayAppendChange:"+str(id)+"."+str(array)+"+="+str(after)+">"
 
 class ArrayElementChange extends Change:
-	# changes element of array
+	# Changes element of array
 	var id:int
 	var array:StringName
 	var index:int
@@ -502,7 +501,7 @@ class ComponentArrayAppendChange extends Change:
 	func _to_string() -> String:
 		return "<ComponentArrayAppendChange:"+str(id)+"."+str(array)+"+="+str(afterId)+">"
 class ComponentArrayElementChange extends Change:
-	# changes element of array of components
+	# Changes element of array of components
 	var id:int
 	var array:StringName
 	var index:int

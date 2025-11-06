@@ -24,30 +24,30 @@ func receiveKey(event:InputEventKey) -> bool:
 			elif main.focused.type == KeyBulk.TYPE.POSROTOR: _keyTypeSelected(KeyBulk.TYPE.SIGNFLIP)
 			else: _keyTypeSelected(KeyBulk.TYPE.POSROTOR)
 		KEY_C: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.focused)
-		KEY_U: if mods.active(&"C5"): _keyTypeSelected(KeyBulk.TYPE.CURSE if main.focused.type != KeyBulk.TYPE.CURSE else KeyBulk.TYPE.UNCURSE)
+		KEY_U: if Mods.active(&"C5"): _keyTypeSelected(KeyBulk.TYPE.CURSE if main.focused.type != KeyBulk.TYPE.CURSE else KeyBulk.TYPE.UNCURSE)
 		KEY_DELETE:
-			changes.addChange(Changes.DeleteComponentChange.new(editor.game,main.focused))
-			changes.bufferSave()
+			Changes.addChange(Changes.DeleteComponentChange.new(editor.game,main.focused))
+			Changes.bufferSave()
 		KEY_Y: _keyInfiniteToggled(!main.focused.infinite)
 		_: return false
 	return true
 
 func _keyColorSelected(color:Game.COLOR) -> void:
 	if main.focused is not KeyBulk: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"color",color))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"color",color))
+	Changes.bufferSave()
 
 func _keyTypeSelected(type:KeyBulk.TYPE) -> void:
 	if main.focused is not KeyBulk: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"type",type))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"type",type))
+	Changes.bufferSave()
 
 func _keyCountSet(count:C) -> void:
 	if main.focused is not KeyBulk: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"count",count))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"count",count))
+	Changes.bufferSave()
 
 func _keyInfiniteToggled(value:bool) -> void:
 	if main.focused is not KeyBulk: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infinite",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infinite",value))
+	Changes.bufferSave()

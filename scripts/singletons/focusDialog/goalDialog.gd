@@ -9,5 +9,5 @@ func focus(focused:Goal, _new:bool) -> void:
 
 func _goalTypeSelected(type:Goal.TYPE) -> void:
 	if main.focused is not Goal: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"type",type))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"type",type))
+	Changes.bufferSave()

@@ -287,7 +287,7 @@ var fastAnimTimer:float = 0 # speed resets when this counts down to 0
 var complexViewHue:float = 0
 
 func _ready() -> void:
-	gameChanges.game = self
+	GameChanges.game = self
 
 func _process(delta:float) -> void:
 	goldIndexFloat += delta*6 # 0.1 per frame, 60fps
@@ -330,9 +330,9 @@ func playTest(spawn:PlayerSpawn) -> void:
 	editor.focusDialog.defocusComponent()
 	editor.focusDialog.defocus()
 	editor.componentDragged = null
-	changes.bufferSave()
+	Changes.bufferSave()
 
-	if starting: gameChanges.start()
+	if starting: GameChanges.start()
 	for object in objects.values():
 		if starting: object.start()
 		object.queue_redraw()
@@ -347,7 +347,7 @@ func pauseTest() -> void:
 
 func stopTest() -> void:
 	playState = PLAY_STATE.EDIT
-	gameChanges.saveBuffered = false
+	GameChanges.saveBuffered = false
 	player.pauseFrame = true
 	await get_tree().process_frame
 	player.queue_free()

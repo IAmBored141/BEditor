@@ -11,7 +11,7 @@ func _ready() -> void:
 	super()
 
 func changedMods() -> void:
-	var colors:Array[Game.COLOR] = mods.colors()
+	var colors:Array[Game.COLOR] = Mods.colors()
 	for button in buttons: button.visible = false
 	for color in colors: buttons[color].visible = true
 	if len(colors) < 15: columns = 7

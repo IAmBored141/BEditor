@@ -1,5 +1,4 @@
 extends Node
-class_name GameChanges
 
 var game:Game
 
@@ -7,7 +6,7 @@ var undoStack:Array[RefCounted] = []
 var saveBuffered:bool = false
 
 # handles the undo system for the game
-# a lot is copied over from changes
+# a lot is copied over from Changes
 
 func start() -> void:
 	undoStack = []
@@ -44,7 +43,7 @@ func undo() -> bool:
 		change.undo()
 	return true # unreachable
 
-static func copy(value:Variant) -> Variant:
+func copy(value:Variant) -> Variant:
 	if value is C || value is Q: return value.copy()
 	else: return value
 

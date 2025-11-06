@@ -25,7 +25,7 @@ func setup() -> void:
 func updateModpacks() -> void:
 	%modpacks.clear()
 	var index:int = 0
-	for modpack in mods.modpacks.values():
+	for modpack in Mods.modpacks.values():
 		%modpacks.add_icon_item(modpack.iconSmall,modpack.name)
 		if modpack == modsWindow.tempActiveModpack: %modpacks.select(index)
 		index += 1
@@ -59,7 +59,7 @@ func updateMods() -> void:
 				addModTreeItem(subRoot, subElement)
 
 func addModTreeItem(root:TreeItem, id:StringName) -> void:
-	var mod:Mods.Mod = mods.mods[id]
+	var mod:Mods.Mod = Mods.mods[id]
 	var item:TreeItem = %mods.create_item(root)
 	item.set_cell_mode(0, TreeItem.CELL_MODE_CHECK)
 	item.set_text(0, mod.name)
@@ -80,13 +80,13 @@ func _modpackSelected(index:int, manual:bool=false) -> void:
 		modsWindow.tempActiveModpack = null
 		modsWindow.tempActiveVersion = null
 	else:
-		if modsWindow.tempActiveModpack == mods.modpacks[mods.modpacks.keys()[index]]: return
-		modsWindow.tempActiveModpack = mods.modpacks[mods.modpacks.keys()[index]]
+		if modsWindow.tempActiveModpack == Mods.modpacks[Mods.modpacks.keys()[index]]: return
+		modsWindow.tempActiveModpack = Mods.modpacks[Mods.modpacks.keys()[index]]
 		modsWindow.tempActiveVersion = modsWindow.tempActiveModpack.versions[0]
 	updateModpacks()
 	updateversions()
 	if index != -1 and !manual:
-		for modId in mods.mods.keys():
+		for modId in Mods.mods.keys():
 			addChange(ModChange.new(self, modId, modId in modsWindow.tempActiveVersion.mods))
 	setInfoModpack(modsWindow.tempActiveModpack)
 	if !manual: bufferSave()
@@ -100,17 +100,17 @@ func _modsDefocused() -> void:
 func _modsSelected() -> void:
 	var item:TreeItem = %mods.get_selected()
 	if !item: return
-	var mod:Mods.Mod = mods.mods[item.get_metadata(0)]
+	var mod:Mods.Mod = Mods.mods[item.get_metadata(0)]
 	if addChange(ModChange.new(self, item.get_metadata(0), item.is_checked(0))): findModpack()
 	setInfoMod(mod)
 
 func findModpack() -> void:
-	# get the current modpack (and version) (or none) from selected mods
-	# assumes modpack mods are in the correct order
-	var activeMods:Array[StringName] = mods.getTempActiveMods()
+	# get the current modpack (and version) (or none) from selected Mods
+	# assumes modpack Mods are in the correct order
+	var activeMods:Array[StringName] = Mods.getTempActiveMods()
 	var modpackIndex:int = 0
-	for modpackId in mods.modpacks.keys():
-		var modpack:Mods.Modpack = mods.modpacks[modpackId]
+	for modpackId in Mods.modpacks.keys():
+		var modpack:Mods.Modpack = Mods.modpacks[modpackId]
 		for version in modpack.versions:
 			if activeMods == version.mods:
 				_modpackSelected(modpackIndex, true)
@@ -144,16 +144,16 @@ func setInfoMod(mod:Mods.Mod) -> void:
 	%infoName.text = mod.name
 
 	%modpackInfo.visible = false
-	%infoDescription.text = mod.description + "\n\n" + mods.listDependencies(mod) + "\n\n" + mods.listIncompatibilities(mod)
+	%infoDescription.text = mod.description + "\n\n" + Mods.listDependencies(mod) + "\n\n" + Mods.listIncompatibilities(mod)
 	%versionInfo.visible = false
 
 class SubTree extends RefCounted:
 	var label:String
-	var mods:Array[StringName] # cant recurse yet; maybe at some point
+	var Mods:Array[StringName] # cant recurse yet; maybe at some point
 
 	func _init(_label:String, _mods:Array[StringName]) -> void:
 		label = _label
-		mods = _mods
+		Mods = _mods
 
 # because we want to be able to undo here
 func bufferSave() -> void:
@@ -204,17 +204,17 @@ class ModChange extends Change:
 		selectMods = _selectMods
 		modsWindow = selectMods.modsWindow
 		mod = _mod
-		before = mods.mods[mod].tempActive
+		before = Mods.mods[mod].tempActive
 		if before == after:
 			cancelled = true
 			return
-		mods.mods[mod].tempActive = after
-		mods.mods[mod].treeItem.set_checked(0, after)
+		Mods.mods[mod].tempActive = after
+		Mods.mods[mod].treeItem.set_checked(0, after)
 		updateArrays(after)
 
 	func undo() -> void:
-		mods.mods[mod].tempActive = before
-		mods.mods[mod].treeItem.set_checked(0, before)
+		Mods.mods[mod].tempActive = before
+		Mods.mods[mod].treeItem.set_checked(0, before)
 		updateArrays(before)
 	
 	func updateArrays(changedTo:bool) -> void:

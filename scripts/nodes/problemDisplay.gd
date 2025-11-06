@@ -12,7 +12,7 @@ var count:int:
 
 func setup(_mod:StringName,_type:StringName, _findProblems:FindProblems) -> ProblemDisplay:
 	modId = _mod
-	mod = mods.mods[modId]
+	mod = Mods.mods[modId]
 	type = _type
 	findProblems = _findProblems
 	%nameLabel.text = getProblemName()

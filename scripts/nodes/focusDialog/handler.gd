@@ -67,7 +67,7 @@ func removeButton(index:int=selected,select:bool=true) -> void:
 		remove.visible = false
 		selected = -1
 	elif select: setSelect(len(buttons)-1)
-	changes.bufferSave()
+	Changes.bufferSave()
 
 func redrawButton(index:int) -> void:
 	buttons[index].queue_redraw()

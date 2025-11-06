@@ -19,7 +19,7 @@ func setup(_door:Door) -> void:
 	remove.visible = len(buttons) > 0
 
 func addComponent() -> void:
-	if door.type == Door.TYPE.SIMPLE: changes.addChange(Changes.PropertyChange.new(editor.game,door,&"type",Door.TYPE.COMBO)) # precoerce so that lock sizes are accurate for placing
+	if door.type == Door.TYPE.SIMPLE: Changes.addChange(Changes.PropertyChange.new(editor.game,door,&"type",Door.TYPE.COMBO)) # precoerce so that lock sizes are accurate for placing
 	door.addLock()
 func removeComponent() -> void: door.removeLock(selected)
 

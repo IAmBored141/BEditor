@@ -6,16 +6,16 @@ class_name ModsWindow
 enum STAGE {SELECT_MODS, FIND_PROBLEMS}
 var stage:STAGE = STAGE.SELECT_MODS
 
-var modsAdded:Array[StringName] # mods that have been added
-var modsRemoved:Array[StringName] # mods that have been added
+var modsAdded:Array[StringName] # Mods that have been added
+var modsRemoved:Array[StringName] # Mods that have been added
 
-var tempActiveModpack:Mods.Modpack = mods.activeModpack
-var tempActiveVersion:Mods.Version = mods.activeVersion
+var tempActiveModpack:Mods.Modpack = Mods.activeModpack
+var tempActiveVersion:Mods.Version = Mods.activeVersion
 
 func _ready() -> void:
 	%selectMods.visible = true
 	%findProblems.visible = false
-	for mod in mods.mods.values():
+	for mod in Mods.mods.values():
 		mod.tempActive = mod.active
 	%selectMods.setup()
 	editor.modsWindow = self
@@ -41,14 +41,14 @@ func _back():
 	stage = STAGE.SELECT_MODS
 
 func _saveChanges():
-	changes.addChange(Changes.GlobalPropertyChange.new(mods,&"activeModpack",tempActiveModpack))
-	changes.addChange(Changes.GlobalPropertyChange.new(mods,&"activeVersion",tempActiveVersion))
-	for mod in mods.mods.values():
-		changes.addChange(Changes.GlobalPropertyChange.new(mod,&"active",mod.tempActive))
+	Changes.addChange(Changes.GlobalPropertyChange.new(Mods,&"activeModpack",tempActiveModpack))
+	Changes.addChange(Changes.GlobalPropertyChange.new(Mods,&"activeVersion",tempActiveVersion))
+	for mod in Mods.mods.values():
+		Changes.addChange(Changes.GlobalPropertyChange.new(mod,&"active",mod.tempActive))
 	for mod in modsAdded: addMod(mod)
 	for mod in modsRemoved: removeMod(mod)
-	if !mods.objectAvailable(editor.otherObjects.selected): editor.otherObjects.objectSelected(PlayerSpawn, true)
-	changes.bufferSave()
+	if !Mods.objectAvailable(editor.otherObjects.selected): editor.otherObjects.objectSelected(PlayerSpawn, true)
+	Changes.bufferSave()
 	get_tree().call_group("modUI", "changedMods")
 	queue_free()
 

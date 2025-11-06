@@ -21,7 +21,7 @@ func _ready() -> void:
 	super()
 
 func changedMods() -> void:
-	var keyTypes:Array[KeyBulk.TYPE] = mods.keyTypes()
+	var keyTypes:Array[KeyBulk.TYPE] = Mods.keyTypes()
 	for button in buttons: button.visible = false
 	for keyType in keyTypes: buttons[keyType].visible = true
 	columns = len(keyTypes)

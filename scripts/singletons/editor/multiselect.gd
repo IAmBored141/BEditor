@@ -53,7 +53,7 @@ func drag() -> void:
 func stopDrag() -> void:
 	state = STATE.HOLDING
 	for select in selected: select.endDrag()
-	changes.bufferSave()
+	Changes.bufferSave()
 
 func continueSelect() -> void:
 	var rect:Rect2 = Rect2(pivot,Vector2.ZERO).expand(get_global_mouse_position())
@@ -121,7 +121,7 @@ func delete() -> void:
 	for select in selected:	select.delete()
 	selected = []
 	draw()
-	changes.bufferSave()
+	Changes.bufferSave()
 
 func deselect() -> void:
 	selected = []
@@ -154,11 +154,11 @@ class TileSelect extends Select:
 		size = Vector2(32,32)
 	
 	func startDrag() -> void:
-		changes.addChange(Changes.TileChange.new(editor.game,position/32,false))
+		Changes.addChange(Changes.TileChange.new(editor.game,position/32,false))
 	func endDrag() -> void:
-		if mods.active(&"OutOfBounds") or editor.game.levelBounds.has_point(position): changes.addChange(Changes.TileChange.new(editor.game,position/32,true))
+		if Mods.active(&"OutOfBounds") or editor.game.levelBounds.has_point(position): Changes.addChange(Changes.TileChange.new(editor.game,position/32,true))
 
-	func delete() -> void: changes.addChange(Changes.TileChange.new(editor.game,position/32,false))
+	func delete() -> void: Changes.addChange(Changes.TileChange.new(editor.game,position/32,false))
 
 class ObjectSelect extends Select:
 
@@ -176,9 +176,9 @@ class ObjectSelect extends Select:
 
 	func endDrag() -> void:
 		object.position = startingPosition
-		changes.addChange(Changes.PropertyChange.new(editor.game,object,&"position",position))
+		Changes.addChange(Changes.PropertyChange.new(editor.game,object,&"position",position))
 	
-	func delete() -> void: changes.addChange(Changes.DeleteComponentChange.new(editor.game,object))
+	func delete() -> void: Changes.addChange(Changes.DeleteComponentChange.new(editor.game,object))
 
 	func getDrawPosition() -> Vector2:
 		if object is RemoteLock: return position-object.getOffset()
@@ -196,7 +196,7 @@ class TileCopy extends Copy: # definitely rethink this at some point
 		position = select.position - editor.multiselect.selectRect.position
 	
 	func paste() -> void:
-		if editor.game.levelBounds.has_point(Vector2i(position)+editor.mouseTilePosition): changes.addChange(Changes.TileChange.new(editor.game,(Vector2i(position)+editor.mouseTilePosition)/32,true))
+		if editor.game.levelBounds.has_point(Vector2i(position)+editor.mouseTilePosition): Changes.addChange(Changes.TileChange.new(editor.game,(Vector2i(position)+editor.mouseTilePosition)/32,true))
 
 class ObjectCopy extends Copy:
 	var properties:Dictionary[StringName, Variant]
@@ -213,10 +213,10 @@ class ObjectCopy extends Copy:
 	
 	func paste() -> GameComponent:
 		if editor.game.levelBounds.has_point(Vector2i(properties[&"position"])+editor.mouseTilePosition):
-			var object:GameObject = changes.addChange(Changes.CreateComponentChange.new(editor.game,type,{&"position":properties[&"position"]+Vector2(editor.mouseTilePosition)})).result
+			var object:GameObject = Changes.addChange(Changes.CreateComponentChange.new(editor.game,type,{&"position":properties[&"position"]+Vector2(editor.mouseTilePosition)})).result
 			for property in object.PROPERTIES:
 				if property != &"id" and property not in object.CREATE_PARAMETERS:
-					changes.addChange(Changes.PropertyChange.new(editor.game,object,property,properties[property]))
+					Changes.addChange(Changes.PropertyChange.new(editor.game,object,property,properties[property]))
 			return object
 		return null
 
@@ -244,12 +244,12 @@ class LockCopy extends Copy:
 			properties[property] = lock.get(property)
 
 	func paste(door:Door) -> Lock:
-		var lock:Lock = changes.addChange(Changes.CreateComponentChange.new(editor.game,Lock,
+		var lock:Lock = Changes.addChange(Changes.CreateComponentChange.new(editor.game,Lock,
 			{&"position":properties[&"position"], &"parentId":door.id}
 		)).result
 		for property in lock.PROPERTIES:
 			if property != &"id" and property not in lock.CREATE_PARAMETERS:
-				changes.addChange(Changes.PropertyChange.new(editor.game,lock,property,properties[property]))
+				Changes.addChange(Changes.PropertyChange.new(editor.game,lock,property,properties[property]))
 		return lock
 
 class KeyCounterCopy extends ObjectCopy:
@@ -276,10 +276,10 @@ class KeyCounterElementCopy extends Copy:
 			properties[property] = element.get(property)
 
 	func paste(keyCounter:KeyCounter) -> KeyCounterElement:
-		var element:KeyCounterElement = changes.addChange(Changes.CreateComponentChange.new(editor.game,KeyCounterElement,
+		var element:KeyCounterElement = Changes.addChange(Changes.CreateComponentChange.new(editor.game,KeyCounterElement,
 			{&"position":properties[&"position"], &"parentId":keyCounter.id}
 		)).result
 		for property in element.PROPERTIES:
 			if property != &"id" and property not in element.CREATE_PARAMETERS:
-				changes.addChange(Changes.PropertyChange.new(editor.game,element,property,properties[property]))
+				Changes.addChange(Changes.PropertyChange.new(editor.game,element,property,properties[property]))
 		return element

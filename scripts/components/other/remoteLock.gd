@@ -113,18 +113,18 @@ func propertyChangedInit(property:StringName) -> void:
 	if property in [&"count", &"sizeType", &"type"]: _setAutoConfiguration()
 	
 	if property == &"type":
-		if (type == Lock.TYPE.BLANK or (type == Lock.TYPE.ALL and !mods.active(&"C3"))) and count.neq(1):
-			changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE))
+		if (type == Lock.TYPE.BLANK or (type == Lock.TYPE.ALL and !Mods.active(&"C3"))) and count.neq(1):
+			Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE))
 		if type == Lock.TYPE.BLAST:
-			if (count.abs().neq(1)) and !mods.active(&"C3"): changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE if count.eq(0) else count.axis()))
+			if (count.abs().neq(1)) and !Mods.active(&"C3"): Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE if count.eq(0) else count.axis()))
 		elif type == Lock.TYPE.ALL:
-			if !isPartial and denominator.neq(1): changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
+			if !isPartial and denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
 		else:
-			if denominator.neq(1): changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
-			if isPartial: changes.addChange(Changes.PropertyChange.new(game,self,&"isPartial",false))
+			if denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
+			if isPartial: Changes.addChange(Changes.PropertyChange.new(game,self,&"isPartial",false))
 
 	if property == &"isPartial" and !isPartial:
-		changes.addChange(Changes.PropertyChange.new(game,self,&"denominator", C.ONE if count.isComplex() or count.eq(0) or type == Lock.TYPE.ALL else count.axis()))
+		Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator", C.ONE if count.isComplex() or count.eq(0) or type == Lock.TYPE.ALL else count.axis()))
 
 func propertyChangedDo(property:StringName) -> void:
 	super(property)
@@ -152,25 +152,25 @@ func receiveMouseInput(event:InputEventMouse) -> bool:
 		return true
 	return false
 
-func _setAutoConfiguration() -> void: changes.addChange(Changes.PropertyChange.new(game,self,&"configuration",Lock.getAutoConfiguration(self)))
+func _setAutoConfiguration() -> void: Changes.addChange(Changes.PropertyChange.new(game,self,&"configuration",Lock.getAutoConfiguration(self)))
 
 func _setSizeType() -> void:
 	var match:int = Lock.SIZES.find(size)
 	var newSizeType:Lock.SIZE_TYPE = Lock.SIZE_TYPE.ANY if match == -1 else match as Lock.SIZE_TYPE
-	changes.addChange(Changes.PropertyChange.new(game,self,&"sizeType",newSizeType))
+	Changes.addChange(Changes.PropertyChange.new(game,self,&"sizeType",newSizeType))
 	queue_redraw()
 
 func _connectTo(door:Door) -> void:
-	changes.addChange(Changes.ComponentArrayAppendChange.new(game,self,&"doors",door))
-	changes.addChange(Changes.ComponentArrayAppendChange.new(game,door,&"remoteLocks",self))
+	Changes.addChange(Changes.ComponentArrayAppendChange.new(game,self,&"doors",door))
+	Changes.addChange(Changes.ComponentArrayAppendChange.new(game,door,&"remoteLocks",self))
 
 func _disconnectTo(door:Door) -> void:
-	changes.addChange(Changes.ComponentArrayPopAtChange.new(game,self,&"doors",doors.find(door)))
-	changes.addChange(Changes.ComponentArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
+	Changes.addChange(Changes.ComponentArrayPopAtChange.new(game,self,&"doors",doors.find(door)))
+	Changes.addChange(Changes.ComponentArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
 
 func deletedInit() -> void:
 	for door in doors:
-		changes.addChange(Changes.ComponentArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
+		Changes.addChange(Changes.ComponentArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
 
 # ==== PLAY ==== #
 var cursed:bool = false
@@ -222,14 +222,14 @@ func check(player:Player) -> void:
 		if gamePainted and player.key[Game.COLOR.GRAFFITI].eq(0): return
 	var satisfiedBefore:bool = satisfied
 	var costBefore:C = cost.copy()
-	gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"satisfied",canOpen(player)))
-	gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cost",getCost(player)))
+	GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"satisfied",canOpen(player)))
+	GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cost",getCost(player)))
 	if !(satisfiedBefore == satisfied and costBefore.eq(cost)):
 		if satisfied: AudioManager.play(preload("res://resources/sounds/remoteLock/success.wav"))
 		else: AudioManager.play(preload("res://resources/sounds/remoteLock/fail.wav"))
 		for door in doors: if door.type == Door.TYPE.GATE: door.gateCheck(player)
 		blinkAnim()
-		gameChanges.bufferSave()
+		GameChanges.bufferSave()
 
 func blinkAnim() -> void:
 	animAlpha = 1
@@ -266,28 +266,28 @@ func checkDoors() -> void:
 	var any:bool = false
 	for door in doors:
 		if door.active: any = true
-	gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"active",any))
+	GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"active",any))
 	queue_redraw()
 
 func setGlitch(setColor:Game.COLOR) -> void:
-	gameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"glitchMimic", setColor))
+	GameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"glitchMimic", setColor))
 	queue_redraw()
 
 func curseCheck(player:Player) -> void:
 	if colorAfterGlitch() == Game.COLOR.PURE or armament: return
 	if player.curseMode > 0 and colorAfterGlitch() != player.curseColor and (!cursed or curseColor != player.curseColor):
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cursed",true))
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"curseColor",player.curseColor))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cursed",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"curseColor",player.curseColor))
 		makeCurseParticles(curseColor, 1, 0.2, 0.5)
 		AudioManager.play(preload("res://resources/sounds/door/curse.wav"))
-		changes.bufferSave()
+		Changes.bufferSave()
 	elif player.curseMode < 0 and cursed and curseColor == player.curseColor:
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cursed",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cursed",false))
 		if curseColor == Game.COLOR.GLITCH:
-			gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"curseGlitchMimic",Game.COLOR.GLITCH))
+			GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"curseGlitchMimic",Game.COLOR.GLITCH))
 		makeCurseParticles(Game.COLOR.BROWN, -1, 0.2, 0.5)
 		AudioManager.play(preload("res://resources/sounds/door/decurse.wav"))
-		changes.bufferSave()
+		Changes.bufferSave()
 
 func makeCurseParticles(particleColor:Game.COLOR, mode:int, scaleMin:float=1,scaleMax:float=1) -> void:
 	for y in floor((size.y)/16):
@@ -297,34 +297,34 @@ func makeCurseParticles(particleColor:Game.COLOR, mode:int, scaleMin:float=1,sca
 func auraCheck(player:Player) -> void:
 	var deAuraed:bool = false
 	if player.auraRed and gameFrozen:
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",false))
 		makeDebris(Door.Debris, Game.COLOR.WHITE)
 		deAuraed = true
 	if player.auraGreen and gameCrumbled:
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",false))
 		makeDebris(Door.Debris, Game.COLOR.BROWN)
 		deAuraed = true
 	if player.auraBlue and gamePainted:
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",false))
 		makeDebris(Door.Debris, Game.COLOR.ORANGE)
 		deAuraed = true
 	var auraed:bool = false
 	if player.auraMaroon and !gameFrozen:
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",true))
 		makeDebris(Door.Debris, Game.COLOR.WHITE)
 		auraed = true
 	if player.auraForest and !gameCrumbled:
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",true))
 		makeDebris(Door.Debris, Game.COLOR.BROWN)
 		auraed = true
 	if player.auraNavy and !gamePainted:
-		gameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",true))
 		makeDebris(Door.Debris, Game.COLOR.ORANGE)
 		auraed = true
 	
 	if deAuraed or auraed:
 		AudioManager.play(preload("res://resources/sounds/door/deaura.wav"))
-		changes.bufferSave()
+		Changes.bufferSave()
 
 func makeDebris(debrisType:GDScript, debrisColor:Game.COLOR) -> void:
 	for y in floor(size.y/16):

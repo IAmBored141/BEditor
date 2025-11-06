@@ -67,8 +67,8 @@ func focusComponent(component:GameComponent, _new:bool) -> void: # Lock or Remot
 	%blastLockSign.button_pressed = component.denominator.sign() < 0
 	%blastLockAxis.button_pressed = component.denominator.isNonzeroImag()
 	
-	%partialBlastSettings.visible = mods.active(&"C3")
-	%isPartial.visible = mods.active(&"C3")
+	%partialBlastSettings.visible = Mods.active(&"C3")
+	%isPartial.visible = Mods.active(&"C3")
 	%isPartial.button_pressed = component.isPartial
 	%partialDenominator.visible = component.isPartial
 	%discreteBlastSettings.visible = !component.isPartial and component.type != Lock.TYPE.ALL
@@ -91,8 +91,8 @@ func receiveKey(event:InputEvent) -> bool:
 		KEY_B: _lockTypeSelected(Lock.TYPE.BLANK)
 		KEY_X: _lockTypeSelected(Lock.TYPE.BLAST)
 		KEY_A: _lockTypeSelected(Lock.TYPE.ALL)
-		KEY_E: if mods.active(&"C3"): _lockTypeSelected(Lock.TYPE.EXACT)
-		KEY_N: if mods.active(&"C1"): _lockNegatedSet(!%lockNegated.button_pressed)
+		KEY_E: if Mods.active(&"C3"): _lockTypeSelected(Lock.TYPE.EXACT)
+		KEY_N: if Mods.active(&"C1"): _lockNegatedSet(!%lockNegated.button_pressed)
 		KEY_C:
 			if main.componentFocused: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.componentFocused)
 			else: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.focused)
@@ -103,8 +103,8 @@ func receiveKey(event:InputEvent) -> bool:
 				main.focused.removeLock(main.componentFocused.index)
 				if len(main.focused.locks) != 0: main.focusComponent(main.focused.locks[-1])
 				else: main.focus(main.focused)
-			else: changes.addChange(Changes.DeleteComponentChange.new(editor.game,main.focused))
-			changes.bufferSave()
+			else: Changes.addChange(Changes.DeleteComponentChange.new(editor.game,main.focused))
+			Changes.bufferSave()
 		KEY_TAB:
 			assert(main.componentFocused) # should be handled by interact otherwise
 			if Input.is_key_pressed(KEY_SHIFT):
@@ -117,11 +117,11 @@ func receiveKey(event:InputEvent) -> bool:
 	return true
 
 func changedMods() -> void:
-	%lockSettingsSep.visible = mods.active(&"C1")
-	%lockNegated.visible = mods.active(&"C1")
-	%lockArmament.visible = mods.active(&"C5")
-	%realInfiniteCopy.visible = mods.active(&"InfCopies")
-	%imaginaryInfiniteCopy.visible = mods.active(&"InfCopies")
+	%lockSettingsSep.visible = Mods.active(&"C1")
+	%lockNegated.visible = Mods.active(&"C1")
+	%lockArmament.visible = Mods.active(&"C5")
+	%realInfiniteCopy.visible = Mods.active(&"InfCopies")
+	%imaginaryInfiniteCopy.visible = Mods.active(&"InfCopies")
 	if main.componentFocused and main.componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]:
 		main.focusComponent(main.componentFocused)
 
@@ -129,35 +129,35 @@ func _doorColorSelected(color:Game.COLOR) -> void:
 	if main.focused is not Door and main.focused is not RemoteLock: return
 	if main.focused is Door:
 		if main.componentFocused:
-			changes.addChange(Changes.PropertyChange.new(editor.game,main.componentFocused,&"color",color))
+			Changes.addChange(Changes.PropertyChange.new(editor.game,main.componentFocused,&"color",color))
 		elif %lockHandler.colorLink.button_pressed and main.focused.type == Door.TYPE.SIMPLE:
-			changes.addChange(Changes.PropertyChange.new(editor.game,main.focused.locks[0],&"color",color))
+			Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused.locks[0],&"color",color))
 		if !main.componentFocused or (%lockHandler.colorLink.button_pressed and main.focused.type == Door.TYPE.SIMPLE):
-			changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"colorSpend",color))
+			Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"colorSpend",color))
 	elif main.focused is RemoteLock:
-		changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"color",color))
-	changes.bufferSave()
+		Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"color",color))
+	Changes.bufferSave()
 
 func _doorCopiesSet(value:C) -> void:
 	if main.focused is not Door: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"copies",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"copies",value))
+	Changes.bufferSave()
 
 func _doorAxialNumberSet(value:C) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",value))
+	Changes.bufferSave()
 
 func _lockTypeSelected(type:Lock.TYPE) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"type",type))
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"type",type))
 
 func _doorTypeSelected(type:Door.TYPE) -> void:
 	if main.focused is not Door: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"type",type))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"type",type))
+	Changes.bufferSave()
 
 func _spendSelected() -> void:
 	main.defocusComponent()
@@ -179,75 +179,75 @@ func _lockConfigurationSelected(option:ConfigurationSelector.OPTION) -> void:
 		ConfigurationSelector.OPTION.AnyM: lock._comboDoorConfigurationChanged(Lock.SIZE_TYPE.AnyM)
 		ConfigurationSelector.OPTION.AnyL: lock._comboDoorConfigurationChanged(Lock.SIZE_TYPE.AnyL)
 		ConfigurationSelector.OPTION.AnyXL: lock._comboDoorConfigurationChanged(Lock.SIZE_TYPE.AnyXL)
-	changes.bufferSave()
+	Changes.bufferSave()
 
 func _frozenSet(value:bool) -> void:
 	if main.focused is not Door and main.focused is not RemoteLock: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"frozen",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"frozen",value))
+	Changes.bufferSave()
 
 func _crumbledSet(value:bool) -> void:
 	if main.focused is not Door and main.focused is not RemoteLock: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"crumbled",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"crumbled",value))
+	Changes.bufferSave()
 
 func _paintedSet(value:bool) -> void:
 	if main.focused is not Door and main.focused is not RemoteLock: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"painted",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"painted",value))
+	Changes.bufferSave()
 
 func _lockNegatedSet(value:bool) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"negated",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"negated",value))
+	Changes.bufferSave()
 
 func partialBlastNumeratorSet(value:C) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",value))
+	Changes.bufferSave()
 
 func partialBlastDenominatorSet(value:C) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"denominator",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"denominator",value))
+	Changes.bufferSave()
 
 func _isPartialSet(value:bool) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"isPartial",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"isPartial",value))
+	Changes.bufferSave()
 
 func _blastLockSignSet(value:bool) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
 	if lock.denominator.sign() < 0 == value: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",lock.count.times(-1)))
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"denominator",lock.denominator.times(-1)))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",lock.count.times(-1)))
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"denominator",lock.denominator.times(-1)))
+	Changes.bufferSave()
 
 func _blastLockAxisSet(value:bool) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
 	if lock.denominator.isNonzeroImag() == value: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",lock.count.times(C.I if value else C.nI)))
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"denominator",lock.denominator.times(C.I if value else C.nI)))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"count",lock.count.times(C.I if value else C.nI)))
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"denominator",lock.denominator.times(C.I if value else C.nI)))
+	Changes.bufferSave()
 
 func _doorRealInfiniteSet(value:bool) -> void:
 	if main.focused is not Door: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infCopies",C.new(int(value), main.focused.infCopies.i)))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infCopies",C.new(int(value), main.focused.infCopies.i)))
+	Changes.bufferSave()
 
 func _doorImaginaryInfiniteSet(value:bool) -> void:
 	if main.focused is not Door: return
-	changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infCopies",C.new(main.focused.infCopies.r, int(value))))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infCopies",C.new(main.focused.infCopies.r, int(value))))
+	Changes.bufferSave()
 
 func _lockArmamentSet(value:bool) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"armament",value))
-	changes.bufferSave()
+	Changes.addChange(Changes.PropertyChange.new(editor.game,lock,&"armament",value))
+	Changes.bufferSave()

@@ -100,21 +100,21 @@ func _gui_input(event:InputEvent) -> void:
 			if isLeftUnclick(event) or isRightUnclick(event):
 				if componentDragged:
 					if sizeDragging():
-						if !mods.active(&"NstdLockSize") and componentDragged is Lock and componentDragged.parent.type != Door.TYPE.SIMPLE:
+						if !Mods.active(&"NstdLockSize") and componentDragged is Lock and componentDragged.parent.type != Door.TYPE.SIMPLE:
 							componentDragged._coerceSize()
 						if componentDragged is GameObject: focusDialog.focus(componentDragged)
 						else: focusDialog.focusComponent(componentDragged)
 					elif dragMode == DRAG_MODE.POSITION:
 						if lockBufferConvert:
 							lockBufferConvert = false
-							var remoteLock = changes.addChange(Changes.CreateComponentChange.new(game,RemoteLock,{&"position":componentDragged.position+componentDragged.parent.position})).result
+							var remoteLock = Changes.addChange(Changes.CreateComponentChange.new(game,RemoteLock,{&"position":componentDragged.position+componentDragged.parent.position})).result
 							for property in Lock.PROPERTIES:
 								if property not in [&"id", &"position", &"parentId", &"index"]:
-									changes.addChange(Changes.PropertyChange.new(game,remoteLock,property,componentDragged.get(property)))
+									Changes.addChange(Changes.PropertyChange.new(game,remoteLock,property,componentDragged.get(property)))
 							focusDialog.focus(remoteLock)
 							remoteLock._connectTo(componentDragged.parent)
-							changes.addChange(Changes.DeleteComponentChange.new(game,componentDragged))
-				changes.bufferSave()
+							Changes.addChange(Changes.DeleteComponentChange.new(game,componentDragged))
+				Changes.bufferSave()
 				componentDragged = null
 			# set mouse cursor
 			if multiselect.state == Multiselect.STATE.DRAGGING: mouse_default_cursor_shape = CURSOR_DRAG
@@ -164,12 +164,12 @@ func _gui_input(event:InputEvent) -> void:
 							focusDialog.defocus()
 							multiselect.startSelect()
 				MODE.TILE:
-					if mods.active(&"OutOfBounds") or game.levelBounds.has_point(mouseWorldPosition):
+					if Mods.active(&"OutOfBounds") or game.levelBounds.has_point(mouseWorldPosition):
 						if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-							changes.addChange(Changes.TileChange.new(game,mouseTilePosition/32,true))
+							Changes.addChange(Changes.TileChange.new(game,mouseTilePosition/32,true))
 							focusDialog.defocus()
 						elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-							changes.addChange(Changes.TileChange.new(game,mouseTilePosition/32,false))
+							Changes.addChange(Changes.TileChange.new(game,mouseTilePosition/32,false))
 							focusDialog.defocus()
 				MODE.KEY:
 					if isLeftClick(event): # if youre hovering a key and you leftclick, focus it
@@ -178,15 +178,15 @@ func _gui_input(event:InputEvent) -> void:
 						else: focusDialog.defocus()
 					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						if objectHovered is not KeyBulk and game.levelBounds.has_point(mouseWorldPosition):
-							var key:KeyBulk = changes.addChange(Changes.CreateComponentChange.new(game,KeyBulk,{&"position":mouseTilePosition})).result
+							var key:KeyBulk = Changes.addChange(Changes.CreateComponentChange.new(game,KeyBulk,{&"position":mouseTilePosition})).result
 							focusDialog.defocus()
 							if !Input.is_key_pressed(KEY_SHIFT):
 								modes.setMode(MODE.SELECT)
 								startPositionDrag(key)
 					if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 						if objectHovered is KeyBulk:
-							changes.addChange(Changes.DeleteComponentChange.new(game,objectHovered))
-							changes.bufferSave()
+							Changes.addChange(Changes.DeleteComponentChange.new(game,objectHovered))
+							Changes.bufferSave()
 				MODE.DOOR:
 					if isLeftClick(event):
 						if componentHovered:
@@ -196,15 +196,15 @@ func _gui_input(event:InputEvent) -> void:
 						elif objectHovered is Door: startPositionDrag(objectHovered)
 						else:
 							if objectHovered is not Door and game.levelBounds.has_point(mouseWorldPosition):
-								var door:Door = changes.addChange(Changes.CreateComponentChange.new(game,Door,{&"position":mouseTilePosition})).result
+								var door:Door = Changes.addChange(Changes.CreateComponentChange.new(game,Door,{&"position":mouseTilePosition})).result
 								startSizeDrag(door)
-								changes.addChange(Changes.CreateComponentChange.new(game,Lock,{&"position":Vector2.ZERO,&"parentId":door.id}))
+								Changes.addChange(Changes.CreateComponentChange.new(game,Lock,{&"position":Vector2.ZERO,&"parentId":door.id}))
 								if !Input.is_key_pressed(KEY_SHIFT):
 									modes.setMode(MODE.SELECT)
 					if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 						if objectHovered is Door:
-							changes.addChange(Changes.DeleteComponentChange.new(game,objectHovered))
-							changes.bufferSave()
+							Changes.addChange(Changes.DeleteComponentChange.new(game,objectHovered))
+							Changes.bufferSave()
 				MODE.OTHER:
 					if isLeftClick(event):
 						if componentHovered is KeyCounterElement and otherObjects.selected == KeyCounter: startPositionDrag(componentHovered)
@@ -213,17 +213,17 @@ func _gui_input(event:InputEvent) -> void:
 						else: focusDialog.defocus()
 					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 						if (!objectHovered or objectHovered.get_script() != otherObjects.selected) and game.levelBounds.has_point(mouseWorldPosition):
-							var object:GameObject = changes.addChange(Changes.CreateComponentChange.new(game,otherObjects.selected,{&"position":mouseTilePosition})).result
+							var object:GameObject = Changes.addChange(Changes.CreateComponentChange.new(game,otherObjects.selected,{&"position":mouseTilePosition})).result
 							focusDialog.defocus()
 							if otherObjects.selected == KeyCounter:
-								changes.addChange(Changes.CreateComponentChange.new(game,KeyCounterElement,{&"position":Vector2(12,12),&"parentId":object.id}))
+								Changes.addChange(Changes.CreateComponentChange.new(game,KeyCounterElement,{&"position":Vector2(12,12),&"parentId":object.id}))
 							if !Input.is_key_pressed(KEY_SHIFT):
 								modes.setMode(MODE.SELECT)
 								startPositionDrag(object)
 					if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 						if objectHovered and objectHovered.get_script() == otherObjects.selected:
-							changes.addChange(Changes.DeleteComponentChange.new(game,objectHovered))
-							changes.bufferSave()
+							Changes.addChange(Changes.DeleteComponentChange.new(game,objectHovered))
+							Changes.bufferSave()
 				MODE.PASTE:
 					if isLeftClick(event):
 						multiselect.paste()
@@ -277,12 +277,12 @@ func dragComponent() -> bool: # returns whether or not an object is being dragge
 		var bottomRight:Vector2 = componentDragged.getOffset()+componentDragged.parent.size-Vector2.ONE
 		# this shit sucks
 		if dragPosition.x < topLeft.x or dragPosition.y < topLeft.y:
-			if mods.active(&"C1"): lockBufferConvert = true
-			elif !mods.active(&"DisconnectedLock"): dragPosition += ceil(Vector2.ZERO.max(topLeft-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
+			if Mods.active(&"C1"): lockBufferConvert = true
+			elif !Mods.active(&"DisconnectedLock"): dragPosition += ceil(Vector2.ZERO.max(topLeft-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
 		if dragMode == DRAG_MODE.POSITION and (dragPosition.x > bottomRight.x or dragPosition.y > bottomRight.y):
-			if mods.active(&"C1"): lockBufferConvert = true
-			elif !mods.active(&"DisconnectedLock"): dragPosition += floor(Vector2.ZERO.min(bottomRight-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
-	elif componentDragged is not KeyCounterElement and !mods.active(&"OutOfBounds"):
+			if Mods.active(&"C1"): lockBufferConvert = true
+			elif !Mods.active(&"DisconnectedLock"): dragPosition += floor(Vector2.ZERO.min(bottomRight-dragPosition)/Vector2(tileSize))*Vector2(tileSize)
+	elif componentDragged is not KeyCounterElement and !Mods.active(&"OutOfBounds"):
 		var topLeft:Vector2 = game.levelBounds.position
 		var bottomRight:Vector2 = game.levelBounds.end-Vector2i.ONE
 		# this shit sucks
@@ -299,7 +299,7 @@ func dragComponent() -> bool: # returns whether or not an object is being dragge
 				elif componentDragged.index < len(componentDragged.parent.elements) - 1 and (componentDragged.position+parentPosition).y - dragPosition.y <= -20:
 					componentDragged.parent._swapElements(componentDragged.index, componentDragged.index+1)
 			else:
-				changes.addChange(Changes.PropertyChange.new(game,componentDragged,&"position",dragPosition + dragOffset))
+				Changes.addChange(Changes.PropertyChange.new(game,componentDragged,&"position",dragPosition + dragOffset))
 		DRAG_MODE.SIZE_FDIAG, DRAG_MODE.SIZE_BDIAG, DRAG_MODE.SIZE_VERT, DRAG_MODE.SIZE_HORIZ:
 			# since mousetileposition rounds down, dragging down or right should go one tile farther
 			if mouseWorldPosition.x > dragPivotRect.position.x:
@@ -319,8 +319,8 @@ func dragComponent() -> bool: # returns whether or not an object is being dragge
 				dragPosition.y = 0
 				dragPosition += dragPivotRect.position
 			var toRect:Rect2 = dragPivotRect.expand(dragPosition)
-			changes.addChange(Changes.PropertyChange.new(game,componentDragged,&"position",toRect.position-parentPosition))
-			changes.addChange(Changes.PropertyChange.new(game,componentDragged,&"size",toRect.size))
+			Changes.addChange(Changes.PropertyChange.new(game,componentDragged,&"position",toRect.position-parentPosition))
+			Changes.addChange(Changes.PropertyChange.new(game,componentDragged,&"size",toRect.size))
 	return true
 
 func _input(event:InputEvent) -> void:
@@ -344,8 +344,8 @@ func _input(event:InputEvent) -> void:
 				KEY_B: modes.setMode(MODE.KEY)
 				KEY_D: modes.setMode(MODE.DOOR)
 				KEY_S: otherObjects.objectSearch.grab_focus()
-				KEY_Z: if Input.is_key_pressed(KEY_CTRL): changes.undo()
-				KEY_Y: if Input.is_key_pressed(KEY_CTRL): changes.redo()
+				KEY_Z: if Input.is_key_pressed(KEY_CTRL): Changes.undo()
+				KEY_Y: if Input.is_key_pressed(KEY_CTRL): Changes.redo()
 				KEY_C: if Input.is_key_pressed(KEY_CTRL): multiselect.copySelection()
 				KEY_V: if Input.is_key_pressed(KEY_CTRL) and multiselect.clipboard != []: modes.setMode(MODE.PASTE)
 				KEY_X:

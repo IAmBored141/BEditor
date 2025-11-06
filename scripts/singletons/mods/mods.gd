@@ -1,6 +1,4 @@
 extends Node
-class_name Mods
-
 @onready var editor:Editor = get_node("/root/editor")
 
 static var mods:Dictionary[StringName, Mod] = {

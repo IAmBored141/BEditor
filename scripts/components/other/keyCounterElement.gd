@@ -51,7 +51,7 @@ func _process(_delta:float) -> void:
 	queue_redraw()
 	drawCurse.color = color
 	drawCurse.scale = Vector2.ONE * (0.4 if color == Game.COLOR.BROWN else 0.5)
-	drawCurse.mode = 1 if mods.active(&"C5") and game.player and game.player.curse[color] else 0
+	drawCurse.mode = 1 if Mods.active(&"C5") and game.player and game.player.curse[color] else 0
 	drawCurse.queue_redraw()
 
 func _draw() -> void:

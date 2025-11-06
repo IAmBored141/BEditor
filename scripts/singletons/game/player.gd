@@ -153,7 +153,7 @@ func receiveKey(event:InputEventKey):
 		KEY_P: game.pauseTest()
 		KEY_O: game.stopTest()
 		KEY_R: game.restart()
-		KEY_Z: if gameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav")).pitch_scale = 0.6
+		KEY_Z: if GameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav")).pitch_scale = 0.6
 		KEY_X: cycleMaster()
 		KEY_S: complexSwitch()
 

@@ -22,4 +22,4 @@ func optionPressed(id:int) -> void:
 		3: pass # save as
 		4: pass # export
 		# CONFIG
-		6: mods.openModsWindow()
+		6: Mods.openModsWindow()

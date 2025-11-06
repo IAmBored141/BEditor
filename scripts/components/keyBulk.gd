@@ -192,7 +192,7 @@ static func drawKey(_game:Game,keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vecto
 
 func propertyChangedInit(property:StringName) -> void:
 	if property == &"type":
-		if type not in [TYPE.NORMAL, TYPE.EXACT] and count.neq(1): changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE))
+		if type not in [TYPE.NORMAL, TYPE.EXACT] and count.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE))
 
 # ==== PLAY ==== #
 var glitchMimic:Game.COLOR = Game.COLOR.GLITCH
@@ -215,19 +215,19 @@ func stop() -> void:
 
 func collect(player:Player) -> void:
 	match type:
-		TYPE.NORMAL: gameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].plus(count)))
-		TYPE.EXACT: gameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), count))
-		TYPE.SIGNFLIP: gameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(-1)))
-		TYPE.POSROTOR: gameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(C.I)))
-		TYPE.NEGROTOR: gameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(C.nI)))
-		TYPE.STAR: gameChanges.addChange(GameChanges.StarChange.new(game, effectiveColor(), true))
-		TYPE.UNSTAR: gameChanges.addChange(GameChanges.StarChange.new(game, effectiveColor(), false))
-		TYPE.CURSE: gameChanges.addChange(GameChanges.CurseChange.new(game, effectiveColor(), true))
-		TYPE.UNCURSE: gameChanges.addChange(GameChanges.CurseChange.new(game, effectiveColor(), false))
+		TYPE.NORMAL: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].plus(count)))
+		TYPE.EXACT: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), count))
+		TYPE.SIGNFLIP: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(-1)))
+		TYPE.POSROTOR: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(C.I)))
+		TYPE.NEGROTOR: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(C.nI)))
+		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(game, effectiveColor(), true))
+		TYPE.UNSTAR: GameChanges.addChange(GameChanges.StarChange.new(game, effectiveColor(), false))
+		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new(game, effectiveColor(), true))
+		TYPE.UNCURSE: GameChanges.addChange(GameChanges.CurseChange.new(game, effectiveColor(), false))
 		
 	if infinite: flashAnimation()
-	else: gameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"active", false))
-	gameChanges.bufferSave()
+	else: GameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"active", false))
+	GameChanges.bufferSave()
 
 	if color == Game.COLOR.MASTER: # not effectiveColor; doesnt trigger on glitch master
 		AudioManager.play(preload("res://resources/sounds/key/master.wav"))
@@ -241,7 +241,7 @@ func collect(player:Player) -> void:
 				else: AudioManager.play(preload("res://resources/sounds/key/normal.wav"))
 
 func setGlitch(setColor:Game.COLOR) -> void:
-	gameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"glitchMimic", setColor))
+	GameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"glitchMimic", setColor))
 	queue_redraw()
 
 func flashAnimation() -> void:

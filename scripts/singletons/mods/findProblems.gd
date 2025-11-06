@@ -29,12 +29,12 @@ func setup() -> void:
 	problems = 0
 	for child in %modsAdded.get_children(): child.queue_free()
 	for child in %modsRemoved.get_children(): child.queue_free()
-	for mod in mods.mods.values(): mod.clearProblems()
+	for mod in Mods.mods.values(): mod.clearProblems()
 	
 	problemDisplays = {}
-	for mod in mods.mods.keys():
+	for mod in Mods.mods.keys():
 		problemDisplays[mod] = {}
-		for problemType in mods.mods[mod].problems.keys():
+		for problemType in Mods.mods[mod].problems.keys():
 			problemDisplays[mod][problemType] = preload("res://scenes/problemDisplay.tscn").instantiate().setup(mod,problemType,self)
 	
 	for object in editor.game.objects.values():
@@ -43,7 +43,7 @@ func setup() -> void:
 	for component in editor.game.components.values():
 		component.problems.clear()
 		findProblems(component)
-	for mod in mods.mods.keys():
+	for mod in Mods.mods.keys():
 		if mod in modsWindow.modsAdded: %modsAdded.add_child(ModSelectButton.new(self,mod))
 		elif mod in modsWindow.modsRemoved: %modsRemoved.add_child(ModSelectButton.new(self,mod))
 	isReady = true
@@ -107,16 +107,16 @@ func noteProblem(mod:StringName, type:StringName, component:GameComponent, isPro
 	var problem:Array = [mod, type]
 	if isProblem and problem not in component.problems:
 		component.problems.append(problem)
-		mods.mods[mod].problems[type].append(component)
+		Mods.mods[mod].problems[type].append(component)
 		problems += 1
 		if isReady: problemDisplays[mod][type].newInstance()
 	elif !isProblem and problem in component.problems:
 		component.problems.erase(problem)
-		var index = mods.mods[mod].problems[type].find(component)
-		mods.mods[mod].problems[type].remove_at(index)
+		var index = Mods.mods[mod].problems[type].find(component)
+		Mods.mods[mod].problems[type].remove_at(index)
 		problems -= 1
 		if isReady: problemDisplays[mod][type].removeInstance(index)
-	if isReady: mods.mods[mod].selectButton.setIcon()
+	if isReady: Mods.mods[mod].selectButton.setIcon()
 
 func componentRemoved(component:GameComponent) -> void:
 	for problem in component.problems:
@@ -135,7 +135,7 @@ class ModSelectButton extends Button:
 		findProblems = _findProblems
 		button_group = findProblems.buttonGroup
 		modId = _modId
-		mod = mods.mods[modId]
+		mod = Mods.mods[modId]
 		mod.selectButton = self
 		text = mod.name
 		setIcon()

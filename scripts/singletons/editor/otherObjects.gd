@@ -24,7 +24,7 @@ func _updateSearch() -> void:
 	var search:String = objectSearch.text.to_lower()
 	var resultCount:int = 0
 	for object in objects:
-		if !mods.objectAvailable(object): continue
+		if !Mods.objectAvailable(object): continue
 		if search == "" or matchesSearch(object, search):
 			var result = preload("res://scenes/searchResult.tscn").instantiate()
 			result.setResult(object)

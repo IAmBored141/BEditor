@@ -73,10 +73,10 @@ func receiveMouseInput(event:InputEventMouse) -> bool:
 	return false
 
 func _elementsChanged() -> void:
-	changes.addChange(Changes.PropertyChange.new(game,self,&"size",Vector2(size.x,23+len(elements)*40)))
+	Changes.addChange(Changes.PropertyChange.new(game,self,&"size",Vector2(size.x,23+len(elements)*40)))
 	var index:int = 0
 	for element in elements:
-		changes.addChange(Changes.PropertyChange.new(game,element,&"position",Vector2(12,12+index*40)))
+		Changes.addChange(Changes.PropertyChange.new(game,element,&"position",Vector2(12,12+index*40)))
 		index += 1
 
 func _swapElements(first:int, second:int) -> void: # TODO:DEJANK
@@ -84,20 +84,20 @@ func _swapElements(first:int, second:int) -> void: # TODO:DEJANK
 	var secondColor:Game.COLOR = elements[second].color
 	editor.componentDragged = elements[second]
 	editor.focusDialog.componentFocused = elements[second]
-	changes.addChange(Changes.PropertyChange.new(game,elements[first],&"color",secondColor))
-	changes.addChange(Changes.PropertyChange.new(game,elements[second],&"color",firstColor))
+	Changes.addChange(Changes.PropertyChange.new(game,elements[first],&"color",secondColor))
+	Changes.addChange(Changes.PropertyChange.new(game,elements[second],&"color",firstColor))
 
 func addElement() -> void:
-	var element:KeyCounterElement = changes.addChange(Changes.CreateComponentChange.new(game,KeyCounterElement,{&"position":Vector2(12,12+len(elements)*40),&"parentId":id})).result
-	changes.addChange(Changes.PropertyChange.new(game,element,&"color",nextColor()))
-	changes.bufferSave()
+	var element:KeyCounterElement = Changes.addChange(Changes.CreateComponentChange.new(game,KeyCounterElement,{&"position":Vector2(12,12+len(elements)*40),&"parentId":id})).result
+	Changes.addChange(Changes.PropertyChange.new(game,element,&"color",nextColor()))
+	Changes.bufferSave()
 
 func removeElement(index:int) -> void:
-	changes.addChange(Changes.DeleteComponentChange.new(game,elements[index]))
-	changes.bufferSave()
+	Changes.addChange(Changes.DeleteComponentChange.new(game,elements[index]))
+	Changes.bufferSave()
 
 func nextColor() -> Game.COLOR:
-	# make sure to change this when implementing mods
+	# make sure to change this when implementing Mods
 	if len(elements) < 2: return Game.COLOR.WHITE
 	if elements[-2].color == Game.COLORS - 1: return Game.COLOR.MASTER
 	return elements[-2].color + 1 as Game.COLOR

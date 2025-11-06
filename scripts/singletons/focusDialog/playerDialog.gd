@@ -12,13 +12,13 @@ func _setLevelStart() -> void:
 	if main.focused is not PlayerSpawn: return
 	if editor.game.levelStart:
 		editor.game.levelStart.queue_redraw()
-	changes.addChange(Changes.GlobalObjectChange.new(editor.game,editor.game,&"levelStart",main.focused))
+	Changes.addChange(Changes.GlobalObjectChange.new(editor.game,editor.game,&"levelStart",main.focused))
 	main.focused.queue_redraw()
 
 func _setSavestate() -> void:
 	if main.focused is not PlayerSpawn: return
 	if editor.game.levelStart == main.focused:
-		changes.addChange(Changes.GlobalObjectChange.new(editor.game,editor.game,&"levelStart",null))
+		Changes.addChange(Changes.GlobalObjectChange.new(editor.game,editor.game,&"levelStart",null))
 		main.focused.queue_redraw()
 
 func _playTest() -> void:
