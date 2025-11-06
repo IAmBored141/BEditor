@@ -32,7 +32,7 @@ func getProblemName() -> String:
 		[&"ZeroCostLock",&"ZeroCostLock"]: return "Zero Cost Lock"
 
 		[&"C1", &"RemoteLock"]: return "Remote Lock"
-		[&"C1", &"NegatedLock"]: return "Negated Lock"
+		[&"C1", &"LockNegated"]: return "Negated Lock"
 		[&"C2", &"DynamiteColor"]: return "Dynamite Color"
 		[&"C2", &"QuicksilverColor"]: return "Quicksilver Color"
 		[&"C3", &"PartialBlastLock"]: return "Partial Blast Lock"
@@ -40,6 +40,7 @@ func getProblemName() -> String:
 		[&"C4", &"DarkAuraColor"]: return "Dark Aura Color"
 		[&"C4", &"AuraBreakerColor"]: return "Aura Breaker Color"
 		[&"C5", &"CurseKeyType"]: return "Curse/Decurse Key"
+		[&"C5", &"LockArmament"]: return "Lock Armament"
 	return "huh?? what??"
 
 func showInstance(index:int) -> void:

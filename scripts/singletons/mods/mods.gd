@@ -37,7 +37,7 @@ static var mods:Dictionary[StringName, Mod] = {
 	&"C1": Mod.new(
 		"IWL:C World 1",
 		"Adds Remote Locks and Negated Locks from world 1 of IWL:C",
-		[&"RemoteLock", &"NegatedLock"]
+		[&"RemoteLock", &"LockNegated"]
 	),
 	&"C2": Mod.new(
 		"IWL:C World 2",
