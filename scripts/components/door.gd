@@ -595,28 +595,28 @@ func gateCheck(player:Player) -> void:
 
 func auraCheck(player:Player) -> void:
 	var deAuraed:bool = false
-	if player.auraRed and gameFrozen:
+	if player.auraRed and gameFrozen and !hasColor(Game.COLOR.MAROON):
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",false))
 		makeDebris(Debris, Game.COLOR.WHITE)
 		deAuraed = true
-	if player.auraGreen and gameCrumbled:
+	if player.auraGreen and gameCrumbled and !hasColor(Game.COLOR.FOREST):
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",false))
 		makeDebris(Debris, Game.COLOR.BROWN)
 		deAuraed = true
-	if player.auraBlue and gamePainted:
+	if player.auraBlue and gamePainted and !hasColor(Game.COLOR.NAVY):
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",false))
 		makeDebris(Debris, Game.COLOR.ORANGE)
 		deAuraed = true
 	var auraed:bool = false
-	if player.auraMaroon and !gameFrozen and !hasColor(Game.COLOR.RED):
+	if player.auraMaroon and !gameFrozen and !hasColor(Game.COLOR.RED) and !isAllColorAfterCurse(Game.COLOR.ICE):
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",true))
 		makeDebris(Debris, Game.COLOR.WHITE)
 		auraed = true
-	if player.auraForest and !gameCrumbled and !hasColor(Game.COLOR.GREEN):
+	if player.auraForest and !gameCrumbled and !hasColor(Game.COLOR.GREEN) and !isAllColorAfterCurse(Game.COLOR.MUD):
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",true))
 		makeDebris(Debris, Game.COLOR.BROWN)
 		auraed = true
-	if player.auraNavy and !gamePainted and !hasColor(Game.COLOR.BLUE):
+	if player.auraNavy and !gamePainted and !hasColor(Game.COLOR.BLUE) and !isAllColorAfterCurse(Game.COLOR.GRAFFITI):
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",true))
 		makeDebris(Debris, Game.COLOR.ORANGE)
 		auraed = true
@@ -624,10 +624,14 @@ func auraCheck(player:Player) -> void:
 		AudioManager.play(preload("res://resources/sounds/door/deaura.wav"))
 		Changes.bufferSave()
 
-
 func isAllColor(color:Game.COLOR) -> bool:
 	if colorSpend != color: return false
 	for lock in locks: if lock.color != color: return false
+	return true
+
+func isAllColorAfterCurse(color:Game.COLOR) -> bool:
+	if colorAfterCurse() != color: return false
+	for lock in locks: if lock.colorAfterCurse() != color: return false
 	return true
 
 func curseCheck(player:Player) -> void:

@@ -296,28 +296,28 @@ func makeCurseParticles(particleColor:Game.COLOR, mode:int, scaleMin:float=1,sca
 
 func auraCheck(player:Player) -> void:
 	var deAuraed:bool = false
-	if player.auraRed and gameFrozen:
+	if player.auraRed and gameFrozen and colorAfterGlitch() != Game.COLOR.MAROON:
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",false))
 		makeDebris(Door.Debris, Game.COLOR.WHITE)
 		deAuraed = true
-	if player.auraGreen and gameCrumbled:
+	if player.auraGreen and gameCrumbled and colorAfterGlitch() != Game.COLOR.FOREST:
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",false))
 		makeDebris(Door.Debris, Game.COLOR.BROWN)
 		deAuraed = true
-	if player.auraBlue and gamePainted:
+	if player.auraBlue and gamePainted and colorAfterGlitch() != Game.COLOR.NAVY:
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",false))
 		makeDebris(Door.Debris, Game.COLOR.ORANGE)
 		deAuraed = true
 	var auraed:bool = false
-	if player.auraMaroon and !gameFrozen and colorAfterGlitch() != Game.COLOR.RED:
+	if player.auraMaroon and !gameFrozen and colorAfterGlitch() != Game.COLOR.RED and colorAfterCurse() != Game.COLOR.ICE:
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",true))
 		makeDebris(Door.Debris, Game.COLOR.WHITE)
 		auraed = true
-	if player.auraForest and !gameCrumbled and colorAfterGlitch() != Game.COLOR.GREEN:
+	if player.auraForest and !gameCrumbled and colorAfterGlitch() != Game.COLOR.GREEN and colorAfterCurse() != Game.COLOR.MUD:
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",true))
 		makeDebris(Door.Debris, Game.COLOR.BROWN)
 		auraed = true
-	if player.auraNavy and !gamePainted and colorAfterGlitch() != Game.COLOR.BLUE:
+	if player.auraNavy and !gamePainted and colorAfterGlitch() != Game.COLOR.BLUE and colorAfterCurse() != Game.COLOR.GRAFFITI:
 		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",true))
 		makeDebris(Door.Debris, Game.COLOR.ORANGE)
 		auraed = true
