@@ -266,7 +266,6 @@ class DeleteComponentChange extends Change:
 				for element in arrays[array][1]: componentArray.append(arrayDictionary[element])
 			else:
 				for element in arrays[array][1]: componentArray.append(Changes.copy(element))
-			print(component.get(array))
 		dictionary[prop[&"id"]] = component
 		
 		if type == Lock:

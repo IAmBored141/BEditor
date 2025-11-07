@@ -37,17 +37,17 @@ func receiveKey(key:InputEventKey):
 		KEY_TAB: editor.focusDialog.tabbed(self)
 		KEY_EQUAL: if purpose != PURPOSE.SINGLE and Input.is_key_pressed(KEY_SHIFT):
 			editor.focusDialog.interact((get_parent().imaginaryEdit if purpose == PURPOSE.REAL else get_parent().realEdit))
-		KEY_0: number = 0
-		KEY_1: number = 1
-		KEY_2: number = 2
-		KEY_3: number = 3
-		KEY_4: number = 4
-		KEY_5: number = 5
-		KEY_6: number = 6
-		KEY_7: number = 7
-		KEY_8: number = 8
-		KEY_9: number = 9
-		KEY_MINUS:
+		KEY_0, KEY_KP_0: number = 0
+		KEY_1, KEY_KP_1: number = 1
+		KEY_2, KEY_KP_2: number = 2
+		KEY_3, KEY_KP_3: number = 3
+		KEY_4, KEY_KP_4: number = 4
+		KEY_5, KEY_KP_5: number = 5
+		KEY_6, KEY_KP_6: number = 6
+		KEY_7, KEY_KP_7: number = 7
+		KEY_8, KEY_KP_8: number = 8
+		KEY_9, KEY_KP_9: number = 9
+		KEY_MINUS, KEY_KP_SUBTRACT:
 			if value.n == 0: bufferedNegative = !bufferedNegative
 			setValue(value.times(-1))
 		KEY_BACKSPACE:

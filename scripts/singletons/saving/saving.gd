@@ -146,7 +146,6 @@ func save(path:String="") -> void:
 	# objects
 	file.store_64(len(game.objects))
 	for object in game.objects.values():
-		print(object)
 		file.store_16(Game.COMPONENTS.find(object.get_script()))
 		for property in object.PROPERTIES:
 			file.store_var(object.get(property), true)

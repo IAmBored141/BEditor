@@ -101,7 +101,6 @@ func _gui_input(event:InputEvent) -> void:
 					MOUSE_BUTTON_WHEEL_UP: zoomCamera(1.25)
 					MOUSE_BUTTON_WHEEL_DOWN: zoomCamera(0.8)
 			# modes
-			#print(lockBufferConvert)
 			if isLeftUnclick(event) or isRightUnclick(event):
 				if componentDragged:
 					if sizeDragging():
