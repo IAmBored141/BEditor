@@ -119,7 +119,7 @@ func save(path:String="") -> void:
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.WRITE)
 
 	# HEADER
-	file.store_pascal_string("IWLCEditorProject")
+	file.store_pascal_string("IWLCEditorPuzzle")
 	file.store_32(FILE_FORMAT_VERSION)
 	# LEVEL METADATA
 	file.store_pascal_string(game.level.name)
