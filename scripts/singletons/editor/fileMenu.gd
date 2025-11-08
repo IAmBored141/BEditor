@@ -16,11 +16,11 @@ func _ready() -> void:
 func optionPressed(id:int) -> void:
 	match id:
 		# FILE
-		0: Saving.new()
+		0: Saving.confirmAction = Saving.ACTION.NONE; Saving.new()
 		1: Saving.open()
 		2: Saving.openForPlay()
-		3: Saving.save()
-		4: Saving.saveAs()
+		3: Saving.confirmAction = Saving.ACTION.NONE; Saving.save()
+		4: Saving.confirmAction = Saving.ACTION.NONE; Saving.saveAs()
 		5: pass # export
 		6: OS.shell_open(ProjectSettings.globalize_path("user://puzzles"))
 		# CONFIG

@@ -2,7 +2,7 @@ extends Node
 
 @onready var editor:Editor = get_node("/root/editor")
 
-enum ACTION {NEW, OPEN, SAVE_FOR_PLAY, OPEN_FOR_PLAY}
+enum ACTION {NEW, OPEN, SAVE_FOR_PLAY, OPEN_FOR_PLAY, NONE}
 
 var savePath:String = ""
 var confirmAction:ACTION
