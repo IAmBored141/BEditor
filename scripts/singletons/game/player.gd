@@ -33,7 +33,7 @@ var key:Array[C] = []
 var star:Array[bool]
 var curse:Array[bool]
 
-var nearDoor:bool = false # cant save if near a door
+var cantSave:bool = false # cant save if near a door
 
 var masterMode:C = C.ZERO
 var masterCycle:int = 0 # 0 = None, 1 = Master, 2 = Silver
@@ -130,9 +130,10 @@ func _physics_process(_delta:float) -> void:
 	if pauseFrame:
 		pauseFrame = false
 	else:
-		nearDoor = false
+		cantSave = false
 		for area in %near.get_overlapping_areas(): near(area)
 		for area in %interact.get_overlapping_areas(): interacted(area)
+		GameChanges.process()
 
 func _process(delta:float) -> void:
 	masterShineAngle += delta*4.1887902048 # 4 degrees per frame, 60fps
@@ -172,15 +173,17 @@ func interacted(area:Area2D) -> void:
 	var object:GameObject = area.get_parent()
 	if object is Door:
 		object.tryOpen(self)
+	elif object is KeyBulk:
+		cantSave = true
 
 func near(area:Area2D) -> void:
 	var object:GameObject = area.get_parent()
 	if object is Door:
-		nearDoor = true
+		cantSave = true
 		object.auraCheck(self)
 		if curseMode: object.curseCheck(self)
 	if object is RemoteLock:
-		nearDoor = true
+		cantSave = true
 		object.auraCheck(self)
 		if curseMode: object.curseCheck(self)
 

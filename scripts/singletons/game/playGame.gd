@@ -30,7 +30,6 @@ func _process(delta:float) -> void:
 		roomTransitionTimer += delta
 		match roomTransitionPhase:
 			0:
-				%roomTransition.mouse_filter = MOUSE_FILTER_STOP
 				roomTransitionColor.a = 1
 				textOffsetAngle = deg_to_rad(min(roomTransitionTimer*60,40)*2.25)
 				queue_redraw()
@@ -38,7 +37,6 @@ func _process(delta:float) -> void:
 					roomTransitionTimer = 0
 					roomTransitionPhase += 1
 			1:
-				%roomTransition.mouse_filter = MOUSE_FILTER_IGNORE
 				roomTransitionColor.a = 1 - roomTransitionTimer/0.5833333333
 				textOffsetAngle = deg_to_rad(90+roomTransitionTimer*154.2857142857)
 				queue_redraw()
@@ -49,11 +47,11 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(mainDraw)
 	# description box
 	if Game.level.description:
-		RenderingServer.canvas_item_add_texture_rect(mainDraw,Rect2(Vector2(11,523),Vector2(784,80)),DESCRIPTION_BOX,false,Color(Color.BLACK,0.35))
-		RenderingServer.canvas_item_add_texture_rect(mainDraw,Rect2(Vector2(8,520),Vector2(784,80)),DESCRIPTION_BOX)
-		Game.FTALK.draw_multiline_string(mainDraw,Vector2(16,544),Game.level.description,HORIZONTAL_ALIGNMENT_LEFT,667,12,4,Color("#200020"),TEXT_BREAK_FLAGS)
-		TextDraw.outlinedCentered(Game.FROOMNUM,mainDraw,"PUZZLE",Color("#d6cfc9"),Color("#3e2d1c"),20,Vector2(732,543))
-		TextDraw.outlinedCentered(Game.FROOMNUM,mainDraw,Game.level.shortNumber,Color("#8c50c8"),Color("#140064"),20,Vector2(732,573))
+		RenderingServer.canvas_item_add_texture_rect(mainDraw,Rect2(Vector2(11,519),Vector2(784,80)),DESCRIPTION_BOX,false,Color(Color.BLACK,0.35))
+		RenderingServer.canvas_item_add_texture_rect(mainDraw,Rect2(Vector2(8,516),Vector2(784,80)),DESCRIPTION_BOX)
+		Game.FTALK.draw_multiline_string(mainDraw,Vector2(16,540),Game.level.description,HORIZONTAL_ALIGNMENT_LEFT,666,12,4,Color("#200020"),TEXT_BREAK_FLAGS)
+		TextDraw.outlinedCentered(Game.FROOMNUM,mainDraw,"PUZZLE",Color("#d6cfc9"),Color("#3e2d1c"),20,Vector2(732,539))
+		TextDraw.outlinedCentered(Game.FROOMNUM,mainDraw,Game.level.shortNumber,Color("#8c50c8"),Color("#140064"),20,Vector2(733,569))
 	# room transition
 	if roomTransitionPhase != -1:
 		var textOffset = Vector2(0,500*sin(textOffsetAngle)-500)
@@ -66,6 +64,7 @@ func _draw() -> void:
 
 func _input(event:InputEvent) -> void:
 	if event is InputEventKey and event.is_pressed():
+		if event.keycode == KEY_F5: queue_redraw()
 		if roomTransitionPhase == 0 and roomTransitionTimer >= 0.6666666667:
 			if event.keycode == KEY_SPACE:
 				roomTransitionPhase += 1
@@ -81,7 +80,7 @@ func start() -> void:
 	Game.player = preload("res://scenes/player.tscn").instantiate()
 	world.add_child(Game.player)
 	assert(Game.levelStart)
-	Game.player.position = Game.levelStart.position + Vector2(17, 23)
+	Game.player.position = Game.levelStart.position + Vector2(16, 23)
 	GameChanges.start()
 	for object in Game.objects.values():
 		object.start()

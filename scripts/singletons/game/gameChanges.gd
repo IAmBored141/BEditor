@@ -11,7 +11,6 @@ func start() -> void:
 	undoStack.append(UndoSeparator.new(Game.player.position))
 
 func bufferSave() -> void:
-	await get_tree().process_frame # maybe race condition? it seems to be able to get stuck sometimes with keys
 	saveBuffered = true
 
 func addChange(change:Change) -> Change:
@@ -19,8 +18,8 @@ func addChange(change:Change) -> Change:
 	undoStack.append(change)
 	return change
 
-func _process(_delta) -> void:
-	if saveBuffered and Game.player.is_on_floor() and !Game.player.nearDoor:
+func process() -> void:
+	if saveBuffered and Game.player.is_on_floor() and !Game.player.cantSave:
 		saveBuffered = false
 		if undoStack[-1] is not UndoSeparator: # could happen if something buffers save on the frame before a reset
 			undoStack.append(UndoSeparator.new(Game.player.position))

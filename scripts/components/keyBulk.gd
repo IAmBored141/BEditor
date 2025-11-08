@@ -89,7 +89,7 @@ const POSROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/posroto
 const NEGROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/negrotor.png")
 const INFINITE_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/infinite.png")
 
-const FKEYBULK:Font = preload("res://resources/fonts/fKeyBulk.tres")
+const FKEYBULK:Font = preload("res://resources/fonts/fKeyBulk.fnt")
 
 const CREATE_PARAMETERS:Array[StringName] = [
 	&"position"
@@ -147,7 +147,7 @@ func _draw() -> void:
 	if animState == ANIM_STATE.FLASH: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,outlineTex(),false,Color(Color.WHITE,animAlpha))
 	match type:
 		KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT:
-			if !count.eq(1): TextDraw.outlined2(FKEYBULK,drawSymbol,str(count),keycountColor(),keycountOutlineColor(),18,Vector2(2,31))
+			if !count.eq(1): TextDraw.outlined2(FKEYBULK,drawSymbol,str(count),keycountColor(),keycountOutlineColor(),14,Vector2(1,25))
 		KeyBulk.TYPE.SIGNFLIP: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,SIGNFLIP_SYMBOL)
 		KeyBulk.TYPE.POSROTOR, KeyBulk.TYPE.CURSE: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,POSROTOR_SYMBOL)
 		KeyBulk.TYPE.NEGROTOR, KeyBulk.TYPE.UNCURSE: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,NEGROTOR_SYMBOL)

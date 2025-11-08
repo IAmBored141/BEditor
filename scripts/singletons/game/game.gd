@@ -344,7 +344,7 @@ func playTest(spawn:PlayerSpawn) -> void:
 		starting = true
 		player = preload("res://scenes/player.tscn").instantiate()
 		world.add_child(player)
-		player.position = spawn.position + Vector2(17, 23)
+		player.position = spawn.position + Vector2(16, 23)
 	playState = PLAY_STATE.PLAY
 	latestSpawn = spawn
 
