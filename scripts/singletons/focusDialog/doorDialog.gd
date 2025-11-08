@@ -71,7 +71,7 @@ func focusComponent(component:GameComponent, _new:bool) -> void: # Lock or Remot
 	%isPartial.visible = Mods.active(&"C3")
 	%isPartial.button_pressed = component.isPartial
 	%partialDenominator.visible = component.isPartial
-	%discreteBlastSettings.visible = !component.isPartial and component.type != Lock.TYPE.ALL
+	%discreteBlastSettings.visible = !component.isPartial and (component.type != Lock.TYPE.ALL or Mods.active(&"C3"))
 	%partialBlastNumeratorEdit.setValue(component.count, true)
 	%partialBlastDenominatorEdit.setValue(component.denominator, true)
 

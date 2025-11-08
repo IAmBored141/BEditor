@@ -229,7 +229,7 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawConfiguration)
 	if !parent.active and game.playState == Game.PLAY_STATE.PLAY: return
 	drawLock(game,drawGlitch,drawScaled,drawMain,drawConfiguration,
-		size,colorAfterCurse(),colorAfterGlitch(),type,effectiveConfiguration(),sizeType,effectiveCount(),isPartial,denominator,negated,armament,
+		size,colorAfterCurse(),colorAfterGlitch(),type,effectiveConfiguration(),sizeType,effectiveCount(),isPartial,effectiveDenominator(),negated,armament,
 		getFrameHighColor(isNegative(), negated),
 		getFrameMainColor(isNegative(), negated),
 		getFrameDarkColor(isNegative(), negated),
@@ -342,7 +342,7 @@ static func drawLock(_game:Game, lockDrawGlitch:RID, lockDrawScaled:RID, lockDra
 			TYPE.BLAST, TYPE.ALL:
 				var numerator:String
 				var ipow:int = 0
-				if lockDenominator.isComplex() or lockDenominator.eq(0) or lockType == TYPE.ALL: numerator = str(lockCount)
+				if lockDenominator.isComplex() or lockDenominator.eq(0): numerator = str(lockCount)
 				else:
 					numerator = str(lockCount.over(lockDenominator.axis()))
 					ipow = lockDenominator.axis().toIpow()
@@ -355,8 +355,8 @@ static func drawLock(_game:Game, lockDrawGlitch:RID, lockDrawScaled:RID, lockDra
 				
 				if lockIsPartial:
 					var denom:String
-					if !lockDenominator.isComplex(): denom = str(lockDenominator.abs())
-					else: denom = str(lockDenominator)
+					if lockDenominator.isComplex(): denom = str(lockDenominator)
+					else: denom = str(lockDenominator.abs())
 					var denomWidth:float = Game.FTALK.get_string_size(denom,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 					var denomStartX = round((lockSize.x - denomWidth)/2)
 					var denomStartY = startY + 10
@@ -563,5 +563,4 @@ func effectiveDenominator(ipow:C=parent.ipow()) -> C:
 	return denominator.times(ipow)
 
 func isNegative() -> bool:
-	if type == TYPE.ALL: return false
-	return (effectiveDenominator() if type == TYPE.BLAST else effectiveCount()).sign() < 0
+	return (effectiveDenominator() if type in [TYPE.BLAST, TYPE.ALL] else effectiveCount()).sign() < 0
