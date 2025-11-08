@@ -64,10 +64,9 @@ static var ARRAYS:Dictionary[GDScript,Dictionary] = {
 # - components
 # - objects
 
-static func load(file:FileAccess, game:Game) -> void:
-	game.level = file.get_var(true)
-	game.level.game = game
-	game.levelBounds.size = file.get_var()
+static func load(file:FileAccess) -> void:
+	Game.level = file.get_var(true)
+	Game.levelBounds.size = file.get_var()
 	for mod in file.get_var(): Mods.mods[mod].active = true
 	var modpackId:StringName = file.get_var()
 	if modpackId: Mods.activeModpack = Mods.modpacks[modpackId]
@@ -75,36 +74,34 @@ static func load(file:FileAccess, game:Game) -> void:
 	var levelStart:int = file.get_64()
 	# LEVEL DATA
 	# tiles
-	game.tiles.tile_map_data = file.get_var()
+	Game.tiles.tile_map_data = file.get_var()
 	# components
-	game.componentIdIter = file.get_64()
+	Game.componentIdIter = file.get_64()
 	var componentBufferedArrays:Dictionary[int,Dictionary] = {} # dictionary[object id, dictionary[property name, array]]
 	for _i in file.get_64():
 		var type:GDScript = COMPONENTS[file.get_16()]
 		var component = type.new()
-		component.game = game
-		component.editor = game.editor
+		component.editor = Game.editor
 		for property in PROPERTIES[type]:
 			var value = file.get_var(true)
 			if property == &"id":
-				game.components[value] = component
+				Game.components[value] = component
 			component.set(property, value)
 			component.propertyChangedDo(property)
 		for array in ARRAYS[type].keys():
 			componentBufferedArrays[component.id][array] = file.get_var() # handle it at the end; not all components will be ready
 	# objects
-	game.objectIdIter = file.get_64()
+	Game.objectIdIter = file.get_64()
 	var objectBufferedArrays:Dictionary[int,Dictionary] = {} # dictionary[object id, dictionary[property name, array]]
 	for _i in file.get_64():
 		var type:GDScript = COMPONENTS[file.get_16()]
 		var object = type.SCENE.instantiate()
-		object.game = game
-		object.editor = game.editor
+		object.editor = Game.editor
 		for property in PROPERTIES[type]:
 			var value = file.get_var(true)
 			if property == &"id":
-				game.objects[value] = object
-				game.objectsParent.add_child(object)
+				Game.objects[value] = object
+				Game.objectsParent.add_child(object)
 			object.set(property, value)
 			object.propertyChangedDo(property)
 		objectBufferedArrays[object.id] = {}
@@ -123,7 +120,7 @@ static func load(file:FileAccess, game:Game) -> void:
 				object.add_child(element)
 	
 	for componentId in componentBufferedArrays.keys():
-		var component:GameComponent = game.components[componentId]
+		var component:GameComponent = Game.components[componentId]
 		for array in ARRAYS[component.get_script()]:
 			var value:Array = componentBufferedArrays[componentId][array]
 			var arrayType:GDScript = ARRAYS[component.get_script()][array]
@@ -131,7 +128,7 @@ static func load(file:FileAccess, game:Game) -> void:
 			component.get(array).assign(value)
 
 	for objectId in objectBufferedArrays.keys():
-		var object:GameObject = game.objects[objectId]
+		var object:GameObject = Game.objects[objectId]
 		for array in ARRAYS[object.get_script()]:
 			var value:Array = objectBufferedArrays[objectId][array]
 			var arrayType:GDScript = ARRAYS[object.get_script()][array]
@@ -139,10 +136,10 @@ static func load(file:FileAccess, game:Game) -> void:
 			object.get(array).assign(value)
 
 	if levelStart != -1:
-		game.levelStart = game.objects[levelStart]
-		game.editor.topBar._updateButtons()
+		Game.levelStart = Game.objects[levelStart]
+		Game.editor.topBar._updateButtons()
 	
-	game.updateWindowName()
-	game.editor.settingsMenu.opened()
-	game.editor.updateDescription()
-	game.get_tree().call_group("modUI", "changedMods")
+	Game.updateWindowName()
+	Game.editor.settingsMenu.opened()
+	Game.editor.updateDescription()
+	Game.get_tree().call_group("modUI", "changedMods")

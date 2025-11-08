@@ -14,7 +14,7 @@ func bufferSave() -> void:
 
 func addChange(change:Change) -> Change:
 	if change.cancelled: return null
-	editor.game.anyChanges = true
+	Game.anyChanges = true
 	if stackPosition != len(undoStack) - 1: undoStack = undoStack.slice(0,stackPosition+1)
 	undoStack.append(change)
 	stackPosition += 1
@@ -29,7 +29,7 @@ func _process(_delta) -> void:
 
 func undo() -> void:
 	if stackPosition == 0: return
-	editor.game.anyChanges = true
+	Game.anyChanges = true
 	if undoStack[stackPosition] is UndoSeparator: stackPosition -= 1
 	else:
 		assert(stackPosition == len(undoStack)-1) # new Changes havent been saved yet
@@ -56,7 +56,6 @@ func copy(value:Variant) -> Variant:
 	else: return value
 
 class Change extends RefCounted:
-	var game:Game
 	var cancelled:bool = false
 	# is a singular recorded change
 	func do() -> void: pass
@@ -72,23 +71,22 @@ class TileChange extends Change:
 	var beforeTile:bool # probably make a tile enum at some point but right now we either have tile or not
 	var afterTile:bool # same as above
 
-	func _init(_game:Game,_position:Vector2i,_afterTile:bool) -> void:
-		game = _game
+	func _init(_position:Vector2i,_afterTile:bool) -> void:
 		position = _position
 		afterTile = _afterTile
-		beforeTile = game.tiles.get_cell_source_id(position) != -1
+		beforeTile = Game.tiles.get_cell_source_id(position) != -1
 		if afterTile == beforeTile:
 			cancelled = true
 			return
 		do()
 
 	func do() -> void:
-		if afterTile: game.tiles.set_cell(position,1,Vector2i(1,1))
-		else: game.tiles.erase_cell(position)
+		if afterTile: Game.tiles.set_cell(position,1,Vector2i(1,1))
+		else: Game.tiles.erase_cell(position)
 
 	func undo() -> void:
-		if beforeTile: game.tiles.set_cell(position,1,Vector2i(1,1))
-		else: game.tiles.erase_cell(position)
+		if beforeTile: Game.tiles.set_cell(position,1,Vector2i(1,1))
+		else: Game.tiles.erase_cell(position)
 
 	func _to_string() -> String:
 		return "<TileChange:"+str(position.x)+","+str(position.y)+">"
@@ -100,33 +98,31 @@ class CreateComponentChange extends Change:
 	var id:int
 	var result:GameComponent
 
-	func _init(_game:Game,_type:GDScript,parameters:Dictionary[StringName, Variant]) -> void:
-		game = _game
+	func _init(_type:GDScript,parameters:Dictionary[StringName, Variant]) -> void:
 		type = _type
 		
-		if type == Lock or type == KeyCounterElement: id = game.componentIdIter; game.componentIdIter += 1
-		else: id = game.objectIdIter; game.objectIdIter += 1
+		if type == Lock or type == KeyCounterElement: id = Game.componentIdIter; Game.componentIdIter += 1
+		else: id = Game.objectIdIter; Game.objectIdIter += 1
 
 		for property in type.CREATE_PARAMETERS:
 			prop[property] = Changes.copy(parameters[property])
 		
-		if type in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
+		if type in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
 
 		do()
-		if type == PlayerSpawn and !game.levelStart:
-			Changes.addChange(GlobalObjectChange.new(game,game,&"levelStart",result))
+		if type == PlayerSpawn and !Game.levelStart:
+			Changes.addChange(GlobalObjectChange.new(Game,&"levelStart",result))
 		elif type == KeyCounterElement:
-			game.objects[prop[&"parentId"]]._elementsChanged()
+			Game.objects[prop[&"parentId"]]._elementsChanged()
 
 	func do() -> void:
 		var component:GameComponent
-		var parent:Node = game.objectsParent
+		var parent:Node = Game.objectsParent
 		if type in Game.NON_OBJECT_COMPONENTS: component = type.new()
 		else: component = type.SCENE.instantiate()
 
-		component.editor = game.editor
-		component.game = game
+		component.editor = Game.editor
 
 		component.id = id
 		for property in component.CREATE_PARAMETERS:
@@ -135,7 +131,7 @@ class CreateComponentChange extends Change:
 		dictionary[id] = component
 
 		if type == Lock:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			component.parent = parent
 			prop[&"index"] = len(parent.locks)
 			component.index = prop[&"index"]
@@ -143,7 +139,7 @@ class CreateComponentChange extends Change:
 			parent.add_child(component)
 			parent.reindexLocks()
 		elif type == KeyCounterElement:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			component.parent = parent
 			prop[&"index"] = len(parent.elements)
 			parent.elements.insert(prop[&"index"], component)
@@ -152,35 +148,35 @@ class CreateComponentChange extends Change:
 		else: parent.add_child(component)
 
 		result = component
-		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])
+		if parent == Game.editor.focusDialog.focused: Game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])
 
 		await component.ready
 		component.isReady = true
-		if game.editor.findProblems: game.editor.findProblems.findProblems(component)
+		if Game.editor.findProblems: Game.editor.findProblems.findProblems(component)
 
 	func undo() -> void:
-		game.editor.objectHovered = null
-		game.editor.componentDragged = null
+		Game.editor.objectHovered = null
+		Game.editor.componentDragged = null
 
-		if dictionary[id] == game.editor.focusDialog.focused: game.editor.focusDialog.defocus()
-		elif dictionary[id] == game.editor.focusDialog.componentFocused: game.editor.focusDialog.defocusComponent()
+		if dictionary[id] == Game.editor.focusDialog.focused: Game.editor.focusDialog.defocus()
+		elif dictionary[id] == Game.editor.focusDialog.componentFocused: Game.editor.focusDialog.defocusComponent()
 
 		var parent:GameObject
 		if type == Lock:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			parent.locks.pop_at(prop[&"index"])
 			parent.reindexLocks()
 		elif type == KeyCounterElement:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			parent.elements.pop_at(prop[&"index"])
 			parent.reindexElements()
 
-		if game.editor.findProblems: game.editor.findProblems.componentRemoved(dictionary[id])
+		if Game.editor.findProblems: Game.editor.findProblems.componentRemoved(dictionary[id])
 
 		dictionary[id].queue_free()
 		dictionary.erase(id)
 
-		if parent and parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerRemoved(type, prop[&"index"])
+		if parent and parent == Game.editor.focusDialog.focused: Game.editor.focusDialog.focusHandlerRemoved(type, prop[&"index"])
 	
 	func _to_string() -> String:
 		return "<CreateComponentChange:"+str(id)+">"
@@ -191,9 +187,8 @@ class DeleteComponentChange extends Change:
 	var dictionary:Dictionary
 	var arrays:Dictionary[StringName, Array] = {} # dictionary[property, array[type, array]]
 
-	func _init(_game:Game,component:GameComponent) -> void:
+	func _init(component:GameComponent) -> void:
 		type = component.get_script()
-		game = _game
 		for property in component.PROPERTIES:
 			prop[property] = Changes.copy(component.get(property))
 		for array in component.ARRAYS.keys():
@@ -203,56 +198,55 @@ class DeleteComponentChange extends Change:
 				else: copiedArray.append(Changes.copy(element))
 			arrays[array] = [component.ARRAYS[array], copiedArray]
 
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
 		
 		if type == Door:
 			for lock in component.locks.duplicate():
-				Changes.addChange(DeleteComponentChange.new(game,lock))
+				Changes.addChange(DeleteComponentChange.new(lock))
 		elif type == KeyCounter:
 			for element in component.elements.duplicate():
-				Changes.addChange(DeleteComponentChange.new(game,element))
+				Changes.addChange(DeleteComponentChange.new(element))
 		
-		if type == PlayerSpawn and component == game.levelStart:
-			Changes.addChange(GlobalObjectChange.new(game,game,&"levelStart",null))
+		if type == PlayerSpawn and component == Game.levelStart:
+			Changes.addChange(GlobalObjectChange.new(Game,&"levelStart",null))
 		
 		component.deletedInit()
 		do()
 		if type == KeyCounterElement:
-			game.objects[prop[&"parentId"]]._elementsChanged()
+			Game.objects[prop[&"parentId"]]._elementsChanged()
 
 	func do() -> void:
-		game.editor.objectHovered = null
-		game.editor.componentDragged = null
+		Game.editor.objectHovered = null
+		Game.editor.componentDragged = null
 
-		if dictionary[prop[&"id"]] == game.editor.focusDialog.focused: game.editor.focusDialog.defocus()
-		elif dictionary[prop[&"id"]] == game.editor.focusDialog.componentFocused: game.editor.focusDialog.defocusComponent()
+		if dictionary[prop[&"id"]] == Game.editor.focusDialog.focused: Game.editor.focusDialog.defocus()
+		elif dictionary[prop[&"id"]] == Game.editor.focusDialog.componentFocused: Game.editor.focusDialog.defocusComponent()
 
 		var parent:GameObject
 		if type == Lock:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			parent.locks.pop_at(prop[&"index"])
 			parent.reindexLocks()
 		elif type == KeyCounterElement:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			parent.elements.pop_at(prop[&"index"])
 			parent.reindexElements()
 		
-		if game.editor.findProblems: game.editor.findProblems.componentRemoved(dictionary[prop[&"id"]])
+		if Game.editor.findProblems: Game.editor.findProblems.componentRemoved(dictionary[prop[&"id"]])
 
 		dictionary[prop[&"id"]].queue_free()
 		dictionary.erase(prop[&"id"])
 
-		if parent and parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerRemoved(type, prop[&"index"])
+		if parent and parent == Game.editor.focusDialog.focused: Game.editor.focusDialog.focusHandlerRemoved(type, prop[&"index"])
 	
 	func undo() -> void:
 		var component:Variant
-		var parent:Variant = game.objectsParent
+		var parent:Variant = Game.objectsParent
 		if type in Game.NON_OBJECT_COMPONENTS: component = type.new()
 		else: component = type.SCENE.instantiate()
 		
-		component.editor = game.editor
-		component.game = game
+		component.editor = Game.editor
 
 		for property in component.PROPERTIES:
 			component.set(property, Changes.copy(prop[property]))
@@ -262,32 +256,32 @@ class DeleteComponentChange extends Change:
 			componentArray.clear()
 			if arrays[array][0] in Game.COMPONENTS:
 				@warning_ignore("incompatible_ternary")
-				var arrayDictionary:Dictionary = game.components if arrays[array][0] in Game.NON_OBJECT_COMPONENTS else game.objects
+				var arrayDictionary:Dictionary = Game.components if arrays[array][0] in Game.NON_OBJECT_COMPONENTS else Game.objects
 				for element in arrays[array][1]: componentArray.append(arrayDictionary[element])
 			else:
 				for element in arrays[array][1]: componentArray.append(Changes.copy(element))
 		dictionary[prop[&"id"]] = component
 		
 		if type == Lock:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			component.parent = parent
 			component.index = prop[&"index"]
 			parent.locks.insert(prop[&"index"], component)
 			parent.add_child(component)
 			parent.reindexLocks()
 		elif type == KeyCounterElement:
-			parent = game.objects[prop[&"parentId"]]
+			parent = Game.objects[prop[&"parentId"]]
 			component.parent = parent
 			parent.elements.insert(prop[&"index"], component)
 			parent.add_child(component)
 			parent.reindexElements()
 		else: parent.add_child(component)
 
-		if parent == game.editor.focusDialog.focused: game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])
+		if parent == Game.editor.focusDialog.focused: Game.editor.focusDialog.focusHandlerAdded(type, prop[&"index"])
 
 		await component.ready
 		component.isReady = true
-		if game.editor.findProblems: game.editor.findProblems.findProblems(component)
+		if Game.editor.findProblems: Game.editor.findProblems.findProblems(component)
 
 	func _to_string() -> String:
 		return "<DeleteComponentChange:"+str(prop[&"id"])+">"
@@ -299,8 +293,7 @@ class PropertyChange extends Change:
 	var after:Variant
 	var type:GDScript
 	
-	func _init(_game:Game,component:GameComponent,_property:StringName,_after:Variant) -> void:
-		game = _game
+	func _init(component:GameComponent,_property:StringName,_after:Variant) -> void:
 		id = component.id
 		property = _property
 		before = Changes.copy(component.get(property))
@@ -317,28 +310,27 @@ class PropertyChange extends Change:
 	
 	func changeValue(value:Variant) -> void:
 		var component:GameComponent
-		if type in Game.NON_OBJECT_COMPONENTS: component = game.components[id]
-		else: component = game.objects[id]
+		if type in Game.NON_OBJECT_COMPONENTS: component = Game.components[id]
+		else: component = Game.objects[id]
 		component.set(property, value)
 		component.propertyChangedDo(property)
 		component.queue_redraw()
-		if game.editor.focusDialog.focused == component: game.editor.focusDialog.focus(component)
-		elif game.editor.focusDialog.componentFocused == component: game.editor.focusDialog.focusComponent(component)
-		if game.editor.findProblems: game.editor.findProblems.findProblems(component)
+		if Game.editor.focusDialog.focused == component: Game.editor.focusDialog.focus(component)
+		elif Game.editor.focusDialog.componentFocused == component: Game.editor.focusDialog.focusComponent(component)
+		if Game.editor.findProblems: Game.editor.findProblems.findProblems(component)
 	
 	func _to_string() -> String:
 		return "<PropertyChange:"+str(id)+"."+str(property)+"->"+str(after)+">"
 
 class GlobalObjectChange extends Change:
-	# Changes a property that points to a gameobject in some singleton; -1 for null
+	# Changes a property that points to a Gameobject in some singleton; -1 for null
 
 	var singleton:Node
 	var property:StringName
 	var beforeId:int
 	var afterId:int
 
-	func _init(_game:Game, _singleton:Node, _property:StringName, after:GameObject) -> void:
-		game =_game
+	func _init(_singleton:Node, _property:StringName, after:GameObject) -> void:
 		singleton = _singleton
 		property = _property
 		if singleton.get(property): beforeId = singleton.get(property).id
@@ -355,10 +347,10 @@ class GlobalObjectChange extends Change:
 
 	func changePointer(id:int) -> void:
 		if id == -1: singleton.set(property, null)
-		else: singleton.set(property, game.objects[id])
+		else: singleton.set(property, Game.objects[id])
 
-		if singleton == game and property == &"levelStart":
-			game.editor.topBar._updateButtons()
+		if singleton == Game and property == &"levelStart":
+			Game.editor.topBar._updateButtons()
 
 	func _to_string() -> String:
 		return "<GlobalObjectChange:"+str(singleton)+"."+str(property)+"->"+str(afterId)+">"
@@ -394,13 +386,12 @@ class ArrayAppendChange extends Change:
 	var after:Variant
 	var dictionary:Dictionary
 
-	func _init(_game:Game,component:GameComponent,_array:StringName,_after:Variant) -> void:
-		game = _game
+	func _init(component:GameComponent,_array:StringName,_after:Variant) -> void:
 		id = component.id
 		after = _after
 		array = _array
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
 		do()
 
 	func do() -> void: dictionary[id].get(array).append(after); dictionary[id].queue_redraw()
@@ -418,15 +409,14 @@ class ArrayElementChange extends Change:
 	var after:Variant
 	var dictionary:Dictionary
 
-	func _init(_game:Game,component:GameComponent,_array:StringName,_index:int,_after:Variant) -> void:
-		game = _game
+	func _init(component:GameComponent,_array:StringName,_index:int,_after:Variant) -> void:
 		id = component.id
 		index = _index
 		array = _array
 		before = Changes.copy(component.get(array)[index])
 		after = Changes.copy(_after)
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
 		do()
 
 	func do() -> void: dictionary[id].get(array)[index] = Changes.copy(after); dictionary[id].queue_redraw()
@@ -442,14 +432,13 @@ class ArrayPopAtChange extends Change:
 	var before:Variant
 	var dictionary:Dictionary
 
-	func _init(_game:Game,component:GameComponent,_array:StringName,_index:int) -> void:
-		game = _game
+	func _init(component:GameComponent,_array:StringName,_index:int) -> void:
 		id = component.id
 		array = _array
 		index = _index
 		before = Changes.copy(component.get(array)[index])
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
 		do()
 
 	func do() -> void: dictionary[id].get(array).pop_at(index); dictionary[id].queue_redraw()
@@ -468,28 +457,27 @@ class ComponentArrayAppendChange extends Change:
 	var elementType:GDScript
 	var index:int
 
-	func _init(_game:Game,component:GameComponent,_array:StringName,after:GameComponent) -> void:
-		game = _game
+	func _init(component:GameComponent,_array:StringName,after:GameComponent) -> void:
 		id = component.id
 		afterId = after.id
 		array = _array
 		elementType = after.get_script()
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
-		if elementType in Game.NON_OBJECT_COMPONENTS: elementDictionary = game.components
-		else: elementDictionary = game.objects
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
+		if elementType in Game.NON_OBJECT_COMPONENTS: elementDictionary = Game.components
+		else: elementDictionary = Game.objects
 		index = len(component.get(array))
 		do()
 
 	func do() -> void:
 		dictionary[id].get(array).append(elementDictionary[afterId])
-		if dictionary[id] == game.editor.focusDialog.focused or dictionary[id] == game.editor.focusDialog.componentFocused:
-			game.editor.focusDialog.focusHandlerAdded(elementType, index)
+		if dictionary[id] == Game.editor.focusDialog.focused or dictionary[id] == Game.editor.focusDialog.componentFocused:
+			Game.editor.focusDialog.focusHandlerAdded(elementType, index)
 		dictionary[id].queue_redraw()
 	func undo() -> void:
 		dictionary[id].get(array).pop_back()
-		if dictionary[id] == game.editor.focusDialog.focused or dictionary[id] == game.editor.focusDialog.componentFocused:
-			game.editor.focusDialog.focusHandlerRemoved(elementType, index)
+		if dictionary[id] == Game.editor.focusDialog.focused or dictionary[id] == Game.editor.focusDialog.componentFocused:
+			Game.editor.focusDialog.focusHandlerRemoved(elementType, index)
 		dictionary[id].queue_redraw()
 
 	func _to_string() -> String:
@@ -504,17 +492,16 @@ class ComponentArrayElementChange extends Change:
 	var dictionary:Dictionary
 	var elementDictionary:Dictionary
 
-	func _init(_game:Game,component:GameComponent,_array:StringName,_index:int,after:GameComponent) -> void:
-		game = _game
+	func _init(component:GameComponent,_array:StringName,_index:int,after:GameComponent) -> void:
 		id = component.id
 		index = _index
 		array = _array
 		beforeId = component.get(array)[index].id
 		afterId = after.id
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
-		if after.get_script() in Game.NON_OBJECT_COMPONENTS: elementDictionary = game.components
-		else: elementDictionary = game.objects
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
+		if after.get_script() in Game.NON_OBJECT_COMPONENTS: elementDictionary = Game.components
+		else: elementDictionary = Game.objects
 		do()
 
 	func do() -> void: dictionary[id].get(array)[index] = elementDictionary[afterId]; dictionary[id].queue_redraw()
@@ -533,29 +520,28 @@ class ComponentArrayPopAtChange extends Change:
 	var elementDictionary:Dictionary
 	var elementType:GDScript
 
-	func _init(_game:Game,component:GameComponent,_array:StringName,_index:int) -> void:
-		game = _game
+	func _init(component:GameComponent,_array:StringName,_index:int) -> void:
 		id = component.id
 		array = _array
 		index = _index
 		beforeId = component.get(array)[index].id
 		elementType = component.get(array)[index].get_script()
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = game.components
-		else: dictionary = game.objects
-		if elementType in Game.NON_OBJECT_COMPONENTS: elementDictionary = game.components
-		else: elementDictionary = game.objects
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		else: dictionary = Game.objects
+		if elementType in Game.NON_OBJECT_COMPONENTS: elementDictionary = Game.components
+		else: elementDictionary = Game.objects
 		do()
 
 	func do() -> void:
 		dictionary[id].get(array).pop_at(index)
-		if dictionary[id] == game.editor.focusDialog.focused or dictionary[id] == game.editor.focusDialog.componentFocused:
-			game.editor.focusDialog.focusHandlerRemoved(elementType, index)
+		if dictionary[id] == Game.editor.focusDialog.focused or dictionary[id] == Game.editor.focusDialog.componentFocused:
+			Game.editor.focusDialog.focusHandlerRemoved(elementType, index)
 		dictionary[id].queue_redraw()
 	
 	func undo() -> void:
 		dictionary[id].get(array).insert(index,elementDictionary[beforeId])
-		if dictionary[id] == game.editor.focusDialog.focused or dictionary[id] == game.editor.focusDialog.componentFocused:
-			game.editor.focusDialog.focusHandlerAdded(elementType, index)
+		if dictionary[id] == Game.editor.focusDialog.focused or dictionary[id] == Game.editor.focusDialog.componentFocused:
+			Game.editor.focusDialog.focusHandlerAdded(elementType, index)
 		dictionary[id].queue_redraw()
 
 	func _to_string() -> String:

@@ -1,8 +1,6 @@
 extends CharacterBody2D
 class_name Player
 
-var game:Game
-
 const HELD_SHINE:Texture2D = preload("res://assets/game/player/held/shine.png")
 func getMasterShineColor() -> Color: return Color("#b4b432") if masterMode.sign() > 0 else Color("#3232b4")
 
@@ -97,7 +95,7 @@ func _ready() -> void:
 		curse.append(color == Game.COLOR.BROWN)
 
 func _physics_process(_delta:float) -> void:
-	if game.playState != Game.PLAY_STATE.PLAY:
+	if Game.playState != Game.PLAY_STATE.PLAY:
 		%sprite.pause()
 		return
 	
@@ -151,9 +149,9 @@ func _process(delta:float) -> void:
 func receiveKey(event:InputEventKey):
 	if event.echo: return
 	match event.keycode:
-		KEY_P: game.pauseTest()
-		KEY_O: game.stopTest()
-		KEY_R: game.restart()
+		KEY_P: Game.pauseTest()
+		KEY_O: Game.stopTest()
+		KEY_R: Game.restart()
 		KEY_Z: if GameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav")).pitch_scale = 0.6
 		KEY_X: cycleMaster()
 		KEY_S: complexSwitch()
@@ -268,8 +266,8 @@ func complexSwitch() -> void:
 	elif masterCycle:
 		AudioManager.play(preload("res://resources/sounds/player/masterUnequip.wav"))
 		dropMaster()
-	for object in game.objects.values(): if object is Door: object.complexCheck()
-	for component in game.components.values(): if component is Lock: component.queue_redraw()
+	for object in Game.objects.values(): if object is Door: object.complexCheck()
+	for component in Game.components.values(): if component is Lock: component.queue_redraw()
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(auraDraw)
@@ -291,7 +289,7 @@ func _draw() -> void:
 		RenderingServer.canvas_item_add_texture_rect(masterShineDraw,Rect2(Vector2(-32,-32)*masterShineScale,Vector2(64,64)*masterShineScale),HELD_SHINE,false,getMasterShineColor())
 		RenderingServer.canvas_item_add_texture_rect(masterKeyDraw,Rect2(Vector2(-16,-16),Vector2(32,32)),getHeldKeySprite(),false,masterDrawOpacity)
 	if complexMode.eq(C.I):
-		TextDraw.outlinedCentered(Game.FTALK,complexModeTextDraw,"I-View",Color.from_hsv(game.complexViewHue,0.4901960784,1),Color.BLACK,12,Vector2(0,-10))
+		TextDraw.outlinedCentered(Game.FTALK,complexModeTextDraw,"I-View",Color.from_hsv(Game.complexViewHue,0.4901960784,1),Color.BLACK,12,Vector2(0,-10))
 	# complex switch
 	if complexSwitchAnim:
 		var switchScale:float = sin(complexSwitchAngle)

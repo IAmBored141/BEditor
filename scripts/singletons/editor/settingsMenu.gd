@@ -22,15 +22,15 @@ func _tabSelected(tab:int) -> void:
 	queue_redraw()
 
 func _levelNumberSet(string:String) -> void:
-	editor.game.level.number = string
+	Game.level.number = string
 	queue_redraw()
 
 func _levelNameSet(string:String) -> void:
-	editor.game.level.name = string if string else "Unnamed Level"
+	Game.level.name = string if string else "Unnamed Level"
 	queue_redraw()
 
 func _levelAuthorSet(string:String) -> void:
-	editor.game.level.author = string
+	Game.level.author = string
 	queue_redraw()
 
 func _draw() -> void:
@@ -47,9 +47,9 @@ func _defocus() -> void:
 
 func opened() -> void:
 	configFile.load("user://config.ini")
-	%levelNumber.text = editor.game.level.number
-	%levelName.text = editor.game.level.name
-	%levelAuthor.text = editor.game.level.author
+	%levelNumber.text = Game.level.number
+	%levelName.text = Game.level.name
+	%levelAuthor.text = Game.level.author
 	%fileDialogWorkaround.button_pressed = configFile.get_value("editor", "fileDialogWorkaround")	
 
 func closed() -> void:

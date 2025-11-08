@@ -23,7 +23,7 @@ func setup(_door:Door) -> void:
 	remove.visible = len(buttons) > 0
 
 func addComponent() -> void:
-	if door.type == Door.TYPE.SIMPLE: Changes.addChange(Changes.PropertyChange.new(editor.game,door,&"type",Door.TYPE.COMBO)) # precoerce so that lock sizes are accurate for placing
+	if door.type == Door.TYPE.SIMPLE: Changes.addChange(Changes.PropertyChange.new(door,&"type",Door.TYPE.COMBO)) # precoerce so that lock sizes are accurate for placing
 	door.addLock()
 func removeComponent() -> void: door.removeLock(selected)
 
@@ -63,7 +63,7 @@ class LockHandlerButton extends HandlerButton:
 		drawMain = RenderingServer.canvas_item_create()
 		RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 		RenderingServer.canvas_item_set_z_index(drawMain,-1)
-		editor.game.connect(&"goldIndexChanged",queue_redraw)
+		Game.connect(&"goldIndexChanged",queue_redraw)
 		queue_redraw()
 
 	func _draw() -> void:
@@ -74,13 +74,13 @@ class LockHandlerButton extends HandlerButton:
 		if lock.color == Game.COLOR.GLITCH: RenderingServer.canvas_item_set_material(drawMain, Game.UNSCALED_GLITCH_MATERIAL)
 		else: RenderingServer.canvas_item_set_material(drawMain, Game.NO_MATERIAL)
 		match lock.color:
-			Game.COLOR.MASTER: texture = editor.game.masterTex()
-			Game.COLOR.PURE: texture = editor.game.pureTex()
-			Game.COLOR.STONE: texture = editor.game.stoneTex()
-			Game.COLOR.DYNAMITE: texture = editor.game.dynamiteTex()
-			Game.COLOR.QUICKSILVER: texture = editor.game.quicksilverTex()
+			Game.COLOR.MASTER: texture = Game.masterTex()
+			Game.COLOR.PURE: texture = Game.pureTex()
+			Game.COLOR.STONE: texture = Game.stoneTex()
+			Game.COLOR.DYNAMITE: texture = Game.dynamiteTex()
+			Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
 		if texture:
 			RenderingServer.canvas_item_add_texture_rect(drawMain,rect,texture)
 		else:
-			RenderingServer.canvas_item_add_rect(drawMain,rect,editor.game.mainTone[lock.color])
+			RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[lock.color])
 		icon = ICONS[lock.type*2 + int(lock.count.isNonzeroImag())]

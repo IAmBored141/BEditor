@@ -18,7 +18,7 @@ func _ready() -> void:
 func draw() -> void:
 	RenderingServer.canvas_item_clear(drawShader)
 	RenderingServer.canvas_item_clear(drawNormal)
-	if editor.game.playState == Game.PLAY_STATE.PLAY: return
+	if Game.playState == Game.PLAY_STATE.PLAY: return
 	if editor.focusDialog.focused:
 		drawOutline(editor.focusDialog.focused)
 	if editor.objectHovered:

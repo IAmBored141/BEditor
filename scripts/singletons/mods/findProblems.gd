@@ -37,10 +37,10 @@ func setup() -> void:
 		for problemType in Mods.mods[mod].problems.keys():
 			problemDisplays[mod][problemType] = preload("res://scenes/problemDisplay.tscn").instantiate().setup(mod,problemType,self)
 	
-	for object in editor.game.objects.values():
+	for object in Game.objects.values():
 		object.problems.clear()
 		findProblems(object)
-	for component in editor.game.components.values():
+	for component in Game.components.values():
 		component.problems.clear()
 		findProblems(component)
 	for mod in Mods.mods.keys():

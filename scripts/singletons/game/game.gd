@@ -1,5 +1,4 @@
-extends Node2D
-class_name Game
+extends Node
 
 static var COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement, KeyBulk, Door, Goal, KeyCounter, PlayerSpawn, RemoteLock]
 static var NON_OBJECT_COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement]
@@ -7,7 +6,7 @@ static var NON_OBJECT_COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement]
 const COLORS:int = 22
 enum COLOR {MASTER, WHITE, ORANGE, PURPLE, RED, GREEN, BLUE, PINK, CYAN, BLACK, BROWN, PURE, GLITCH, STONE, DYNAMITE, QUICKSILVER, MAROON, FOREST, NAVY, ICE, MUD, GRAFFITI}
 
-static func isAnimated(color:COLOR) -> bool: return color in [COLOR.MASTER, COLOR.PURE, COLOR.DYNAMITE, COLOR.QUICKSILVER]
+func isAnimated(color:COLOR) -> bool: return color in [COLOR.MASTER, COLOR.PURE, COLOR.DYNAMITE, COLOR.QUICKSILVER]
 
 const MASTER_TEXTURE:Array[Texture2D] = [
 	preload("res://assets/game/colorTexture/master0.png"),
@@ -234,10 +233,11 @@ const darkTone:Array[Color] = [
 ]
 
 @onready var editor:Editor = get_node("/root/editor")
-@onready var tiles:TileMapLayer = %tiles
-@onready var editorCamera:Camera2D = %editorCamera
-@onready var playCamera:Camera2D = %playCamera
-@onready var objectsParent:Node = %objectsParent
+var world:World
+var tiles:TileMapLayer
+var editorCamera:Camera2D
+var playCamera:Camera2D
+var objectsParent:Node
 
 var level:Level = Level.new()
 var anyChanges:bool = false:
@@ -258,10 +258,10 @@ var levelBounds:Rect2i = Rect2i(0,0,800,608):
 	set(value):
 		levelBounds = value
 		RenderingServer.global_shader_parameter_set(&"LEVEL_SIZE", levelBounds.size)
-		%playCamera.limit_left = levelBounds.position.x
-		%playCamera.limit_top = levelBounds.position.y
-		%playCamera.limit_right = levelBounds.end.x
-		%playCamera.limit_bottom = levelBounds.end.y
+		playCamera.limit_left = levelBounds.position.x
+		playCamera.limit_top = levelBounds.position.y
+		playCamera.limit_right = levelBounds.end.x
+		playCamera.limit_bottom = levelBounds.end.y
 
 const NO_MATERIAL:CanvasItemMaterial = preload("res://resources/materials/noMaterial.tres")
 const GLITCH_MATERIAL:ShaderMaterial = preload("res://resources/materials/glitchDrawMaterial.tres") # uses texture pixel size
@@ -287,8 +287,8 @@ var playState:PLAY_STATE = PLAY_STATE.EDIT:
 	set(value):
 		playState = value
 		editor.topBar._updateButtons()
-		%editorCamera.enabled = playState != PLAY_STATE.PLAY
-		%playCamera.enabled = playState == PLAY_STATE.PLAY
+		editorCamera.enabled = playState != PLAY_STATE.PLAY
+		playCamera.enabled = playState == PLAY_STATE.PLAY
 		fastAnimSpeed = 0
 		fastAnimTimer = 0
 		complexViewHue = 0
@@ -299,10 +299,12 @@ var fastAnimTimer:float = 0 # speed resets when this counts down to 0
 
 var complexViewHue:float = 0
 
-func _ready() -> void:
-	GameChanges.game = self
-	Saving.game = self
-	level.game = self
+func setWorld(_world:World) -> void:
+	world = _world
+	tiles = world.tiles
+	editorCamera = world.editorCamera
+	playCamera = world.playCamera
+	objectsParent = world.objectsParent
 	updateWindowName()
 
 func _process(delta:float) -> void:
@@ -314,7 +316,7 @@ func _process(delta:float) -> void:
 	RenderingServer.global_shader_parameter_set(&"NOISE_OFFSET", Vector2(randf_range(-1000, 1000), randf_range(-1000, 1000)))
 	RenderingServer.global_shader_parameter_set(&"RCAMERA_ZOOM", 1/editor.cameraZoom)
 	if player:
-		%playCamera.position = player.position
+		playCamera.position = player.position
 	# fast anims
 	if fastAnimTimer > 0:
 		fastAnimTimer -= delta
@@ -338,8 +340,7 @@ func playTest(spawn:PlayerSpawn) -> void:
 	if playState == PLAY_STATE.EDIT:
 		starting = true
 		player = preload("res://scenes/player.tscn").instantiate()
-		player.game = self
-		add_child(player)
+		world.add_child(player)
 		player.position = spawn.position + Vector2(17, 23)
 	playState = PLAY_STATE.PLAY
 	latestSpawn = spawn

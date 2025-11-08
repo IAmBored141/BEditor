@@ -9,7 +9,6 @@ var problems:Array[Array] = [] # array[array[mod, problemtype]]
 var isReady:bool = false
 
 var editor:Editor
-var game:Game
 
 func getDrawPosition() -> Vector2: return position
 

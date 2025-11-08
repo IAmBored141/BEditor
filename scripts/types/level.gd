@@ -1,14 +1,12 @@
 extends RefCounted
 class_name Level
 
-var game:Game
-
 var shortNumber:String = "X-X"
 var number:String = ""
 var name:String = "Unnamed Level":
 	set(value):
 		name = value
-		if game: game.updateWindowName()
+		Game.updateWindowName()
 var description:String = ""
 var author:String = ""
 

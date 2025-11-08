@@ -22,7 +22,7 @@ func _ready() -> void:
 func focus(object:GameObject, dontRedirect:bool=false) -> void:
 	var new:bool = object != focused
 	focused = object
-	editor.game.objectsParent.move_child(focused, -1)
+	Game.objectsParent.move_child(focused, -1)
 	showCorrectDialog()
 	if new: deinteract()
 	if focused is KeyBulk: keyDialog.focus(focused, new)
@@ -44,7 +44,7 @@ func defocus() -> void:
 	if !focused: return
 	var object:GameObject = focused
 	editor.quickSet.applyOrCancel()
-	if object is Door and !Mods.active(&"ZeroCopies") and object.copies.eq(0): Changes.addChange(Changes.PropertyChange.new(editor.game,object,&"copies",C.new(1)))
+	if object is Door and !Mods.active(&"ZeroCopies") and object.copies.eq(0): Changes.addChange(Changes.PropertyChange.new(object,&"copies",C.new(1)))
 	focused = null
 	if object is RemoteLock: object.queue_redraw()
 	deinteract()
@@ -59,7 +59,7 @@ func focusComponent(component:GameComponent) -> void:
 
 func defocusComponent() -> void:
 	if !componentFocused: return
-	if componentFocused is Lock and !Mods.active(&"ZeroCostLock") and !(Mods.active(&"C3") and componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]) and componentFocused.count.eq(0): Changes.addChange(Changes.PropertyChange.new(editor.game,componentFocused,&"count",C.new(1)))
+	if componentFocused is Lock and !Mods.active(&"ZeroCostLock") and !(Mods.active(&"C3") and componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]) and componentFocused.count.eq(0): Changes.addChange(Changes.PropertyChange.new(componentFocused,&"count",C.new(1)))
 	componentFocused = null
 	deinteract()
 
@@ -146,7 +146,7 @@ func receiveKey(event:InputEvent) -> bool:
 	else:
 		match event.keycode:
 			KEY_DELETE:
-				Changes.addChange(Changes.DeleteComponentChange.new(editor.game,focused))
+				Changes.addChange(Changes.DeleteComponentChange.new(focused))
 				Changes.bufferSave()
 			_: return false
 	return true

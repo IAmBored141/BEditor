@@ -26,7 +26,7 @@ func receiveKey(event:InputEventKey) -> bool:
 		KEY_C: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.focused)
 		KEY_U: if Mods.active(&"C5"): _keyTypeSelected(KeyBulk.TYPE.CURSE if main.focused.type != KeyBulk.TYPE.CURSE else KeyBulk.TYPE.UNCURSE)
 		KEY_DELETE:
-			Changes.addChange(Changes.DeleteComponentChange.new(editor.game,main.focused))
+			Changes.addChange(Changes.DeleteComponentChange.new(main.focused))
 			Changes.bufferSave()
 		KEY_Y: _keyInfiniteToggled(!main.focused.infinite)
 		_: return false
@@ -34,20 +34,20 @@ func receiveKey(event:InputEventKey) -> bool:
 
 func _keyColorSelected(color:Game.COLOR) -> void:
 	if main.focused is not KeyBulk: return
-	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"color",color))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"color",color))
 	Changes.bufferSave()
 
 func _keyTypeSelected(type:KeyBulk.TYPE) -> void:
 	if main.focused is not KeyBulk: return
-	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"type",type))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"type",type))
 	Changes.bufferSave()
 
 func _keyCountSet(count:C) -> void:
 	if main.focused is not KeyBulk: return
-	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"count",count))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",count))
 	Changes.bufferSave()
 
 func _keyInfiniteToggled(value:bool) -> void:
 	if main.focused is not KeyBulk: return
-	Changes.addChange(Changes.PropertyChange.new(editor.game,main.focused,&"infinite",value))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infinite",value))
 	Changes.bufferSave()

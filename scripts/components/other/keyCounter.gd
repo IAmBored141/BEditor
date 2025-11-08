@@ -67,10 +67,10 @@ func receiveMouseInput(event:InputEventMouse) -> bool:
 	return false
 
 func _elementsChanged() -> void:
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"size",Vector2(size.x,23+len(elements)*40)))
+	Changes.addChange(Changes.PropertyChange.new(self,&"size",Vector2(size.x,23+len(elements)*40)))
 	var index:int = 0
 	for element in elements:
-		Changes.addChange(Changes.PropertyChange.new(game,element,&"position",Vector2(12,12+index*40)))
+		Changes.addChange(Changes.PropertyChange.new(element,&"position",Vector2(12,12+index*40)))
 		index += 1
 
 func _swapElements(first:int, second:int) -> void: # TODO:DEJANK
@@ -78,16 +78,16 @@ func _swapElements(first:int, second:int) -> void: # TODO:DEJANK
 	var secondColor:Game.COLOR = elements[second].color
 	editor.componentDragged = elements[second]
 	editor.focusDialog.componentFocused = elements[second]
-	Changes.addChange(Changes.PropertyChange.new(game,elements[first],&"color",secondColor))
-	Changes.addChange(Changes.PropertyChange.new(game,elements[second],&"color",firstColor))
+	Changes.addChange(Changes.PropertyChange.new(elements[first],&"color",secondColor))
+	Changes.addChange(Changes.PropertyChange.new(elements[second],&"color",firstColor))
 
 func addElement() -> void:
-	var element:KeyCounterElement = Changes.addChange(Changes.CreateComponentChange.new(game,KeyCounterElement,{&"position":Vector2(12,12+len(elements)*40),&"parentId":id})).result
-	Changes.addChange(Changes.PropertyChange.new(game,element,&"color",nextColor()))
+	var element:KeyCounterElement = Changes.addChange(Changes.CreateComponentChange.new(KeyCounterElement,{&"position":Vector2(12,12+len(elements)*40),&"parentId":id})).result
+	Changes.addChange(Changes.PropertyChange.new(element,&"color",nextColor()))
 	Changes.bufferSave()
 
 func removeElement(index:int) -> void:
-	Changes.addChange(Changes.DeleteComponentChange.new(game,elements[index]))
+	Changes.addChange(Changes.DeleteComponentChange.new(elements[index]))
 	Changes.bufferSave()
 
 func nextColor() -> Game.COLOR:

@@ -53,7 +53,7 @@ func updateText() -> void:
 		string += "[M]Move [Del]Delete"
 	elif editor.otherObjects.objectSearch.has_focus():
 		string += "Object Search / "+control+"[Enter][Tab]Select object [Esc]Cancel"
-	elif editor.game.playState == Game.PLAY_STATE.PLAY:
+	elif Game.playState == Game.PLAY_STATE.PLAY:
 		string += control# + ARROWS_LR+"Move [Space]Jump [Shift]Walk [X]Hold action [S]Switch axis [Z]Undo [R]Restart"
 	else:
 		string += control

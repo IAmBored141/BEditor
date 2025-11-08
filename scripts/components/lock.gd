@@ -220,25 +220,25 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawScaled,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawConfiguration,get_canvas_item())
-	game.connect(&"goldIndexChanged",queue_redraw)
+	Game.connect(&"goldIndexChanged",queue_redraw)
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawGlitch)
 	RenderingServer.canvas_item_clear(drawScaled)
 	RenderingServer.canvas_item_clear(drawMain)
 	RenderingServer.canvas_item_clear(drawConfiguration)
-	if !parent.active and game.playState == Game.PLAY_STATE.PLAY: return
-	drawLock(game,drawGlitch,drawScaled,drawMain,drawConfiguration,
+	if !parent.active and Game.playState == Game.PLAY_STATE.PLAY: return
+	drawLock(drawGlitch,drawScaled,drawMain,drawConfiguration,
 		size,colorAfterCurse(),colorAfterGlitch(),type,effectiveConfiguration(),sizeType,effectiveCount(),isPartial,effectiveDenominator(),negated,armament,
 		getFrameHighColor(isNegative(), negated),
 		getFrameMainColor(isNegative(), negated),
 		getFrameDarkColor(isNegative(), negated),
 		isNegative(),
 		parent.animState != Door.ANIM_STATE.RELOCK or parent.animPart > 2,
-		game.playState != Game.PLAY_STATE.EDIT and parent.ipow().across(game.player.complexMode).eq(0)
+		Game.playState != Game.PLAY_STATE.EDIT and parent.ipow().across(Game.player.complexMode).eq(0)
 	)
 
-static func drawLock(_game:Game, lockDrawGlitch:RID, lockDrawScaled:RID, lockDrawMain:RID, lockDrawConfiguration:RID, lockSize:Vector2,
+static func drawLock(lockDrawGlitch:RID, lockDrawScaled:RID, lockDrawMain:RID, lockDrawConfiguration:RID, lockSize:Vector2,
 	lockBaseColor:Game.COLOR, lockGlitchColor:Game.COLOR,
 	lockType:TYPE,
 	lockConfiguration:CONFIGURATION,
@@ -263,11 +263,11 @@ static func drawLock(_game:Game, lockDrawGlitch:RID, lockDrawScaled:RID, lockDra
 		var texture:Texture2D
 		var tileTexture:bool = false
 		match lockBaseColor:
-			Game.COLOR.MASTER: texture = _game.masterTex()
-			Game.COLOR.PURE: texture = _game.pureTex()
-			Game.COLOR.STONE: texture = _game.stoneTex()
-			Game.COLOR.DYNAMITE: texture = _game.dynamiteTex(); tileTexture = true
-			Game.COLOR.QUICKSILVER: texture = _game.quicksilverTex()
+			Game.COLOR.MASTER: texture = Game.masterTex()
+			Game.COLOR.PURE: texture = Game.pureTex()
+			Game.COLOR.STONE: texture = Game.stoneTex()
+			Game.COLOR.DYNAMITE: texture = Game.dynamiteTex(); tileTexture = true
+			Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
 		if texture:
 			if !tileTexture:
 				RenderingServer.canvas_item_set_material(lockDrawScaled,Game.PIXELATED_MATERIAL.get_rid())
@@ -297,7 +297,7 @@ static func drawLock(_game:Game, lockDrawGlitch:RID, lockDrawScaled:RID, lockDra
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_HIGH,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameHigh)
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_MAIN,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameMain)
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_DARK,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameDark)
-	if lockArmament: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ARMAMENT_RECT,ARMAMENT[_game.goldIndex%4],ARMAMENT_CORNER_SIZE,ARMAMENT_CORNER_SIZE,TILE,TILE,false)
+	if lockArmament: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ARMAMENT_RECT,ARMAMENT[Game.goldIndex%4],ARMAMENT_CORNER_SIZE,ARMAMENT_CORNER_SIZE,TILE,TILE,false)
 	# configuration
 	if lockConfiguration == CONFIGURATION.NONE:
 		match lockType:
@@ -389,14 +389,14 @@ func _simpleDoorUpdate() -> void:
 		Vector2(64,64): newSizeType = SIZE_TYPE.AnyL
 		Vector2(96,96): newSizeType = SIZE_TYPE.AnyXL
 		_: newSizeType = SIZE_TYPE.ANY
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"position",Vector2.ZERO))
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"sizeType",newSizeType))
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"size",parent.size - Vector2(14,14)))
+	Changes.addChange(Changes.PropertyChange.new(self,&"position",Vector2.ZERO))
+	Changes.addChange(Changes.PropertyChange.new(self,&"sizeType",newSizeType))
+	Changes.addChange(Changes.PropertyChange.new(self,&"size",parent.size - Vector2(14,14)))
 	queue_redraw()
 
 func _comboDoorConfigurationChanged(newSizeType:SIZE_TYPE,newConfiguration:CONFIGURATION=CONFIGURATION.NONE) -> void:
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"sizeType",newSizeType))
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"configuration",newConfiguration))
+	Changes.addChange(Changes.PropertyChange.new(self,&"sizeType",newSizeType))
+	Changes.addChange(Changes.PropertyChange.new(self,&"configuration",newConfiguration))
 	var newSize:Vector2
 	match sizeType:
 		SIZE_TYPE.AnyS: newSize = Vector2(18,18)
@@ -405,7 +405,7 @@ func _comboDoorConfigurationChanged(newSizeType:SIZE_TYPE,newConfiguration:CONFI
 		SIZE_TYPE.AnyM: newSize = Vector2(38,38)
 		SIZE_TYPE.AnyL: newSize = Vector2(50,50)
 		SIZE_TYPE.AnyXL: newSize = Vector2(82,82)
-	if newSize: Changes.addChange(Changes.PropertyChange.new(game,self,&"size",newSize))
+	if newSize: Changes.addChange(Changes.PropertyChange.new(self,&"size",newSize))
 	queue_redraw()
 
 func _comboDoorSizeChanged() -> void:
@@ -417,9 +417,9 @@ func _comboDoorSizeChanged() -> void:
 		Vector2(38,38): newSizeType = SIZE_TYPE.AnyM
 		Vector2(50,50): newSizeType = SIZE_TYPE.AnyL
 		Vector2(82,82): newSizeType = SIZE_TYPE.AnyXL
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"sizeType",newSizeType))
+	Changes.addChange(Changes.PropertyChange.new(self,&"sizeType",newSizeType))
 	if [sizeType, configuration] not in getAvailableConfigurations():
-		Changes.addChange(Changes.PropertyChange.new(game,self,&"configuration",CONFIGURATION.NONE))
+		Changes.addChange(Changes.PropertyChange.new(self,&"configuration",CONFIGURATION.NONE))
 
 static func getAutoConfiguration(lock:GameComponent) -> CONFIGURATION:
 	var newConfiguration:CONFIGURATION = CONFIGURATION.NONE
@@ -430,7 +430,7 @@ static func getAutoConfiguration(lock:GameComponent) -> CONFIGURATION:
 	return newConfiguration
 
 func _setAutoConfiguration() -> void:
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"configuration",getAutoConfiguration(self)))
+	Changes.addChange(Changes.PropertyChange.new(self,&"configuration",getAutoConfiguration(self)))
 
 func receiveMouseInput(event:InputEventMouse) -> bool:
 	# resizing
@@ -464,7 +464,7 @@ func _coerceSize() -> void:
 		# 1x3, 2x3 -> 3x3
 		if newSize.x < newSize.y: newSize = Vector2(newSize.y, newSize.y)
 		elif newSize.y < newSize.x: newSize = Vector2(newSize.x, newSize.x)
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"size",newSize))
+	Changes.addChange(Changes.PropertyChange.new(self,&"size",newSize))
 
 func propertyChangedInit(property:StringName) -> void:
 	if parent.type != Door.TYPE.SIMPLE:
@@ -473,19 +473,19 @@ func propertyChangedInit(property:StringName) -> void:
 	
 	if property == &"type":
 		if (type == TYPE.BLANK or (type == TYPE.ALL and !Mods.active(&"C3"))) and count.neq(1):
-			Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE))
+			Changes.addChange(Changes.PropertyChange.new(self,&"count",C.ONE))
 		if type == TYPE.BLAST:
-			if (count.abs().neq(1)) and !Mods.active(&"C3"): Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE if count.eq(0) else count.axis()))
+			if (count.abs().neq(1)) and !Mods.active(&"C3"): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.ONE if count.eq(0) else count.axis()))
 		elif type == TYPE.ALL:
-			if !isPartial and denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
+			if !isPartial and denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"denominator",C.ONE))
 		else:
-			if denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
-			if isPartial: Changes.addChange(Changes.PropertyChange.new(game,self,&"isPartial",false))
+			if denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"denominator",C.ONE))
+			if isPartial: Changes.addChange(Changes.PropertyChange.new(self,&"isPartial",false))
 
 	if property in [&"color", &"type"] and editor.focusDialog.focused == parent: editor.focusDialog.doorDialog.lockHandler.redrawButton(index)
 	
 	if property == &"isPartial" and !isPartial:
-		Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator", C.ONE if count.isComplex() or count.eq(0) or type == TYPE.ALL else count.axis()))
+		Changes.addChange(Changes.PropertyChange.new(self,&"denominator", C.ONE if count.isComplex() or count.eq(0) or type == TYPE.ALL else count.axis()))
 
 func propertyChangedDo(property:StringName) -> void:
 	if property in [&"count", &"denominator"] and parent: parent.queue_redraw()

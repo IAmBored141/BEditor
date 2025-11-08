@@ -1,16 +1,14 @@
 extends Node
 
-var game:Game
-
 var undoStack:Array[RefCounted] = []
 var saveBuffered:bool = false
 
-# handles the undo system for the game
+# handles the undo system for the Game
 # a lot is copied over from Changes
 
 func start() -> void:
 	undoStack = []
-	undoStack.append(UndoSeparator.new(game.player.position))
+	undoStack.append(UndoSeparator.new(Game.player.position))
 
 func bufferSave() -> void:
 	await get_tree().process_frame # maybe race condition? it seems to be able to get stuck sometimes with keys
@@ -22,22 +20,22 @@ func addChange(change:Change) -> Change:
 	return change
 
 func _process(_delta) -> void:
-	if saveBuffered and game.player.is_on_floor() and !game.player.nearDoor:
+	if saveBuffered and Game.player.is_on_floor() and !Game.player.nearDoor:
 		saveBuffered = false
 		if undoStack[-1] is not UndoSeparator: # could happen if something buffers save on the frame before a reset
-			undoStack.append(UndoSeparator.new(game.player.position))
+			undoStack.append(UndoSeparator.new(Game.player.position))
 
 func undo() -> bool:
 	if len(undoStack) == 1: return false
 	if undoStack[-1] is UndoSeparator: undoStack.pop_back()
 	saveBuffered = false
-	game.player.pauseFrame = true
+	Game.player.pauseFrame = true
 	while true:
 		if undoStack[-1] is UndoSeparator:
-			game.player.position = undoStack[-1].position
-			game.player.dropMaster()
-			for object in game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateBufferCheck = null
-			game.player.checkKeys()
+			Game.player.position = undoStack[-1].position
+			Game.player.dropMaster()
+			for object in Game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateBufferCheck = null
+			Game.player.checkKeys()
 			return true
 		var change = undoStack.pop_back()
 		change.undo()
@@ -48,7 +46,6 @@ func copy(value:Variant) -> Variant:
 	else: return value
 
 class Change extends RefCounted:
-	var game:Game
 	var cancelled:bool = false
 	# is a singular recorded change
 	# do() subsumed to _init()
@@ -69,28 +66,27 @@ class ColorChange extends Change:
 	var color:Game.COLOR
 	var before:Variant
 
-	func _init(_game:Game, _color:Game.COLOR, after:Variant) -> void:
-		game = _game
+	func _init(_color:Game.COLOR, after:Variant) -> void:
 		color = _color
-		before = GameChanges.copy(game.player.get(array())[color])
+		before = GameChanges.copy(Game.player.get(array())[color])
 		if before == after:
 			cancelled = true
 			return
-		game.player.get(array())[color] = GameChanges.copy(after)
-		game.player.checkKeys()
+		Game.player.get(array())[color] = GameChanges.copy(after)
+		Game.player.checkKeys()
 	
-	func undo() -> void: game.player.get(array())[color] = GameChanges.copy(before)
+	func undo() -> void: Game.player.get(array())[color] = GameChanges.copy(before)
 
 class KeyChange extends ColorChange:
 	# C major -> A minor, for example
 	static func array() -> StringName: return &"key"
 
-	func _init(_game:Game, _color:Game.COLOR, after:Variant) -> void:
-		if _game.player.star[_color]:
+	func _init(_color:Game.COLOR, after:Variant) -> void:
+		if Game.player.star[_color]:
 			cancelled = true
 			return
-		super(_game,_color,after)
-		for object in game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateCheck(game.player)
+		super(_color,after)
+		for object in Game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateCheck(Game.player)
 
 class StarChange extends ColorChange:
 	# a change to the starred state
@@ -107,8 +103,7 @@ class PropertyChange extends Change:
 	var before:Variant
 	var type:GDScript
 	
-	func _init(_game:Game,component:GameComponent,_property:StringName,after:Variant) -> void:
-		game = _game
+	func _init(component:GameComponent,_property:StringName,after:Variant) -> void:
 		id = component.id
 		property = _property
 		before = Changes.copy(component.get(property))
@@ -124,8 +119,8 @@ class PropertyChange extends Change:
 	func changeValue(value:Variant) -> void:
 		var component:GameComponent
 		match type:
-			Lock: component = game.components[id]
-			_: component = game.objects[id]
+			Lock: component = Game.components[id]
+			_: component = Game.objects[id]
 		component.set(property, value)
 		component.propertyGameChangedDo(property)
 		component.queue_redraw()

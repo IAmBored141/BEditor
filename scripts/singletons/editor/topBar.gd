@@ -5,15 +5,15 @@ class_name TopBar
 @onready var play:Button = %play
 
 func _updateButtons() -> void:
-	%modes.visible = editor.game.playState != Game.PLAY_STATE.PLAY and !editor.settingsOpen
+	%modes.visible = Game.playState != Game.PLAY_STATE.PLAY and !editor.settingsOpen
 
-	play.visible = editor.game.playState != Game.PLAY_STATE.PLAY and !editor.settingsOpen
-	%pause.visible = editor.game.playState == Game.PLAY_STATE.PLAY and !editor.settingsOpen
-	%stop.visible = editor.game.playState != Game.PLAY_STATE.EDIT and !editor.settingsOpen
+	play.visible = Game.playState != Game.PLAY_STATE.PLAY and !editor.settingsOpen
+	%pause.visible = Game.playState == Game.PLAY_STATE.PLAY and !editor.settingsOpen
+	%stop.visible = Game.playState != Game.PLAY_STATE.EDIT and !editor.settingsOpen
 	%settingTabs.visible = editor.settingsOpen
 
-	play.disabled = !(editor.game.playState == Game.PLAY_STATE.PAUSED || editor.game.levelStart)
+	play.disabled = !(Game.playState == Game.PLAY_STATE.PAUSED || Game.levelStart)
 
-func _play() -> void: editor.game.playTest(editor.game.levelStart)
-func _pause() -> void: editor.game.pauseTest()
-func _stop() -> void: editor.game.stopTest()
+func _play() -> void: Game.playTest(Game.levelStart)
+func _pause() -> void: Game.pauseTest()
+func _stop() -> void: Game.stopTest()

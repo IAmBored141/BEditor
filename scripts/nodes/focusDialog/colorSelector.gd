@@ -41,7 +41,7 @@ class ColorSelectorButton extends SelectorButton:
 		RenderingServer.canvas_item_set_z_index(drawMain,-1)
 		RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 		await get_tree().process_frame
-		if Game.isAnimated(value): editor.game.connect(&"goldIndexChanged",queue_redraw)
+		if Game.isAnimated(value): Game.connect(&"goldIndexChanged",queue_redraw)
 		await get_tree().process_frame
 		queue_redraw()
 	
@@ -50,12 +50,12 @@ class ColorSelectorButton extends SelectorButton:
 		var rect:Rect2 = Rect2(Vector2.ONE, size-Vector2(2,2))
 		var texture:Texture2D
 		match value:
-			Game.COLOR.MASTER: texture = editor.game.masterTex()
-			Game.COLOR.PURE: texture = editor.game.pureTex()
-			Game.COLOR.STONE: texture = editor.game.stoneTex()
-			Game.COLOR.DYNAMITE: texture = editor.game.dynamiteTex()
-			Game.COLOR.QUICKSILVER: texture = editor.game.quicksilverTex()
+			Game.COLOR.MASTER: texture = Game.masterTex()
+			Game.COLOR.PURE: texture = Game.pureTex()
+			Game.COLOR.STONE: texture = Game.stoneTex()
+			Game.COLOR.DYNAMITE: texture = Game.dynamiteTex()
+			Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
 		if texture:
 			RenderingServer.canvas_item_add_texture_rect(drawMain,rect,texture)
 		else:
-			RenderingServer.canvas_item_add_rect(drawMain,rect,editor.game.mainTone[value])
+			RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[value])

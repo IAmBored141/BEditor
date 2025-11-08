@@ -118,7 +118,7 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawGlitch,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawSymbol,get_canvas_item())
-	game.connect(&"goldIndexChanged",func():if Game.isAnimated(color): queue_redraw())
+	Game.connect(&"goldIndexChanged",func():if Game.isAnimated(color): queue_redraw())
 
 func outlineTex() -> Texture2D: return getOutlineTexture(color, type)
 
@@ -141,9 +141,9 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawGlitch)
 	RenderingServer.canvas_item_clear(drawMain)
 	RenderingServer.canvas_item_clear(drawSymbol)
-	if !active and game.playState == Game.PLAY_STATE.PLAY: return
+	if !active and Game.playState == Game.PLAY_STATE.PLAY: return
 	var rect:Rect2 = Rect2(Vector2.ZERO, size)
-	drawKey(game,drawGlitch,drawMain,Vector2.ZERO,color,type,glitchMimic)
+	drawKey(drawGlitch,drawMain,Vector2.ZERO,color,type,glitchMimic)
 	if animState == ANIM_STATE.FLASH: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,outlineTex(),false,Color(Color.WHITE,animAlpha))
 	match type:
 		KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT:
@@ -156,18 +156,18 @@ func _draw() -> void:
 func keycountColor() -> Color: return Color("#363029") if count.sign() < 0 else Color("#ebe3dd")
 func keycountOutlineColor() -> Color: return Color("#d6cfc9") if count.sign() < 0 else Color("#363029")
 
-static func drawKey(_game:Game,keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor:Game.COLOR,keyType:TYPE=TYPE.NORMAL,keyGlitchMimic:Game.COLOR=Game.COLOR.GLITCH) -> void:
+static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor:Game.COLOR,keyType:TYPE=TYPE.NORMAL,keyGlitchMimic:Game.COLOR=Game.COLOR.GLITCH) -> void:
 	var texture:Texture2D
 	var rect:Rect2 = Rect2(keyOffset, Vector2(32,32))
 	match keyColor:
-		Game.COLOR.MASTER: texture = _game.masterKeyTex(keyType)
-		Game.COLOR.PURE: texture = _game.pureKeyTex(keyType)
-		Game.COLOR.STONE: texture = _game.stoneKeyTex(keyType)
-		Game.COLOR.DYNAMITE: texture = _game.dynamiteKeyTex(keyType)
-		Game.COLOR.QUICKSILVER: texture = _game.quicksilverKeyTex(keyType)
-		Game.COLOR.ICE: texture = _game.iceKeyTex(keyType)
-		Game.COLOR.MUD: texture = _game.mudKeyTex(keyType)
-		Game.COLOR.GRAFFITI: texture = _game.graffitiKeyTex(keyType)
+		Game.COLOR.MASTER: texture = Game.masterKeyTex(keyType)
+		Game.COLOR.PURE: texture = Game.pureKeyTex(keyType)
+		Game.COLOR.STONE: texture = Game.stoneKeyTex(keyType)
+		Game.COLOR.DYNAMITE: texture = Game.dynamiteKeyTex(keyType)
+		Game.COLOR.QUICKSILVER: texture = Game.quicksilverKeyTex(keyType)
+		Game.COLOR.ICE: texture = Game.iceKeyTex(keyType)
+		Game.COLOR.MUD: texture = Game.mudKeyTex(keyType)
+		Game.COLOR.GRAFFITI: texture = Game.graffitiKeyTex(keyType)
 	if texture:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,texture)
 	elif keyColor == Game.COLOR.GLITCH:
@@ -192,7 +192,7 @@ static func drawKey(_game:Game,keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vecto
 
 func propertyChangedInit(property:StringName) -> void:
 	if property == &"type":
-		if type not in [TYPE.NORMAL, TYPE.EXACT] and count.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE))
+		if type not in [TYPE.NORMAL, TYPE.EXACT] and count.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.ONE))
 
 # ==== PLAY ==== #
 var glitchMimic:Game.COLOR = Game.COLOR.GLITCH
@@ -215,18 +215,18 @@ func stop() -> void:
 
 func collect(player:Player) -> void:
 	match type:
-		TYPE.NORMAL: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].plus(count)))
-		TYPE.EXACT: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), count))
-		TYPE.SIGNFLIP: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(-1)))
-		TYPE.POSROTOR: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(C.I)))
-		TYPE.NEGROTOR: GameChanges.addChange(GameChanges.KeyChange.new(game, effectiveColor(), player.key[effectiveColor()].times(C.nI)))
-		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(game, effectiveColor(), true))
-		TYPE.UNSTAR: GameChanges.addChange(GameChanges.StarChange.new(game, effectiveColor(), false))
-		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new(game, effectiveColor(), true))
-		TYPE.UNCURSE: GameChanges.addChange(GameChanges.CurseChange.new(game, effectiveColor(), false))
+		TYPE.NORMAL: GameChanges.addChange(GameChanges.KeyChange.new( effectiveColor(), player.key[effectiveColor()].plus(count)))
+		TYPE.EXACT: GameChanges.addChange(GameChanges.KeyChange.new( effectiveColor(), count))
+		TYPE.SIGNFLIP: GameChanges.addChange(GameChanges.KeyChange.new( effectiveColor(), player.key[effectiveColor()].times(-1)))
+		TYPE.POSROTOR: GameChanges.addChange(GameChanges.KeyChange.new( effectiveColor(), player.key[effectiveColor()].times(C.I)))
+		TYPE.NEGROTOR: GameChanges.addChange(GameChanges.KeyChange.new( effectiveColor(), player.key[effectiveColor()].times(C.nI)))
+		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new( effectiveColor(), true))
+		TYPE.UNSTAR: GameChanges.addChange(GameChanges.StarChange.new( effectiveColor(), false))
+		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new( effectiveColor(), true))
+		TYPE.UNCURSE: GameChanges.addChange(GameChanges.CurseChange.new( effectiveColor(), false))
 		
 	if infinite: flashAnimation()
-	else: GameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"active", false))
+	else: GameChanges.addChange(GameChanges.PropertyChange.new( self, &"active", false))
 	GameChanges.bufferSave()
 
 	if color == Game.COLOR.MASTER: # not effectiveColor; doesnt trigger on glitch master
@@ -241,7 +241,7 @@ func collect(player:Player) -> void:
 				else: AudioManager.play(preload("res://resources/sounds/key/normal.wav"))
 
 func setGlitch(setColor:Game.COLOR) -> void:
-	GameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"glitchMimic", setColor))
+	GameChanges.addChange(GameChanges.PropertyChange.new( self, &"glitchMimic", setColor))
 	queue_redraw()
 
 func flashAnimation() -> void:

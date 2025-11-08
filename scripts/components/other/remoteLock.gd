@@ -66,7 +66,7 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawCrumbled,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawPainted,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawFrozen,get_canvas_item())
-	game.connect(&"goldIndexChanged",queue_redraw)
+	Game.connect(&"goldIndexChanged",queue_redraw)
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawConnections)
@@ -77,8 +77,8 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawCrumbled)
 	RenderingServer.canvas_item_clear(drawPainted)
 	RenderingServer.canvas_item_clear(drawFrozen)
-	if !active and game.playState == Game.PLAY_STATE.PLAY: return
-	Lock.drawLock(game,drawGlitch,drawScaled,drawMain,drawConfiguration,
+	if !active and Game.playState == Game.PLAY_STATE.PLAY: return
+	Lock.drawLock(drawGlitch,drawScaled,drawMain,drawConfiguration,
 		size,colorAfterCurse(),colorAfterGlitch(),type,configuration,sizeType,count,isPartial,denominator,negated,armament,
 		Lock.getFrameHighColor(isNegative(), negated).blend(Color(animColor,animAlpha)),
 		Lock.getFrameMainColor(isNegative(), negated).blend(Color(animColor,animAlpha)),
@@ -88,22 +88,22 @@ func _draw() -> void:
 	var from:Vector2 = size/2-getOffset()
 	var index:int = 0
 	for door in doors:
-		if !door.active and game.playState == Game.PLAY_STATE.PLAY: continue
+		if !door.active and Game.playState == Game.PLAY_STATE.PLAY: continue
 		var to:Vector2 = door.position+door.size/2 - position
 		if self == editor.focusDialog.focused and index == editor.focusDialog.doorDialog.doorsHandler.selected:
 			RenderingServer.canvas_item_add_line(drawConnections,from,to,Color("#00a2ff"),4+4/editor.cameraZoom)
-		RenderingServer.canvas_item_add_line(drawConnections,from,to,Color.WHITE if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,4)
-		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.mainTone[color] if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,2)
+		RenderingServer.canvas_item_add_line(drawConnections,from,to,Color.WHITE if satisfied or Game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,4)
+		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.mainTone[color] if satisfied or Game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,2)
 		index += 1
 	if self == editor.connectionSource:
 		var to:Vector2 = editor.mouseWorldPosition - position
-		RenderingServer.canvas_item_add_line(drawConnections,from,to,Color.WHITE if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,4)
-		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.mainTone[color] if satisfied or game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,2)
+		RenderingServer.canvas_item_add_line(drawConnections,from,to,Color.WHITE if satisfied or Game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,4)
+		RenderingServer.canvas_item_add_line(drawConnections,from,to,Game.mainTone[color] if satisfied or Game.playState == Game.PLAY_STATE.EDIT else Color.BLACK,2)
 	# auras
 	Door.drawAuras(drawCrumbled,drawPainted,drawFrozen,
-		frozen if game.playState == Game.PLAY_STATE.EDIT else gameFrozen,
-		crumbled if game.playState == Game.PLAY_STATE.EDIT else gameCrumbled,
-		painted if game.playState == Game.PLAY_STATE.EDIT else gamePainted,
+		frozen if Game.playState == Game.PLAY_STATE.EDIT else gameFrozen,
+		crumbled if Game.playState == Game.PLAY_STATE.EDIT else gameCrumbled,
+		painted if Game.playState == Game.PLAY_STATE.EDIT else gamePainted,
 		Rect2(-getOffset(),size))
 
 func getDrawPosition() -> Vector2: return position - getOffset()
@@ -114,17 +114,17 @@ func propertyChangedInit(property:StringName) -> void:
 	
 	if property == &"type":
 		if (type == Lock.TYPE.BLANK or (type == Lock.TYPE.ALL and !Mods.active(&"C3"))) and count.neq(1):
-			Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE))
+			Changes.addChange(Changes.PropertyChange.new(self,&"count",C.ONE))
 		if type == Lock.TYPE.BLAST:
-			if (count.abs().neq(1)) and !Mods.active(&"C3"): Changes.addChange(Changes.PropertyChange.new(game,self,&"count",C.ONE if count.eq(0) else count.axis()))
+			if (count.abs().neq(1)) and !Mods.active(&"C3"): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.ONE if count.eq(0) else count.axis()))
 		elif type == Lock.TYPE.ALL:
-			if !isPartial and denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
+			if !isPartial and denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"denominator",C.ONE))
 		else:
-			if denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator",C.ONE))
-			if isPartial: Changes.addChange(Changes.PropertyChange.new(game,self,&"isPartial",false))
+			if denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"denominator",C.ONE))
+			if isPartial: Changes.addChange(Changes.PropertyChange.new(self,&"isPartial",false))
 
 	if property == &"isPartial" and !isPartial:
-		Changes.addChange(Changes.PropertyChange.new(game,self,&"denominator", C.ONE if count.isComplex() or count.eq(0) or type == Lock.TYPE.ALL else count.axis()))
+		Changes.addChange(Changes.PropertyChange.new(self,&"denominator", C.ONE if count.isComplex() or count.eq(0) or type == Lock.TYPE.ALL else count.axis()))
 
 func propertyChangedDo(property:StringName) -> void:
 	super(property)
@@ -152,25 +152,25 @@ func receiveMouseInput(event:InputEventMouse) -> bool:
 		return true
 	return false
 
-func _setAutoConfiguration() -> void: Changes.addChange(Changes.PropertyChange.new(game,self,&"configuration",Lock.getAutoConfiguration(self)))
+func _setAutoConfiguration() -> void: Changes.addChange(Changes.PropertyChange.new(self,&"configuration",Lock.getAutoConfiguration(self)))
 
 func _setSizeType() -> void:
 	var match:int = Lock.SIZES.find(size)
 	var newSizeType:Lock.SIZE_TYPE = Lock.SIZE_TYPE.ANY if match == -1 else match as Lock.SIZE_TYPE
-	Changes.addChange(Changes.PropertyChange.new(game,self,&"sizeType",newSizeType))
+	Changes.addChange(Changes.PropertyChange.new(self,&"sizeType",newSizeType))
 	queue_redraw()
 
 func _connectTo(door:Door) -> void:
-	Changes.addChange(Changes.ComponentArrayAppendChange.new(game,self,&"doors",door))
-	Changes.addChange(Changes.ComponentArrayAppendChange.new(game,door,&"remoteLocks",self))
+	Changes.addChange(Changes.ComponentArrayAppendChange.new(self,&"doors",door))
+	Changes.addChange(Changes.ComponentArrayAppendChange.new(door,&"remoteLocks",self))
 
 func _disconnectTo(door:Door) -> void:
-	Changes.addChange(Changes.ComponentArrayPopAtChange.new(game,self,&"doors",doors.find(door)))
-	Changes.addChange(Changes.ComponentArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
+	Changes.addChange(Changes.ComponentArrayPopAtChange.new(self,&"doors",doors.find(door)))
+	Changes.addChange(Changes.ComponentArrayPopAtChange.new(door,&"remoteLocks",door.remoteLocks.find(self)))
 
 func deletedInit() -> void:
 	for door in doors:
-		Changes.addChange(Changes.ComponentArrayPopAtChange.new(game,door,&"remoteLocks",door.remoteLocks.find(self)))
+		Changes.addChange(Changes.ComponentArrayPopAtChange.new(door,&"remoteLocks",door.remoteLocks.find(self)))
 
 # ==== PLAY ==== #
 var cursed:bool = false
@@ -222,8 +222,8 @@ func check(player:Player) -> void:
 		if gamePainted and player.key[Game.COLOR.GRAFFITI].eq(0): return
 	var satisfiedBefore:bool = satisfied
 	var costBefore:C = cost.copy()
-	GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"satisfied",canOpen(player)))
-	GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cost",getCost(player)))
+	GameChanges.addChange(GameChanges.PropertyChange.new(self,&"satisfied",canOpen(player)))
+	GameChanges.addChange(GameChanges.PropertyChange.new(self,&"cost",getCost(player)))
 	if !(satisfiedBefore == satisfied and costBefore.eq(cost)):
 		if satisfied: AudioManager.play(preload("res://resources/sounds/remoteLock/success.wav"))
 		else: AudioManager.play(preload("res://resources/sounds/remoteLock/fail.wav"))
@@ -266,25 +266,25 @@ func checkDoors() -> void:
 	var any:bool = false
 	for door in doors:
 		if door.active: any = true
-	GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"active",any))
+	GameChanges.addChange(GameChanges.PropertyChange.new(self,&"active",any))
 	queue_redraw()
 
 func setGlitch(setColor:Game.COLOR) -> void:
-	GameChanges.addChange(GameChanges.PropertyChange.new(game, self, &"glitchMimic", setColor))
+	GameChanges.addChange(GameChanges.PropertyChange.new( self, &"glitchMimic", setColor))
 	queue_redraw()
 
 func curseCheck(player:Player) -> void:
 	if colorAfterGlitch() == Game.COLOR.PURE or armament: return
 	if player.curseMode > 0 and colorAfterGlitch() != player.curseColor and (!cursed or curseColor != player.curseColor):
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cursed",true))
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"curseColor",player.curseColor))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"cursed",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"curseColor",player.curseColor))
 		makeCurseParticles(curseColor, 1, 0.2, 0.5)
 		AudioManager.play(preload("res://resources/sounds/door/curse.wav"))
 		Changes.bufferSave()
 	elif player.curseMode < 0 and cursed and curseColor == player.curseColor:
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"cursed",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"cursed",false))
 		if curseColor == Game.COLOR.GLITCH:
-			GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"curseGlitchMimic",Game.COLOR.GLITCH))
+			GameChanges.addChange(GameChanges.PropertyChange.new(self,&"curseGlitchMimic",Game.COLOR.GLITCH))
 		makeCurseParticles(Game.COLOR.BROWN, -1, 0.2, 0.5)
 		AudioManager.play(preload("res://resources/sounds/door/decurse.wav"))
 		Changes.bufferSave()
@@ -297,28 +297,28 @@ func makeCurseParticles(particleColor:Game.COLOR, mode:int, scaleMin:float=1,sca
 func auraCheck(player:Player) -> void:
 	var deAuraed:bool = false
 	if player.auraRed and gameFrozen and colorAfterGlitch() != Game.COLOR.MAROON:
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gameFrozen",false))
 		makeDebris(Door.Debris, Game.COLOR.WHITE)
 		deAuraed = true
 	if player.auraGreen and gameCrumbled and colorAfterGlitch() != Game.COLOR.FOREST:
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gameCrumbled",false))
 		makeDebris(Door.Debris, Game.COLOR.BROWN)
 		deAuraed = true
 	if player.auraBlue and gamePainted and colorAfterGlitch() != Game.COLOR.NAVY:
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",false))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gamePainted",false))
 		makeDebris(Door.Debris, Game.COLOR.ORANGE)
 		deAuraed = true
 	var auraed:bool = false
 	if player.auraMaroon and !gameFrozen and colorAfterGlitch() != Game.COLOR.RED and colorAfterCurse() != Game.COLOR.ICE:
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameFrozen",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gameFrozen",true))
 		makeDebris(Door.Debris, Game.COLOR.WHITE)
 		auraed = true
 	if player.auraForest and !gameCrumbled and colorAfterGlitch() != Game.COLOR.GREEN and colorAfterCurse() != Game.COLOR.MUD:
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gameCrumbled",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gameCrumbled",true))
 		makeDebris(Door.Debris, Game.COLOR.BROWN)
 		auraed = true
 	if player.auraNavy and !gamePainted and colorAfterGlitch() != Game.COLOR.BLUE and colorAfterCurse() != Game.COLOR.GRAFFITI:
-		GameChanges.addChange(GameChanges.PropertyChange.new(game,self,&"gamePainted",true))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gamePainted",true))
 		makeDebris(Door.Debris, Game.COLOR.ORANGE)
 		auraed = true
 	
@@ -329,7 +329,7 @@ func auraCheck(player:Player) -> void:
 func makeDebris(debrisType:GDScript, debrisColor:Game.COLOR) -> void:
 	for y in floor(size.y/16):
 		for x in floor(size.x/16):
-			add_child(debrisType.new(game,debrisColor,Vector2(x*16,y*16)))
+			add_child(debrisType.new(debrisColor,Vector2(x*16,y*16)))
 
 func propertyGameChangedDo(property:StringName) -> void:
 	if property == &"active":

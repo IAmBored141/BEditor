@@ -5,21 +5,21 @@ class_name PlayerDialog
 @onready var main:FocusDialog = get_parent()
 
 func focus(focused:PlayerSpawn, _new:bool) -> void:
-	if editor.game.levelStart == focused: %levelStart.button_pressed = true
+	if Game.levelStart == focused: %levelStart.button_pressed = true
 	else: %savestate.button_pressed = true
 
 func _setLevelStart() -> void:
 	if main.focused is not PlayerSpawn: return
-	if editor.game.levelStart:
-		editor.game.levelStart.queue_redraw()
-	Changes.addChange(Changes.GlobalObjectChange.new(editor.game,editor.game,&"levelStart",main.focused))
+	if Game.levelStart:
+		Game.levelStart.queue_redraw()
+	Changes.addChange(Changes.GlobalObjectChange.new(Game,&"levelStart",main.focused))
 	main.focused.queue_redraw()
 
 func _setSavestate() -> void:
 	if main.focused is not PlayerSpawn: return
-	if editor.game.levelStart == main.focused:
-		Changes.addChange(Changes.GlobalObjectChange.new(editor.game,editor.game,&"levelStart",null))
+	if Game.levelStart == main.focused:
+		Changes.addChange(Changes.GlobalObjectChange.new(Game,&"levelStart",null))
 		main.focused.queue_redraw()
 
 func _playTest() -> void:
-	editor.game.playTest(main.focused)
+	Game.playTest(main.focused)

@@ -54,7 +54,7 @@ class KeyCounterHandlerButton extends HandlerButton:
 		RenderingServer.canvas_item_set_parent(drawGlitch,get_canvas_item())
 		RenderingServer.canvas_item_set_z_index(drawMain,-1)
 		RenderingServer.canvas_item_set_z_index(drawGlitch,-1)
-		editor.game.connect(&"goldIndexChanged",queue_redraw)
+		Game.connect(&"goldIndexChanged",queue_redraw)
 		queue_redraw()
 	
 	func _draw() -> void:
@@ -64,14 +64,14 @@ class KeyCounterHandlerButton extends HandlerButton:
 		var rect:Rect2 = Rect2(Vector2.ONE, size-Vector2(2,2))
 		var texture:Texture2D
 		match element.color:
-			Game.COLOR.MASTER: texture = editor.game.masterTex()
-			Game.COLOR.PURE: texture = editor.game.pureTex()
-			Game.COLOR.STONE: texture = editor.game.stoneTex()
-			Game.COLOR.DYNAMITE: texture = editor.game.dynamiteTex()
-			Game.COLOR.QUICKSILVER: texture = editor.game.quicksilverTex()
+			Game.COLOR.MASTER: texture = Game.masterTex()
+			Game.COLOR.PURE: texture = Game.pureTex()
+			Game.COLOR.STONE: texture = Game.stoneTex()
+			Game.COLOR.DYNAMITE: texture = Game.dynamiteTex()
+			Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
 		if texture:
 			RenderingServer.canvas_item_add_texture_rect(drawMain,rect,texture)
 		elif element.color == Game.COLOR.GLITCH:
-			RenderingServer.canvas_item_add_rect(drawGlitch,rect,editor.game.mainTone[element.color])
+			RenderingServer.canvas_item_add_rect(drawGlitch,rect,Game.mainTone[element.color])
 		else:
-			RenderingServer.canvas_item_add_rect(drawMain,rect,editor.game.mainTone[element.color])
+			RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[element.color])
