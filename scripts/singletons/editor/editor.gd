@@ -78,7 +78,7 @@ func _process(delta:float) -> void:
 	elif Input.is_key_pressed(KEY_CTRL): tileSize = Vector2i(16,16)
 	else: tileSize = Vector2i(32,32)
 	
-	if Game.playState != Game.PLAY_STATE.PLAY and !focusDialog.focused and !settingsOpen:
+	if Game.playState != Game.PLAY_STATE.PLAY and !focusDialog.focused and get_window().has_focus() and has_focus():
 		editorCamera.position += Vector2(Input.get_axis(&"camera_left", &"camera_right"),Input.get_axis(&"camera_up", &"camera_down"))*delta/editorCamera.zoom*700
 
 
@@ -459,7 +459,9 @@ func _toggleSettingsMenu(toggled_on:bool) -> void:
 	settingsOpen = toggled_on
 	get_tree().call_group(&"hotkeyButton", &"queue_redraw")
 	topBar._updateButtons()
-	if toggled_on: %settingsMenu.opened()
+	if toggled_on:
+		%settingsMenu.opened()
+		%settingsMenu.grab_focus()
 	else:
 		%settingsMenu.closed()
 		grab_focus()
