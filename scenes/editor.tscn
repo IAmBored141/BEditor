@@ -278,9 +278,10 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 current_tab = 0
-tab_count = 2
+tab_count = 3
 tab_0/title = "Level"
 tab_1/title = "Editor"
+tab_2/title = "Game"
 
 [node name="playControls" type="HBoxContainer" parent="c/c/topBar/c"]
 layout_mode = 2

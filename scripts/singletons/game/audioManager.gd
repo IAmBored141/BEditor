@@ -1,5 +1,7 @@
 extends Node
 
+@onready var masterBus:int = AudioServer.get_bus_index(&"Master")
+
 func play(stream:AudioStream) -> AudioStreamPlayer:
 	var player:AudioStreamPlayer = AudioStreamPlayer.new()
 	player.stream = stream

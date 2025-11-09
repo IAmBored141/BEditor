@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://uojm0pynavni"]
+[gd_scene load_steps=9 format=3 uid="uid://uojm0pynavni"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_c8k7n"]
 [ext_resource type="Script" uid="uid://cp1r75v1n7qs1" path="res://scripts/singletons/editor/settingsMenu.gd" id="2_onm7i"]
 [ext_resource type="FontFile" uid="uid://dftdrhvd8mdyi" path="res://resources/fonts/fLevelID.fnt" id="3_tixgc"]
 [ext_resource type="FontFile" uid="uid://cdifvlr6awojn" path="res://resources/fonts/fLevelName.fnt" id="4_egwj7"]
 [ext_resource type="Texture2D" uid="uid://cpllfu67xbr0h" path="res://assets/ui/settings/clarifier.png" id="5_iswfj"]
+[ext_resource type="PackedScene" uid="uid://cudl265jx2hk6" path="res://scenes/gameSetings.tscn" id="6_tyaol"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a5etv"]
 content_margin_left = 0.0
@@ -138,6 +139,11 @@ layout_mode = 2
 size_flags_vertical = 0
 tooltip_text = "Uses godot's built-in file dialog instead of the OS native one. If file dialogs aren't opening correctly (eg. Save As does nothing), turn this on."
 texture = ExtResource("5_iswfj")
+
+[node name="gameSettings" parent="c" instance=ExtResource("6_tyaol")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
 
 [connection signal="focus_exited" from="c/levelSettings/c/c/levelNumber" to="." method="_defocus"]
 [connection signal="text_changed" from="c/levelSettings/c/c/levelNumber" to="." method="_levelNumberSet"]

@@ -4,6 +4,7 @@ class_name SettingsMenu
 @onready var editor:Editor = get_node("/root/editor")
 @onready var levelSettings:MarginContainer = %levelSettings
 @onready var editorSettings:MarginContainer = %editorSettings
+@onready var gameSettings:GameSettings = %gameSettings
 
 var configFile:ConfigFile = ConfigFile.new()
 
@@ -18,6 +19,7 @@ func _ready() -> void:
 func _tabSelected(tab:int) -> void:
 	%levelSettings.visible = tab == 0
 	%editorSettings.visible = tab == 1
+	%gameSettings.visible = tab == 2
 	editor.updateDescription()
 	queue_redraw()
 
@@ -53,10 +55,12 @@ func opened() -> void:
 	%levelNumber.text = Game.level.number
 	%levelName.text = Game.level.name
 	%levelAuthor.text = Game.level.author
-	%fileDialogWorkaround.button_pressed = configFile.get_value("editor", "fileDialogWorkaround")	
+	%fileDialogWorkaround.button_pressed = configFile.get_value("editor", "fileDialogWorkaround", false)
+	%gameSettings.opened(configFile)
 
 func closed() -> void:
 	configFile.set_value("editor", "fileDialogWorkaround", %fileDialogWorkaround.button_pressed)
+	%gameSettings.closed(configFile)
 	configFile.save("user://config.ini")
 
 func _fileDialogWorkaroundSet(toggled_on: bool) -> void:

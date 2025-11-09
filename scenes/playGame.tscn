@@ -22,13 +22,14 @@ script = ExtResource("2_rt4fk")
 metadata/_custom_type_script = "uid://q0u3f7fb1u41"
 
 [node name="gameViewportCont" type="SubViewportContainer" parent="aspectRatioContainer"]
+editor_description = "this is broken here but its fine ingame. no idea why"
+custom_minimum_size = Vector2(1, 1)
 layout_mode = 2
 stretch = true
 
 [node name="gameViewport" type="SubViewport" parent="aspectRatioContainer/gameViewportCont"]
 handle_input_locally = false
-canvas_item_default_texture_filter = 0
-size = Vector2i(820, 697)
+size = Vector2i(2, 2)
 size_2d_override = Vector2i(800, 608)
 size_2d_override_stretch = true
 render_target_update_mode = 4
