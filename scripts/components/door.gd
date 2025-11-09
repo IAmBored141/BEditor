@@ -497,7 +497,7 @@ func tryQuicksilverOpen(player:Player) -> bool:
 		cost = cost.plus(lock.cost.times(player.masterMode))
 
 	GameChanges.addChange(GameChanges.KeyChange.new( Game.COLOR.QUICKSILVER, player.key[Game.COLOR.QUICKSILVER].minus(player.masterMode)))
-	GameChanges.addChange(GameChanges.KeyChange.new( colorAfterGlitch(), player.key[colorAfterGlitch()].plus(cost)))
+	GameChanges.addChange(GameChanges.KeyChange.new( colorAfterGlitch(), player.key[colorAfterGlitch()].minus(cost)))
 
 	AudioManager.play(preload("res://resources/sounds/door/master.wav"))
 	relockAnimation()
