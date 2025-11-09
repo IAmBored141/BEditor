@@ -114,9 +114,9 @@ func _gui_input(event:InputEvent) -> void:
 	if !componentHovered: componentHovered = null
 	if event is InputEventMouse:
 		if settingsOpen:
-			pass
+			mouse_default_cursor_shape = CURSOR_ARROW
 		elif Game.playState == Game.PLAY_STATE.PLAY:
-			pass
+			mouse_default_cursor_shape = CURSOR_ARROW
 		else:
 			# move camera
 			if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
