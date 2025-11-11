@@ -5,7 +5,7 @@
 [ext_resource type="FontFile" uid="uid://dftdrhvd8mdyi" path="res://resources/fonts/fLevelID.fnt" id="3_tixgc"]
 [ext_resource type="FontFile" uid="uid://cdifvlr6awojn" path="res://resources/fonts/fLevelName.fnt" id="4_egwj7"]
 [ext_resource type="Texture2D" uid="uid://cpllfu67xbr0h" path="res://assets/ui/settings/clarifier.png" id="5_iswfj"]
-[ext_resource type="PackedScene" uid="uid://cudl265jx2hk6" path="res://scenes/gameSetings.tscn" id="6_tyaol"]
+[ext_resource type="PackedScene" uid="uid://cudl265jx2hk6" path="res://scenes/gameSettings.tscn" id="6_tyaol"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a5etv"]
 content_margin_left = 0.0

@@ -12,7 +12,7 @@ func focus(focused:GameObject, new:bool, dontRedirect:bool) -> void: # Door or R
 		%door.visible = true
 		%remoteLock.visible = false
 		%doorTypes.get_child(focused.type).button_pressed = true
-		%lockHandler.colorLink.visible = focused.type == Door.TYPE.SIMPLE
+		%colorLink.visible = focused.type == Door.TYPE.SIMPLE
 		%spend.queue_redraw()
 		%lockConfigurationSelector.visible = main.componentFocused and focused.type != Door.TYPE.SIMPLE
 		%doorColorSelector.visible = main.componentFocused or focused.type != Door.TYPE.GATE # a mod will probably add something so i wont turn off the menu completely
@@ -99,7 +99,9 @@ func receiveKey(event:InputEvent) -> bool:
 		KEY_C:
 			if main.componentFocused: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.componentFocused)
 			else: editor.quickSet.startQuick(QuickSet.QUICK.COLOR, main.focused)
-		KEY_L: if Input.is_key_pressed(KEY_CTRL): main.focused.addLock()
+		KEY_L:
+			if Input.is_key_pressed(KEY_CTRL): main.focused.addLock()
+			else: %colorLink.button_pressed = !%colorLink.button_pressed
 		KEY_F: if main.focused is RemoteLock: %doorsHandler.addComponent()
 		KEY_MINUS: if !main.interacted and main.componentFocused and main.componentFocused.type == Lock.TYPE.BLAST: _blastLockSignSet(!%blastLockSign.button_pressed)
 		KEY_I: if !main.interacted and main.componentFocused and main.componentFocused.type == Lock.TYPE.BLAST: _blastLockAxisSet(!%blastLockAxis.button_pressed)
@@ -135,9 +137,9 @@ func _doorColorSelected(color:Game.COLOR) -> void:
 	if main.focused is Door:
 		if main.componentFocused:
 			Changes.addChange(Changes.PropertyChange.new(main.componentFocused,&"color",color))
-		elif %lockHandler.colorLink.button_pressed and main.focused.type == Door.TYPE.SIMPLE:
+		elif %colorLink.button_pressed and main.focused.type == Door.TYPE.SIMPLE:
 			Changes.addChange(Changes.PropertyChange.new(main.focused.locks[0],&"color",color))
-		if !main.componentFocused or (%lockHandler.colorLink.button_pressed and main.focused.type == Door.TYPE.SIMPLE):
+		if !main.componentFocused or (%colorLink.button_pressed and main.focused.type == Door.TYPE.SIMPLE):
 			Changes.addChange(Changes.PropertyChange.new(main.focused,&"colorSpend",color))
 	elif main.focused is RemoteLock:
 		Changes.addChange(Changes.PropertyChange.new(main.focused,&"color",color))

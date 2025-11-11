@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://djnt51xv7wn52"]
+[gd_scene load_steps=45 format=3 uid="uid://djnt51xv7wn52"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_j8y2p"]
 [ext_resource type="Script" uid="uid://2wjcj6frwpjo" path="res://scripts/singletons/editor/editor.gd" id="2_o435n"]
@@ -99,6 +99,13 @@ shader_parameter/tileSize = Vector2(32, 32)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lo5f0"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mxdmd"]
+
+[sub_resource type="Resource" id="Resource_jke8t"]
+script = ExtResource("17_bn54a")
+hotkeys = Dictionary[String, String]({
+"Shift+Esc": "Open Settings"
+})
+metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [node name="editor" type="Control"]
 layout_mode = 3
@@ -492,11 +499,12 @@ text = "IWLCEditor"
 scroll_active = false
 autowrap_mode = 0
 
-[node name="toggleSettingsMenu" type="Button" parent="c/c3/c2"]
+[node name="toggleSettingsMenu" type="Button" parent="c/c3/c2" groups=["explained"]]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
 icon = ExtResource("27_1abrv")
+metadata/explanation = SubResource("Resource_jke8t")
 
 [node name="focusDialog" parent="." instance=ExtResource("12_74j0u")]
 unique_name_in_owner = true
