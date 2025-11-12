@@ -352,7 +352,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 				var ipow:int = 0
 				if lockDenominator.isComplex() or lockDenominator.eq(0): numerator = str(lockCount)
 				else:
-					numerator = str(lockCount.over(lockDenominator.axis()))
+					numerator = str(lockCount.over(lockDenominator.axisOrOne()))
 					ipow = lockDenominator.axis().toIpow()
 				if numerator == "1": numerator = ""
 				
@@ -489,6 +489,9 @@ func propertyChangedInit(property:StringName) -> void:
 		else:
 			if denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"denominator",C.ONE))
 			if isPartial: Changes.addChange(Changes.PropertyChange.new(self,&"isPartial",false))
+			if count.isComplex():
+				if count.i.abs().gt(count.r.abs()): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.new(0,count.i)))
+				else: Changes.addChange(Changes.PropertyChange.new(self,&"count",C.new(count.r)))
 
 	if property in [&"color", &"type"] and editor.focusDialog.focused == parent: editor.focusDialog.doorDialog.lockHandler.redrawButton(index)
 	

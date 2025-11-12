@@ -81,7 +81,7 @@ func _toneSelected(button:Button) -> void:
 	updateLabels()
 
 func _colorSelected(color:Game.COLOR) -> void:
-	%colorEditLabel.text = "Editing '" + Game.COLOR.keys()[color].to_pascal_case() + "'"
+	%colorEditLabel.text = "Editing '" + Game.COLOR_NAMES[color] + "'"
 	updateLabels()
 
 func updateLabels() -> void:

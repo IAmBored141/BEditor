@@ -48,6 +48,8 @@ func axis() -> C: return C.new(r.sign(), i.sign())
 func axibs() -> C: return C.new(r.abs().sign(), i.abs().sign())
 func acrabs() -> C: return C.new(r.abs(), i.abs())
 
+func axisOrOne() -> C: return C.ONE if axis().eq(0) else axis()
+
 func reduce() -> Q: return r.plus(i)
 
 func isNonzeroReal() -> bool: return r.neq(0) and i.eq(0)

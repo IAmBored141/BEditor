@@ -126,6 +126,9 @@ func propertyChangedInit(property:StringName) -> void:
 		else:
 			if denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"denominator",C.ONE))
 			if isPartial: Changes.addChange(Changes.PropertyChange.new(self,&"isPartial",false))
+			if count.isComplex():
+				if count.i.abs().gt(count.r.abs()): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.new(0,count.i)))
+				else: Changes.addChange(Changes.PropertyChange.new(self,&"count",C.new(count.r)))
 
 	if property == &"isPartial" and !isPartial:
 		Changes.addChange(Changes.PropertyChange.new(self,&"denominator", C.ONE if count.isComplex() or count.eq(0) or type == Lock.TYPE.ALL else count.axis()))
@@ -208,6 +211,7 @@ func start() -> void:
 	gameFrozen = frozen
 	gameCrumbled = crumbled
 	gamePainted = painted
+	cost = getCost(Game.player)
 
 func stop() -> void:
 	cursed = false
@@ -262,7 +266,6 @@ func colorAfterAurabreaker() -> Game.COLOR:
 func isNegative() -> bool:
 	return (denominator if type in [Lock.TYPE.BLAST, Lock.TYPE.ALL] else count).sign() < 0
 
-
 func effectiveCount(_ipow:C=C.ONE) -> C: return count
 func effectiveDenominator(_ipow:C=C.ONE) -> C: return denominator
 
@@ -279,7 +282,7 @@ func setGlitch(setColor:Game.COLOR) -> void:
 
 func curseCheck(player:Player) -> void:
 	if colorAfterGlitch() == Game.COLOR.PURE or armament: return
-	if player.curseMode > 0 and colorAfterGlitch() != player.curseColor and (!cursed or curseColor != player.curseColor):
+	if player.curseMode > 0 and color != player.curseColor and (!cursed or curseColor != player.curseColor):
 		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"cursed",true))
 		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"curseColor",player.curseColor))
 		makeCurseParticles(curseColor, 1, 0.2, 0.5)

@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://chu3ujnqyd5tv"
+path="res://.godot/imported/fMouseover.fnt-284b6e71983c57e61094089d9e782e6d.fontdata"
+
+[deps]
+
+source_file="res://resources/fonts/fMouseover.fnt"
+dest_files=["res://.godot/imported/fMouseover.fnt-284b6e71983c57e61094089d9e782e6d.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://djnt51xv7wn52"]
+[gd_scene load_steps=46 format=3 uid="uid://djnt51xv7wn52"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_j8y2p"]
 [ext_resource type="Script" uid="uid://2wjcj6frwpjo" path="res://scripts/singletons/editor/editor.gd" id="2_o435n"]
@@ -29,6 +29,7 @@
 [ext_resource type="Material" uid="uid://bc5stfiew5ji4" path="res://resources/materials/outlineDrawMaterial.tres" id="22_jke8t"]
 [ext_resource type="Script" uid="uid://c7ptucaohcnil" path="res://scripts/singletons/editor/outline.gd" id="23_lo5f0"]
 [ext_resource type="PackedScene" uid="uid://uojm0pynavni" path="res://scenes/settingsMenu.tscn" id="25_6lm8n"]
+[ext_resource type="PackedScene" uid="uid://ccqphk3fjcl1e" path="res://scenes/mouseover.tscn" id="26_lo5f0"]
 [ext_resource type="Texture2D" uid="uid://fegj6p13p4ot" path="res://assets/game/gameUI/description.png" id="26_nhltt"]
 [ext_resource type="Texture2D" uid="uid://ba540b55427af" path="res://assets/ui/settings/setings.png" id="27_1abrv"]
 [ext_resource type="FontFile" uid="uid://c81fuf05yiuem" path="res://resources/fonts/fRoomNum.fnt" id="27_v24q3"]
@@ -378,6 +379,10 @@ script = ExtResource("23_lo5f0")
 unique_name_in_owner = true
 layout_mode = 2
 script = ExtResource("13_0u1f5")
+
+[node name="mouseover" parent="c/gameCont/gameViewportCont" instance=ExtResource("26_lo5f0")]
+unique_name_in_owner = true
+layout_mode = 2
 
 [node name="c" type="Control" parent="c/gameCont"]
 layout_mode = 2

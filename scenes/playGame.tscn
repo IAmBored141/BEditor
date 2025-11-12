@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://br4e21jc0gv8o"]
+[gd_scene load_steps=12 format=3 uid="uid://br4e21jc0gv8o"]
 
 [ext_resource type="Script" uid="uid://bkauup2it2tfp" path="res://scripts/singletons/game/playGame.gd" id="1_abwwd"]
 [ext_resource type="PackedScene" uid="uid://2hd65vn44me7" path="res://scenes/world.tscn" id="2_abwwd"]
 [ext_resource type="Script" uid="uid://q0u3f7fb1u41" path="res://scripts/nodes/aspectRatioContainer.gd" id="2_rt4fk"]
 [ext_resource type="Shader" uid="uid://donorxvv474n1" path="res://resources/materials/playGame.gdshader" id="3_wfiui"]
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="5_n2d1d"]
+[ext_resource type="PackedScene" uid="uid://ccqphk3fjcl1e" path="res://scenes/mouseover.tscn" id="5_y4ge2"]
 [ext_resource type="PackedScene" uid="uid://cudl265jx2hk6" path="res://scenes/gameSettings.tscn" id="6_m88lo"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abwwd"]
@@ -66,6 +67,9 @@ unique_name_in_owner = true
 
 [node name="playCamera" type="Camera2D" parent="aspectRatioContainer/gameViewportCont/gameViewport/worldViewportCont/worldViewport/world"]
 anchor_mode = 0
+
+[node name="mouseover" parent="aspectRatioContainer/gameViewportCont/gameViewport" instance=ExtResource("5_y4ge2")]
+unique_name_in_owner = true
 
 [node name="pauseMenu" type="Panel" parent="aspectRatioContainer/gameViewportCont/gameViewport"]
 unique_name_in_owner = true
