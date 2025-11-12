@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://br4e21jc0gv8o"]
+[gd_scene load_steps=11 format=3 uid="uid://br4e21jc0gv8o"]
 
 [ext_resource type="Script" uid="uid://bkauup2it2tfp" path="res://scripts/singletons/game/playGame.gd" id="1_abwwd"]
 [ext_resource type="PackedScene" uid="uid://2hd65vn44me7" path="res://scenes/world.tscn" id="2_abwwd"]
@@ -16,7 +16,9 @@ shader_parameter/pauseAnimTimer = 0.0
 shader_parameter/darken = false
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wfiui"]
-bg_color = Color(0.25490198, 0.25490198, 0.25490198, 1)
+bg_color = Color(0.15727392, 0.15727398, 0.15727389, 1)
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_m88lo"]
 
 [node name="playGame" type="PanelContainer"]
 anchors_preset = 15
@@ -79,6 +81,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_wfiui")
 [node name="gameSettings" parent="aspectRatioContainer/gameViewportCont/gameViewport/pauseMenu" instance=ExtResource("6_m88lo")]
 unique_name_in_owner = true
 layout_mode = 1
+toneButtonGroup = SubResource("ButtonGroup_m88lo")
 
 [node name="main" type="MarginContainer" parent="aspectRatioContainer/gameViewportCont/gameViewport/pauseMenu"]
 unique_name_in_owner = true

@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://d6t6vo5afrap"]
+
+[ext_resource type="Shader" uid="uid://cwqo3uqk1jly1" path="res://resources/materials/textGradient.gdshader" id="1_lyjc5"]
+
+[resource]
+shader = ExtResource("1_lyjc5")

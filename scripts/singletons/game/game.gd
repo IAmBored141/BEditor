@@ -279,6 +279,7 @@ const PIXELATED_MATERIAL:ShaderMaterial = preload("res://resources/materials/pix
 const ADDITIVE_MATERIAL:CanvasItemMaterial = preload("res://resources/materials/additiveMaterial.tres")
 const SUBTRACTIVE_MATERIAL:CanvasItemMaterial = preload("res://resources/materials/subtractiveMaterial.tres")
 const NEGATIVE_MATERIAL:ShaderMaterial = preload("res://resources/materials/negativeMaterial.tres")
+const TEXT_GRADIENT_MATERIAL:ShaderMaterial = preload("res://resources/materials/textGradientMaterial.tres")
 
 const FKEYX:Font = preload("res://resources/fonts/fKeyX.fnt")
 const FKEYNUM:Font = preload("res://resources/fonts/fKeyNum.fnt")
@@ -286,6 +287,7 @@ const FTALK:Font = preload("res://resources/fonts/fTalk.fnt")
 const FLEVELID:Font = preload("res://resources/fonts/fLevelID.fnt")
 const FLEVELNAME:Font = preload("res://resources/fonts/fLevelName.fnt")
 const FROOMNUM:Font = preload("res://resources/fonts/fRoomNum.fnt")
+const FMINIID:Font = preload("res://resources/fonts/fMiniId.fnt")
 
 var latestSpawn:PlayerSpawn
 var levelStart:PlayerSpawn
@@ -440,7 +442,7 @@ func playReadied() -> void:
 	setWorld(playGame.world)
 	Saving.load(Saving.savePath)
 	playState = PLAY_STATE.PLAY
-	playGame.updateSettings()
+	playGame.loadSettings()
 	playGame.startLevel()
 
 func edit() -> void:

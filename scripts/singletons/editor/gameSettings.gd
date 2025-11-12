@@ -56,6 +56,7 @@ func closed(configFile:ConfigFile) -> void:
 		configFile.set_value("game", "mainTone"+str(color), Game.mainTone[color])
 		configFile.set_value("game", "darkTone"+str(color), Game.darkTone[color])
 	configFile.set_value("game", "hideTimer", %hideTimer.button_pressed)
+	configFile.set_value("game", "autoRun", Game.autoRun)
 	configFile.set_value("game", "fullJumps", %fullJumps.button_pressed)
 	configFile.set_value("game", "fastAnimations", %fastAnimations.button_pressed)
 

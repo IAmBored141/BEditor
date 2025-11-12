@@ -14,6 +14,7 @@ var configFile:ConfigFile = ConfigFile.new()
 var paused:bool = false
 
 var mainDraw:RID
+var autoRunGradientDraw:RID
 
 var roomTransitionPhase:int = -1
 var roomTransitionTimer:float = 0
@@ -22,10 +23,14 @@ var textWiggleAngle:float = 0
 var textOffsetAngle:float = 0
 var pauseAnimPhase:int = -1
 var pauseAnimTimer:float = 0
+var autoRunTimer:float = 0
 
 func _ready() -> void:
 	mainDraw = RenderingServer.canvas_item_create()
+	autoRunGradientDraw = RenderingServer.canvas_item_create()
+	RenderingServer.canvas_item_set_material(autoRunGradientDraw, Game.TEXT_GRADIENT_MATERIAL)
 	RenderingServer.canvas_item_set_parent(mainDraw, %worldViewportCont.get_canvas_item())
+	RenderingServer.canvas_item_set_parent(autoRunGradientDraw, %worldViewportCont.get_canvas_item())
 	Game.playGame = self
 	Game.playReadied()
 
@@ -65,10 +70,15 @@ func _process(delta:float) -> void:
 					%mouseBlocker.mouse_filter = MOUSE_FILTER_IGNORE
 					%gameViewportCont.get_material().set_shader_parameter(&"pauseAnimTimer", 0)
 					%gameViewportCont.get_material().set_shader_parameter(&"darken", false)
+	if autoRunTimer < 2:
+		autoRunTimer += delta
+		queue_redraw()
+		if autoRunTimer >= 2: autoRunTimer = 2
 	if !paused: Game.timer += delta
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(mainDraw)
+	RenderingServer.canvas_item_clear(autoRunGradientDraw)
 	# description box
 	if Game.level.description:
 		RenderingServer.canvas_item_add_texture_rect(mainDraw,Rect2(Vector2(11,519),Vector2(784,80)),DESCRIPTION_BOX,false,Color(Color.BLACK,0.35))
@@ -85,6 +95,14 @@ func _draw() -> void:
 		TextDraw.outlinedCentered2(Game.FLEVELID,mainDraw,Game.level.number,Color.WHITE,Color.BLACK,24,Vector2(400,216)+textWiggle+textOffset)
 		TextDraw.outlinedCentered2(Game.FLEVELNAME,mainDraw,Game.level.name,Color.WHITE,Color.BLACK,36,Vector2(400,280)+textWiggle2+textOffset)
 		TextDraw.outlinedCentered2(Game.FLEVELNAME,mainDraw,Game.level.author,Color.BLACK,Color.WHITE,36,Vector2(400,376)+textWiggle+textOffset)
+	var autoRunAlpha:float = abs(sin(autoRunTimer*PI))
+	if autoRunAlpha > 0:
+		TextDraw.outlinedGradient(Game.FMINIID,mainDraw,autoRunGradientDraw,
+			"[E] Auto-Run is " + ("on" if Game.autoRun else "off"),
+			Color(Color("#e6ffe6") if Game.autoRun else Color("#dcffe6"),autoRunAlpha),
+			Color(Color("#e6c896") if Game.autoRun else Color("#64dc8c"),autoRunAlpha),
+			Color(Color.BLACK,autoRunAlpha),12,Vector2(4,20)
+		)
 
 func _input(event:InputEvent) -> void:
 	if event is InputEventKey and event.is_pressed():
@@ -96,7 +114,9 @@ func _input(event:InputEvent) -> void:
 					roomTransitionTimer = 0
 			if !inAnimation():
 				if event.keycode == KEY_ESCAPE: pause()
-		if !paused and !inAnimation(): Game.player.receiveKey(event)
+		if !paused and !inAnimation():
+			if event.keycode == KEY_E: autoRun()
+			Game.player.receiveKey(event)
 
 func startLevel() -> void:
 	start()
@@ -144,25 +164,29 @@ func pause() -> void:
 	var pauseSound:AudioStreamPlayer = AudioManager.play(preload("res://resources/sounds/pause.wav"))
 	pauseSound.volume_linear = 0.85
 	pauseSound.pitch_scale = 0.6
-	if paused:
-		%gameSettings.closed(configFile)
-		configFile.save("user://config.ini")
-	else:
-		configFile.load("user://config.ini")
-		%gameSettings.opened(configFile)
+	if paused: saveSettings()
+	else: loadSettings()
 
 func quit() -> void:
-	%gameSettings.closed(configFile)
-	configFile.save("user://config.ini")
+	saveSettings()
 	get_tree().quit()
 
 func editLevel() -> void:
-	%gameSettings.closed(configFile)
-	configFile.save("user://config.ini")
+	saveSettings()
 	await get_tree().process_frame
 	Game.edit()
 
-func updateSettings() -> void:
+func loadSettings() -> void:
 	configFile.load("user://config.ini")
 	%gameSettings.playGame = self
 	%gameSettings.opened(configFile)
+
+func saveSettings() -> void:
+	%gameSettings.closed(configFile)
+	configFile.save("user://config.ini")
+
+func autoRun() -> void:
+	Game.autoRun = !Game.autoRun
+	AudioManager.play(preload("res://resources/sounds/autoRun.wav")).pitch_scale = 1.0 if Game.autoRun else 0.7
+	autoRunTimer = 0
+	saveSettings()
