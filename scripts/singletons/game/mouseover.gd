@@ -15,6 +15,7 @@ func describe(object:GameObject, pos:Vector2, screenBottomRight:Vector2) -> void
 			string += KEY_TYPES[object.type] + Game.COLOR_NAMES[object.color] + " Key"
 			if object.type in [KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT]:
 				string += "\nAmount: " + str(object.count)
+			if object.color == Game.COLOR.GLITCH: string += "\nMimic: " + Game.COLOR_NAMES[object.glitchMimic]
 		Door:
 			if object.type == Door.TYPE.SIMPLE:
 				string += LOCK_TYPES[object.locks[0].type] + Game.COLOR_NAMES[object.colorSpend] + " Door"
@@ -26,7 +27,11 @@ func describe(object:GameObject, pos:Vector2, screenBottomRight:Vector2) -> void
 				else: string += "Gate"
 				for lock in object.locks:
 					string += "\nLock: " + LOCK_TYPES[lock.type] + Game.COLOR_NAMES[lock.color] + ", Cost: " + lockCost(lock)
-					if lock.armament: string += " (Armament)"
+					if lock.armament:
+						string += " (Armament"
+						if lock.color == Game.COLOR.GLITCH and lock.glitchMimic != object.glitchMimic: string += ", Mimic: " + Game.COLOR_NAMES[lock.glitchMimic]
+						string += ")"
+			if object.hasBaseColor(Game.COLOR.GLITCH): string += "\nMimic: " + Game.COLOR_NAMES[object.glitchMimic]
 			string += effects(object)
 			
 		RemoteLock:
@@ -34,6 +39,7 @@ func describe(object:GameObject, pos:Vector2, screenBottomRight:Vector2) -> void
 			string += ("S" if object.satisfied else "Uns") + "atisfied, Cost: " + str(object.cost)
 			if object.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]: string += " (" + lockCost(object) + ")"
 			if object.armament: string += " (Armament)"
+			if object.color == Game.COLOR.GLITCH: string += "\nMimic: " + Game.COLOR_NAMES[object.glitchMimic]
 			string += effects(object)
 		_:
 			visible = false
@@ -68,7 +74,9 @@ func effects(object:GameObject) -> String:
 	var string:String = ""
 	if object.cursed:
 		if object.curseColor == Game.COLOR.BROWN: string += "\nCursed!"
-		else: string += "\nCursed " + Game.COLOR_NAMES[object.curseColor]
+		else:
+			string += "\nCursed " + Game.COLOR_NAMES[object.curseColor] + "!"
+			if object.curseColor == Game.COLOR.GLITCH: string += " (Mimic: " + Game.COLOR_NAMES[object.curseGlitchMimic] + ")"
 	if object.gameFrozen: string += "\nFrozen! (1xRed)"
 	if object.gameCrumbled: string += "\nEroded! (5xGreen)"
 	if object.gamePainted: string += "\nPainted! (3xBlue)"

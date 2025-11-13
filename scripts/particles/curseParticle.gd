@@ -10,6 +10,8 @@ var color:Game.COLOR
 var rotateSpeed:float # by default 2.5 degrees per frame, 60fps
 @export var mode:int
 
+var drawMain:RID
+
 func _init(_color:Game.COLOR,_mode:int,_position:Vector2=Vector2.ZERO,_rotateSpeed:float=2.6179938780,_scale:float=0.6) -> void:
 	color = _color
 	mode = _mode
@@ -17,24 +19,28 @@ func _init(_color:Game.COLOR,_mode:int,_position:Vector2=Vector2.ZERO,_rotateSpe
 	rotateSpeed = _rotateSpeed
 	scale = Vector2(_scale,_scale)
 
+func _ready() -> void:
+	drawMain = RenderingServer.canvas_item_create()
+	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
+
 func _process(delta:float) -> void:
 	rotation += delta*rotateSpeed
 	rotation = fmod(rotation,TAU)
 
 func _draw() -> void:
-	RenderingServer.canvas_item_clear(get_canvas_item())
+	RenderingServer.canvas_item_clear(drawMain)
 	if mode == 0: return
 	if color == Game.COLOR.BROWN:
 		if mode > 0:
-			material = Game.SUBTRACTIVE_MATERIAL
-			RenderingServer.canvas_item_add_texture_rect(get_canvas_item(),DRAW_RECT,TEXTURE_BROWN_POSITIVE)
+			RenderingServer.canvas_item_set_material(drawMain,Game.SUBTRACTIVE_MATERIAL)
+			RenderingServer.canvas_item_add_texture_rect(drawMain,DRAW_RECT,TEXTURE_BROWN_POSITIVE)
 		else:
-			material = Game.ADDITIVE_MATERIAL
-			RenderingServer.canvas_item_add_texture_rect(get_canvas_item(),DRAW_RECT,TEXTURE_BROWN)
+			RenderingServer.canvas_item_set_material(drawMain,Game.ADDITIVE_MATERIAL)
+			RenderingServer.canvas_item_add_texture_rect(drawMain,DRAW_RECT,TEXTURE_BROWN)
 	else:
-		material = null
-		if mode > 0: RenderingServer.canvas_item_add_texture_rect(get_canvas_item(),DRAW_RECT,TEXTURE_GENERIC,false,getCurseColor())
-		else: RenderingServer.canvas_item_add_texture_rect(get_canvas_item(),DRAW_RECT,TEXTURE_GENERIC,false,getCurseColor().inverted())
+		RenderingServer.canvas_item_set_material(drawMain,Game.NO_MATERIAL)
+		if mode > 0: RenderingServer.canvas_item_add_texture_rect(drawMain,DRAW_RECT,TEXTURE_GENERIC,false,getCurseColor())
+		else: RenderingServer.canvas_item_add_texture_rect(drawMain,DRAW_RECT,TEXTURE_GENERIC,false,getCurseColor().inverted())
 
 func getCurseColor() -> Color:
 	match color:

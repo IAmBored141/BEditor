@@ -277,7 +277,7 @@ func checkDoors() -> void:
 	queue_redraw()
 
 func setGlitch(setColor:Game.COLOR) -> void:
-	GameChanges.addChange(GameChanges.PropertyChange.new( self, &"glitchMimic", setColor))
+	GameChanges.addChange(GameChanges.PropertyChange.new(self, &"glitchMimic", setColor))
 	queue_redraw()
 
 func curseCheck(player:Player) -> void:

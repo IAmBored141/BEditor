@@ -13,6 +13,7 @@ var configFile:ConfigFile = ConfigFile.new()
 
 var paused:bool = false
 
+var drawDescription:RID
 var drawMain:RID
 var drawAutoRunGradient:RID
 
@@ -26,11 +27,13 @@ var pauseAnimTimer:float = 0
 var autoRunTimer:float = 2
 
 func _ready() -> void:
+	drawDescription = RenderingServer.canvas_item_create()
 	drawMain = RenderingServer.canvas_item_create()
 	drawAutoRunGradient = RenderingServer.canvas_item_create()
 	RenderingServer.canvas_item_set_material(drawAutoRunGradient, Game.TEXT_GRADIENT_MATERIAL)
-	RenderingServer.canvas_item_set_parent(drawMain, %worldViewportCont.get_canvas_item())
-	RenderingServer.canvas_item_set_parent(drawAutoRunGradient, %worldViewportCont.get_canvas_item())
+	RenderingServer.canvas_item_set_parent(drawDescription, %worldViewportCont.get_canvas_item())
+	RenderingServer.canvas_item_set_parent(drawMain, %drawParent.get_canvas_item())
+	RenderingServer.canvas_item_set_parent(drawAutoRunGradient, %drawParent.get_canvas_item())
 	Game.playGame = self
 	Game.playReadied()
 
@@ -75,17 +78,24 @@ func _process(delta:float) -> void:
 		queue_redraw()
 		if autoRunTimer >= 2: autoRunTimer = 2
 	if !paused: Game.timer += delta
+	var objectHovered:GameObject
+	var mouseWorldPosition = %world.get_local_mouse_position()
+	print(mouseWorldPosition)
+	for object in Game.objects.values():
+		if Rect2(object.position,object.size).has_point(mouseWorldPosition): objectHovered = object
+	%mouseover.describe(objectHovered, %gameViewportCont.get_local_mouse_position(),Vector2(800,608))
 
 func _draw() -> void:
+	RenderingServer.canvas_item_clear(drawDescription)
 	RenderingServer.canvas_item_clear(drawMain)
 	RenderingServer.canvas_item_clear(drawAutoRunGradient)
 	# description box
 	if Game.level.description:
-		RenderingServer.canvas_item_add_texture_rect(drawMain,Rect2(Vector2(11,519),Vector2(784,80)),DESCRIPTION_BOX,false,Color(Color.BLACK,0.35))
-		RenderingServer.canvas_item_add_texture_rect(drawMain,Rect2(Vector2(8,516),Vector2(784,80)),DESCRIPTION_BOX)
-		Game.FTALK.draw_multiline_string(drawMain,Vector2(16,540),Game.level.description,HORIZONTAL_ALIGNMENT_LEFT,666,12,4,Color("#200020"),TEXT_BREAK_FLAGS)
-		TextDraw.outlinedCentered(Game.FROOMNUM,drawMain,"PUZZLE",Color("#d6cfc9"),Color("#3e2d1c"),20,Vector2(732,539))
-		TextDraw.outlinedCentered(Game.FROOMNUM,drawMain,Game.level.shortNumber,Color("#8c50c8"),Color("#140064"),20,Vector2(733,569))
+		RenderingServer.canvas_item_add_texture_rect(drawDescription,Rect2(Vector2(11,519),Vector2(784,80)),DESCRIPTION_BOX,false,Color(Color.BLACK,0.35))
+		RenderingServer.canvas_item_add_texture_rect(drawDescription,Rect2(Vector2(8,516),Vector2(784,80)),DESCRIPTION_BOX)
+		Game.FTALK.draw_multiline_string(drawDescription,Vector2(16,540),Game.level.description,HORIZONTAL_ALIGNMENT_LEFT,666,12,4,Color("#200020"),TEXT_BREAK_FLAGS)
+		TextDraw.outlinedCentered(Game.FROOMNUM,drawDescription,"PUZZLE",Color("#d6cfc9"),Color("#3e2d1c"),20,Vector2(732,539))
+		TextDraw.outlinedCentered(Game.FROOMNUM,drawDescription,Game.level.shortNumber,Color("#8c50c8"),Color("#140064"),20,Vector2(733,569))
 	# room transition
 	if roomTransitionPhase != -1:
 		var textOffset = Vector2(0,500*sin(textOffsetAngle)-500)

@@ -516,7 +516,7 @@ func colorAfterCurse() -> Game.COLOR:
 
 func colorAfterGlitch() -> Game.COLOR:
 	var base:Game.COLOR = colorAfterCurse()
-	if base == Game.COLOR.GLITCH: return curseGlitchMimic if parent.cursed else glitchMimic
+	if base == Game.COLOR.GLITCH: return curseGlitchMimic if (parent.cursed and !armament) else glitchMimic
 	return base
 
 func colorAfterAurabreaker() -> Game.COLOR:

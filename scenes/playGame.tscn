@@ -71,6 +71,9 @@ anchor_mode = 0
 [node name="mouseover" parent="aspectRatioContainer/gameViewportCont/gameViewport" instance=ExtResource("5_y4ge2")]
 unique_name_in_owner = true
 
+[node name="drawParent" type="Node2D" parent="aspectRatioContainer/gameViewportCont/gameViewport"]
+unique_name_in_owner = true
+
 [node name="pauseMenu" type="Panel" parent="aspectRatioContainer/gameViewportCont/gameViewport"]
 unique_name_in_owner = true
 visible = false
