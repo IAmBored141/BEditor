@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://uojm0pynavni"]
+[gd_scene load_steps=10 format=3 uid="uid://uojm0pynavni"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_c8k7n"]
 [ext_resource type="Script" uid="uid://cp1r75v1n7qs1" path="res://scripts/singletons/editor/settingsMenu.gd" id="2_onm7i"]
@@ -25,6 +25,8 @@ content_margin_right = 4.0
 content_margin_bottom = 3.0
 color = Color(0.5, 0.5, 0.5, 1)
 thickness = 2
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_tyaol"]
 
 [node name="settingsMenu" type="PanelContainer"]
 anchors_preset = 15
@@ -126,15 +128,16 @@ size_flags_vertical = 3
 [node name="c" type="VBoxContainer" parent="c/editorSettings"]
 layout_mode = 2
 
-[node name="c" type="HBoxContainer" parent="c/editorSettings/c"]
+[node name="fileDialogWorkaroundCont" type="HBoxContainer" parent="c/editorSettings/c"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="fileDialogWorkaround" type="CheckBox" parent="c/editorSettings/c/c"]
+[node name="fileDialogWorkaround" type="CheckBox" parent="c/editorSettings/c/fileDialogWorkaroundCont"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "File Dialog Workaround"
 
-[node name="TextureRect" type="TextureRect" parent="c/editorSettings/c/c"]
+[node name="TextureRect" type="TextureRect" parent="c/editorSettings/c/fileDialogWorkaroundCont"]
 layout_mode = 2
 size_flags_vertical = 0
 tooltip_text = "Uses godot's built-in file dialog instead of the OS native one. If file dialogs aren't opening correctly (eg. Save As does nothing), turn this on."
@@ -149,6 +152,7 @@ text = "Enable Fullscreen (in editor)"
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+toneButtonGroup = SubResource("ButtonGroup_tyaol")
 
 [connection signal="focus_exited" from="c/levelSettings/c/c/levelNumber" to="." method="_defocus"]
 [connection signal="text_changed" from="c/levelSettings/c/c/levelNumber" to="." method="_levelNumberSet"]
@@ -156,5 +160,5 @@ layout_mode = 2
 [connection signal="text_changed" from="c/levelSettings/c/c/levelName" to="." method="_levelNameSet"]
 [connection signal="focus_exited" from="c/levelSettings/c/c/levelAuthor" to="." method="_defocus"]
 [connection signal="text_changed" from="c/levelSettings/c/c/levelAuthor" to="." method="_levelAuthorSet"]
-[connection signal="toggled" from="c/editorSettings/c/c/fileDialogWorkaround" to="." method="_fileDialogWorkaroundSet"]
+[connection signal="toggled" from="c/editorSettings/c/fileDialogWorkaroundCont/fileDialogWorkaround" to="." method="_fileDialogWorkaroundSet"]
 [connection signal="toggled" from="c/editorSettings/c/fullscreen" to="." method="_fullscreenSet"]
