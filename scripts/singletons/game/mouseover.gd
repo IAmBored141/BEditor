@@ -64,7 +64,7 @@ func lockCost(lock:GameComponent) -> String:
 		Lock.TYPE.BLAST, Lock.TYPE.ALL:
 			string += "["
 			var numerator:C = lock.count
-			var divideThrough:bool = !lock.denominator.isComplex() and !lock.numerator.isComplex()
+			var divideThrough:bool = !lock.denominator.isComplex() and !numerator.isComplex()
 			if divideThrough: numerator = numerator.over(lock.denominator.axisOrOne())
 			if numerator.neq(1): string += str(numerator)
 			string += "All" if lock.type == Lock.TYPE.BLAST else "ALL"

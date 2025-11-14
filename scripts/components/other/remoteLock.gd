@@ -263,8 +263,12 @@ func colorAfterAurabreaker() -> Game.COLOR:
 	if gamePainted: return Game.COLOR.GRAFFITI
 	return colorAfterGlitch()
 
+
 func isNegative() -> bool:
-	return (denominator if type in [Lock.TYPE.BLAST, Lock.TYPE.ALL] else count).sign() < 0
+	if type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]:
+		if count.isComplex() or denominator.isComplex(): return false
+		return effectiveDenominator().sign() < 0
+	return effectiveCount().sign() < 0
 
 func effectiveCount(_ipow:C=C.ONE) -> C: return count
 func effectiveDenominator(_ipow:C=C.ONE) -> C: return denominator

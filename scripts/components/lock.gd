@@ -350,7 +350,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 			TYPE.BLAST, TYPE.ALL:
 				var numerator:String
 				var ipow:int = 0
-				if lockDenominator.isComplex() or lockDenominator.eq(0): numerator = str(lockCount)
+				if lockDenominator.isComplex() or lockCount.isComplex() or lockDenominator.eq(0): numerator = str(lockCount)
 				else:
 					numerator = str(lockCount.over(lockDenominator.axisOrOne()))
 					ipow = lockDenominator.axis().toIpow()
@@ -363,7 +363,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 				
 				if lockIsPartial:
 					var denom:String
-					if lockDenominator.isComplex(): denom = str(lockDenominator)
+					if lockDenominator.isComplex() or lockCount.isComplex(): denom = str(lockDenominator)
 					else: denom = str(lockDenominator.abs())
 					var denomWidth:float = Game.FTALK.get_string_size(denom,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 					var denomStartX = round((lockSize.x - denomWidth)/2)
@@ -573,4 +573,7 @@ func effectiveDenominator(ipow:C=parent.ipow()) -> C:
 	return denominator.times(ipow)
 
 func isNegative() -> bool:
-	return (effectiveDenominator() if type in [TYPE.BLAST, TYPE.ALL] else effectiveCount()).sign() < 0
+	if type in [TYPE.BLAST, TYPE.ALL]:
+		if count.isComplex() or denominator.isComplex(): return false
+		return effectiveDenominator().sign() < 0
+	return effectiveCount().sign() < 0
