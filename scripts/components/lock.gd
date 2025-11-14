@@ -296,6 +296,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 				elif glitchTexture: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,glitchTexture)
 				else: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,GLITCH_FILL[lockSizeType],false,Game.mainTone[lockGlitchColor])
 		elif lockBaseColor in [Game.COLOR.ICE, Game.COLOR.MUD, Game.COLOR.GRAFFITI]:
+			RenderingServer.canvas_item_set_material(lockDrawScaled,Game.NO_MATERIAL.get_rid())
 			RenderingServer.canvas_item_add_rect(lockDrawScaled,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Game.mainTone[lockBaseColor])
 			Door.drawAuras(lockDrawAuraBreaker,lockDrawAuraBreaker,lockDrawAuraBreaker,lockBaseColor==Game.COLOR.ICE,lockBaseColor==Game.COLOR.MUD,lockBaseColor==Game.COLOR.GRAFFITI,rect)
 		else:

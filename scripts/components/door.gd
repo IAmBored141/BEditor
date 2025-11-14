@@ -193,6 +193,7 @@ static func drawDoor(doorDrawScaled:RID,doorDrawAuraBreaker:RID,doorDrawGlitch:R
 						RenderingServer.canvas_item_add_nine_patch(doorDrawMain,rect,TEXTURE_RECT,GLITCH_MAIN,GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Game.mainTone[doorGlitchColor])
 						RenderingServer.canvas_item_add_nine_patch(doorDrawMain,rect,TEXTURE_RECT,GLITCH_DARK,GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Game.darkTone[doorGlitchColor])
 			elif doorBaseColor in [Game.COLOR.ICE, Game.COLOR.MUD, Game.COLOR.GRAFFITI]:
+				RenderingServer.canvas_item_set_material(doorDrawScaled,Game.NO_MATERIAL.get_rid())
 				RenderingServer.canvas_item_add_nine_patch(doorDrawScaled,rect,TEXTURE_RECT,SPEND_HIGH,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,Game.highTone[doorBaseColor])
 				RenderingServer.canvas_item_add_nine_patch(doorDrawScaled,rect,TEXTURE_RECT,SPEND_MAIN,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,Game.mainTone[doorBaseColor])
 				RenderingServer.canvas_item_add_nine_patch(doorDrawScaled,rect,TEXTURE_RECT,SPEND_DARK,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,Game.darkTone[doorBaseColor])
