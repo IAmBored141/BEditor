@@ -25,7 +25,7 @@
 [ext_resource type="Script" uid="uid://y6lb6luqyxy2" path="res://scripts/singletons/editor/quickSet.gd" id="14_sdh1e"]
 [ext_resource type="Texture2D" uid="uid://lbuoq1o35ds2" path="res://assets/ui/playControls/pause.png" id="15_fce0a"]
 [ext_resource type="Texture2D" uid="uid://dnjchcne7ikhq" path="res://assets/ui/playControls/stop.png" id="16_m12ww"]
-[ext_resource type="Script" uid="uid://lwocqakgt4qr" path="res://resources/controlExplanation.gd" id="17_bn54a"]
+[ext_resource type="Script" uid="uid://cgjhnhjwymb8g" path="res://scripts/resources/controlExplanation.gd" id="17_bn54a"]
 [ext_resource type="Material" uid="uid://bc5stfiew5ji4" path="res://resources/materials/outlineDrawMaterial.tres" id="22_jke8t"]
 [ext_resource type="Script" uid="uid://c7ptucaohcnil" path="res://scripts/singletons/editor/outline.gd" id="23_lo5f0"]
 [ext_resource type="PackedScene" uid="uid://uojm0pynavni" path="res://scenes/settingsMenu.tscn" id="25_6lm8n"]
