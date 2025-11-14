@@ -62,12 +62,12 @@ func lockCost(lock:GameComponent) -> String:
 			string += "["
 			var numerator:C = lock.count
 			if !lock.denominator.isComplex(): numerator = numerator.over(lock.denominator.axisOrOne())
-			if lock.count.isComplex() or numerator.neq(1): string += str(numerator)
+			if numerator.neq(1): string += str(numerator)
 			string += "All" if lock.type == Lock.TYPE.BLAST else "ALL"
 			if lock.type == Lock.TYPE.BLAST and !lock.denominator.isComplex(): string += (" -" if lock.denominator.sign()<0 else " +") + ("i" if lock.denominator.isNonzeroImag() else "")
 			if lock.isPartial:
-				if lock.denominator.isComplex() or lock.denominator.eq(0): string += " / " + str(lock.denominator)
-				else: string += "/" + str(lock.denominator.over(lock.denominator.axis()))
+				if lock.denominator.isComplex(): string += " / " + str(lock.denominator)
+				else: string += "/" + str(lock.denominator.over(lock.denominator.axisOrOne()))
 			string += "]"
 		Lock.TYPE.EXACT: string += "Exactly " + str(lock.count)
 	return string
