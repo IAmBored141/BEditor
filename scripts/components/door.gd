@@ -428,7 +428,7 @@ func start() -> void:
 	animPart = 0
 	propertyGameChangedDo(&"gateOpen")
 	complexCheck()
-	if type == TYPE.GATE: gateCheck(Game.player)
+	if type == TYPE.GATE: gateCheck(Game.player, true)
 	super()
 
 func stop() -> void:
@@ -614,7 +614,7 @@ func propertyGameChangedDo(property:StringName) -> void:
 		%collision.process_mode = PROCESS_MODE_DISABLED if gateOpen else PROCESS_MODE_INHERIT
 	if property == &"gameCopies": complexCheck()
 
-func gateCheck(player:Player) -> void:
+func gateCheck(player:Player, starting:bool=false) -> void:
 	var shouldOpen:bool = true
 	for lock in locks:
 		if !lock.canOpen(player): shouldOpen = false
@@ -624,7 +624,8 @@ func gateCheck(player:Player) -> void:
 		gateBufferCheck = player
 	elif !gateOpen and shouldOpen:
 		gateBufferCheck = null
-		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateOpen",true))
+		if starting: gateOpen = true; propertyGameChangedDo(&"gateOpen")
+		else: GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateOpen",true))
 
 func auraCheck(player:Player) -> void:
 	var deAuraed:bool = false

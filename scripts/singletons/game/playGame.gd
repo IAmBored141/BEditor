@@ -82,7 +82,7 @@ func _process(delta:float) -> void:
 	var mouseWorldPosition = %world.get_local_mouse_position()
 	for object in Game.objects.values():
 		if object.active and Rect2(object.position,object.size).has_point(mouseWorldPosition): objectHovered = object
-	%mouseover.describe(objectHovered, %gameViewportCont.get_local_mouse_position(),Vector2(800,608))
+	%mouseover.describe(objectHovered, %gameViewportCont.get_local_mouse_position()*Vector2(800,608)/%gameViewportCont.size,Vector2(800,608))
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawDescription)
