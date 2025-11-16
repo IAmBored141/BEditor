@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkrx61uwm1lil"
-path="res://.godot/imported/star.png-0cb515b596387c4178a6e04582d5229a.ctex"
+uid="uid://dsiofn07bv1om"
+path="res://.godot/imported/uncurse.png-559e7d473314879126310ee6458b76c8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/focusDialog/keyType/star.png"
-dest_files=["res://.godot/imported/star.png-0cb515b596387c4178a6e04582d5229a.ctex"]
+source_file="res://assets/ui/focusDialog/keySplitType/uncurse.png"
+dest_files=["res://.godot/imported/uncurse.png-559e7d473314879126310ee6458b76c8.ctex"]
 
 [params]
 

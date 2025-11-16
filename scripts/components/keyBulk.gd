@@ -2,8 +2,8 @@ extends GameObject
 class_name KeyBulk
 const SCENE:PackedScene = preload("res://scenes/objects/keyBulk.tscn")
 
-const TYPES:int = 7
-enum TYPE {NORMAL, EXACT, STAR, UNSTAR, ROTOR, CURSE, UNCURSE}
+const TYPES:int = 5
+enum TYPE {NORMAL, EXACT, STAR, ROTOR, CURSE}
 
 # colors that use textures
 const TEXTURE_COLORS:Array[Game.COLOR] = [Game.COLOR.MASTER, Game.COLOR.PURE, Game.COLOR.STONE, Game.COLOR.DYNAMITE, Game.COLOR.QUICKSILVER, Game.COLOR.ICE, Game.COLOR.MUD, Game.COLOR.GRAFFITI]
@@ -31,7 +31,7 @@ const CREATE_PARAMETERS:Array[StringName] = [
 ]
 const PROPERTIES:Array[StringName] = [
 	&"id", &"position", &"size",
-	&"color", &"type", &"count", &"infinite"
+	&"color", &"type", &"count", &"infinite", &"un"
 ]
 static var ARRAYS:Dictionary[StringName,GDScript] = {}
 
@@ -39,6 +39,7 @@ var color:Game.COLOR = Game.COLOR.WHITE
 var type:TYPE = TYPE.NORMAL
 var count:C = C.ONE
 var infinite:bool = false
+var un:bool = false # whether a star or curse key is an unstar or uncurse key
 
 var drawGlitch:RID
 var drawMain:RID
@@ -55,10 +56,10 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawSymbol,get_canvas_item())
 	Game.connect(&"goldIndexChanged",func():if color in Game.ANIMATED_COLORS: queue_redraw())
 
-func outlineTex() -> Texture2D: return getOutlineTexture(color, type)
+func outlineTex() -> Texture2D: return getOutlineTexture(color, type, un)
 
-static func getOutlineTexture(keyColor:Game.COLOR, keyType:TYPE=TYPE.NORMAL) -> Texture2D:
-	var textureType:KeyTextureLoader.TYPE = keyTextureType(keyType)
+static func getOutlineTexture(keyColor:Game.COLOR, keyType:TYPE=TYPE.NORMAL, keyUn:bool=false) -> Texture2D:
+	var textureType:KeyTextureLoader.TYPE = keyTextureType(keyType,keyUn)
 	match keyColor:
 		Game.COLOR.MASTER:
 			match textureType:
@@ -78,7 +79,7 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawSymbol)
 	if !active and Game.playState == Game.PLAY_STATE.PLAY: return
 	var rect:Rect2 = Rect2(Vector2.ZERO, size)
-	drawKey(drawGlitch,drawMain,Vector2.ZERO,color,type,glitchMimic)
+	drawKey(drawGlitch,drawMain,Vector2.ZERO,color,type,un,glitchMimic)
 	if animState == ANIM_STATE.FLASH: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,outlineTex(),false,Color(Color.WHITE,animAlpha))
 	match type:
 		KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT:
@@ -92,18 +93,16 @@ func _draw() -> void:
 func keycountColor() -> Color: return Color("#363029") if count.sign() < 0 else Color("#ebe3dd")
 func keycountOutlineColor() -> Color: return Color("#d6cfc9") if count.sign() < 0 else Color("#363029")
 
-static func keyTextureType(keyType:TYPE) -> KeyTextureLoader.TYPE:
+static func keyTextureType(keyType:TYPE, keyUn:bool) -> KeyTextureLoader.TYPE:
 	match keyType:
 		TYPE.EXACT: return KeyTextureLoader.TYPE.EXACT
-		TYPE.STAR: return KeyTextureLoader.TYPE.STAR
-		TYPE.UNSTAR: return KeyTextureLoader.TYPE.UNSTAR
-		TYPE.CURSE: return KeyTextureLoader.TYPE.CURSE
-		TYPE.UNCURSE: return KeyTextureLoader.TYPE.UNCURSE
+		TYPE.STAR: return KeyTextureLoader.TYPE.UNSTAR if keyUn else KeyTextureLoader.TYPE.STAR
+		TYPE.CURSE: return KeyTextureLoader.TYPE.UNCURSE if keyUn else KeyTextureLoader.TYPE.CURSE
 		_: return KeyTextureLoader.TYPE.NORMAL
 
-static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor:Game.COLOR,keyType:TYPE=TYPE.NORMAL,keyGlitchMimic:Game.COLOR=Game.COLOR.GLITCH) -> void:
+static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor:Game.COLOR,keyType:TYPE=TYPE.NORMAL,keyUn:bool=false,keyGlitchMimic:Game.COLOR=Game.COLOR.GLITCH) -> void:
 	var rect:Rect2 = Rect2(keyOffset, Vector2(32,32))
-	var textureType:KeyTextureLoader.TYPE = keyTextureType(keyType)
+	var textureType:KeyTextureLoader.TYPE = keyTextureType(keyType, keyUn)
 	if keyColor in TEXTURE_COLORS:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,TEXTURE.current([keyColor,textureType]))
 	elif keyColor == Game.COLOR.GLITCH:
@@ -116,12 +115,13 @@ static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor
 	else:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FRAME.current([textureType]))
 		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FILL.current([textureType]),false,Game.mainTone[keyColor])
-		if keyType == TYPE.CURSE: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,CURSE_FILL_DARK,false,Game.darkTone[keyColor])
+		if keyType == TYPE.CURSE and !keyUn: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,CURSE_FILL_DARK,false,Game.darkTone[keyColor])
 
 func propertyChangedInit(property:StringName) -> void:
 	if property == &"type":
 		if type not in [TYPE.NORMAL, TYPE.EXACT] and count.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.ONE))
 		if type == TYPE.ROTOR and (count.abs().neq(1) or count.eq(1)): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.nONE))
+		if type not in [TYPE.STAR, TYPE.CURSE] and un: Changes.addChange(Changes.PropertyChange.new(self,&"un",false))
 
 # ==== PLAY ==== #
 var glitchMimic:Game.COLOR = Game.COLOR.GLITCH
@@ -147,10 +147,8 @@ func collect(player:Player) -> void:
 		TYPE.NORMAL: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), player.key[effectiveColor()].plus(count)))
 		TYPE.EXACT: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), count))
 		TYPE.ROTOR: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), player.key[effectiveColor()].times(count)))
-		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(effectiveColor(), true))
-		TYPE.UNSTAR: GameChanges.addChange(GameChanges.StarChange.new(effectiveColor(), false))
-		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new(effectiveColor(), true))
-		TYPE.UNCURSE: GameChanges.addChange(GameChanges.CurseChange.new(effectiveColor(), false))
+		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(effectiveColor(), !un))
+		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new(effectiveColor(), !un))
 		
 	if infinite: flashAnimation()
 	else: GameChanges.addChange(GameChanges.PropertyChange.new(self, &"active", false))
@@ -161,8 +159,9 @@ func collect(player:Player) -> void:
 	else:
 		match type:
 			TYPE.ROTOR: AudioManager.play(preload("res://resources/sounds/key/signflip.wav"))
-			TYPE.STAR: AudioManager.play(preload("res://resources/sounds/key/star.wav"))
-			TYPE.UNSTAR: AudioManager.play(preload("res://resources/sounds/key/unstar.wav"))
+			TYPE.STAR:
+				if un: AudioManager.play(preload("res://resources/sounds/key/unstar.wav"))
+				else: AudioManager.play(preload("res://resources/sounds/key/star.wav"))
 			_:
 				if count.sign() < 0: AudioManager.play(preload("res://resources/sounds/key/negative.wav"))
 				else: AudioManager.play(preload("res://resources/sounds/key/normal.wav"))

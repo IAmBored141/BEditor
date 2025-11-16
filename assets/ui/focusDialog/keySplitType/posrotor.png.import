@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcpdvtsnt63k"
-path="res://.godot/imported/signflip.png-ad343d1622beac8b4c155484e940a87c.ctex"
+uid="uid://orse01jajp5v"
+path="res://.godot/imported/posrotor.png-77d8ad3277d3759e5d0282691efd2b57.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/focusDialog/keyRotor/signflip.png"
-dest_files=["res://.godot/imported/signflip.png-ad343d1622beac8b4c155484e940a87c.ctex"]
+source_file="res://assets/ui/focusDialog/keySplitType/posrotor.png"
+dest_files=["res://.godot/imported/posrotor.png-77d8ad3277d3759e5d0282691efd2b57.ctex"]
 
 [params]
 

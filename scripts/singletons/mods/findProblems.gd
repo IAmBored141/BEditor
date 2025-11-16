@@ -66,7 +66,7 @@ func findProblems(component:GameComponent) -> void:
 		KeyBulk:
 			findColorProblems(component, component.color)
 			if &"C5" in modsWindow.modsRemoved:
-				noteProblem(&"C5", &"CurseKeyType", component, component.type in [KeyBulk.TYPE.CURSE, KeyBulk.TYPE.UNCURSE])
+				noteProblem(&"C5", &"CurseKeyType", component, component.type == KeyBulk.TYPE.CURSE)
 		Lock, RemoteLock:
 			findColorProblems(component, component.color)
 			if component is Lock:

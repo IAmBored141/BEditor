@@ -5,10 +5,8 @@ const ICONS:Array[Texture2D] = [
 	preload("res://assets/ui/focusDialog/keyType/normal.png"),
 	preload("res://assets/ui/focusDialog/keyType/exact.png"),
 	preload("res://assets/ui/focusDialog/keyType/star.png"),
-	preload("res://assets/ui/focusDialog/keyType/unstar.png"),
 	preload("res://assets/ui/focusDialog/keyType/rotor.png"),
 	preload("res://assets/ui/focusDialog/keyType/curse.png"),
-	preload("res://assets/ui/focusDialog/keyType/uncurse.png"),
 ]
 
 func _ready() -> void:
@@ -22,9 +20,9 @@ func _ready() -> void:
 		match button.value:
 			KeyBulk.TYPE.NORMAL: explanation.hotkeys["N"] = "Set normal key type"
 			KeyBulk.TYPE.EXACT: explanation.hotkeys["E"] = "Set exact key type"
-			KeyBulk.TYPE.STAR, KeyBulk.TYPE.UNSTAR: explanation.hotkeys["S"] = "Toggle star key type"
+			KeyBulk.TYPE.STAR: explanation.hotkeys["S"] = "Toggle star key type"
 			KeyBulk.TYPE.ROTOR: explanation.hotkeys["R"] = "Rotate signflip/rotor key type"
-			KeyBulk.TYPE.CURSE, KeyBulk.TYPE.UNCURSE: explanation.hotkeys["U"] = "Toggle curse key type"
+			KeyBulk.TYPE.CURSE: explanation.hotkeys["U"] = "Toggle curse key type"
 		Explainer.addControl(button,explanation)
 
 func changedMods() -> void:
