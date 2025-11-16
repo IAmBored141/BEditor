@@ -62,16 +62,6 @@ class KeyCounterHandlerButton extends HandlerButton:
 		RenderingServer.canvas_item_clear(drawGlitch)
 		if deleted: return
 		var rect:Rect2 = Rect2(Vector2.ONE, size-Vector2(2,2))
-		var texture:Texture2D
-		match element.color:
-			Game.COLOR.MASTER: texture = Game.masterTex()
-			Game.COLOR.PURE: texture = Game.pureTex()
-			Game.COLOR.STONE: texture = Game.stoneTex()
-			Game.COLOR.DYNAMITE: texture = Game.dynamiteTex()
-			Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
-		if texture:
-			RenderingServer.canvas_item_add_texture_rect(drawMain,rect,texture)
-		elif element.color == Game.COLOR.GLITCH:
-			RenderingServer.canvas_item_add_rect(drawGlitch,rect,Game.mainTone[element.color])
-		else:
-			RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[element.color])
+		if element.color in Game.TEXTURED_COLORS: RenderingServer.canvas_item_add_texture_rect(drawMain,rect,Game.COLOR_TEXTURES.current([element.color]))
+		elif element.color == Game.COLOR.GLITCH: RenderingServer.canvas_item_add_rect(drawGlitch,rect,Game.mainTone[element.color])
+		else: RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[element.color])

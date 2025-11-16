@@ -53,8 +53,9 @@ render_target_update_mode = 4
 
 [node name="worldViewportCont" type="SubViewportContainer" parent="aspectRatioContainer/gameViewportCont/gameViewport"]
 unique_name_in_owner = true
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 1.0
+offset_right = 801.0
+offset_bottom = 608.0
 
 [node name="worldViewport" type="SubViewport" parent="aspectRatioContainer/gameViewportCont/gameViewport/worldViewportCont"]
 handle_input_locally = false

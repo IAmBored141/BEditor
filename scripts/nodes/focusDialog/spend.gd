@@ -17,19 +17,10 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawMain)
 	if door is not Door: return
 	var rect:Rect2 = Rect2(position+Vector2.ONE, size-Vector2(2,2))
-	var texture:Texture2D
 	if door.colorSpend == Game.COLOR.GLITCH: RenderingServer.canvas_item_set_material(drawMain, Game.UNSCALED_GLITCH_MATERIAL)
 	else: RenderingServer.canvas_item_set_material(drawMain, Game.NO_MATERIAL)
 	if door.type == Door.TYPE.GATE:
 		RenderingServer.canvas_item_add_texture_rect(drawMain,rect,GATE_FILL,true)
 	else:
-		match door.colorSpend:
-			Game.COLOR.MASTER: texture = Game.masterTex()
-			Game.COLOR.PURE: texture = Game.pureTex()
-			Game.COLOR.STONE: texture = Game.stoneTex()
-			Game.COLOR.DYNAMITE: texture = Game.dynamiteTex()
-			Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
-		if texture:
-			RenderingServer.canvas_item_add_texture_rect(drawMain,rect,texture)
-		else:
-			RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[door.colorSpend])
+		if door.colorSpend in Game.TEXTURED_COLORS: RenderingServer.canvas_item_add_texture_rect(drawMain,rect,Game.COLOR_TEXTURES.current([door.colorSpend]))
+		else: RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[door.colorSpend])

@@ -3,9 +3,13 @@ class_name Lock
 
 const TYPES:int = 5
 enum TYPE {NORMAL, BLANK, BLAST, ALL, EXACT}
+const SIZE_TYPES:int = 7
 enum SIZE_TYPE {AnyS, AnyH, AnyV, AnyM, AnyL, AnyXL, ANY}
 const SIZES:Array[Vector2] = [Vector2(18,18), Vector2(50,18), Vector2(18,50), Vector2(38,38), Vector2(50,50), Vector2(82,82)]
 enum CONFIGURATION {spr1A, spr2H, spr2V, spr3H, spr3V, spr4A, spr4B, spr5A, spr5B, spr6A, spr6B, spr8A, spr12A, spr24A, spr7A, spr9A, spr9B, spr10A, spr11A, spr13A, spr24B, NONE}
+const CONFIGURATION_NAMES:Array[String] = ["1A", "2H", "2V", "3H", "3V", "4A", "4B", "5A", "5B", "6A", "6B", "8A", "12A", "24A", "7A", "9A", "9B", "10A", "11A", "13A", "24B"]
+const PREDEFINED_REAL:Array[CONFIGURATION] = [CONFIGURATION.spr1A, CONFIGURATION.spr2H, CONFIGURATION.spr2V, CONFIGURATION.spr3H, CONFIGURATION.spr3V, CONFIGURATION.spr4A, CONFIGURATION.spr4B, CONFIGURATION.spr5A, CONFIGURATION.spr5B, CONFIGURATION.spr6A, CONFIGURATION.spr6B, CONFIGURATION.spr8A, CONFIGURATION.spr12A, CONFIGURATION.spr24A, CONFIGURATION.spr7A, CONFIGURATION.spr9A, CONFIGURATION.spr9B, CONFIGURATION.spr10A, CONFIGURATION.spr11A, CONFIGURATION.spr13A, CONFIGURATION.spr24B]
+const PREDEFINED_IMAGINARY:Array[CONFIGURATION] = [CONFIGURATION.spr1A, CONFIGURATION.spr2H, CONFIGURATION.spr2V, CONFIGURATION.spr3H, CONFIGURATION.spr3V]
 
 func getAvailableConfigurations() -> Array[Array]: return availableConfigurations(effectiveCount(), type)
 
@@ -45,40 +49,12 @@ const GLITCH_CORNER_SIZE:Vector2 = Vector2(9,9)
 const TILE:RenderingServer.NinePatchAxisMode = RenderingServer.NinePatchAxisMode.NINE_PATCH_TILE # just to save characters
 const STRETCH:RenderingServer.NinePatchAxisMode = RenderingServer.NinePatchAxisMode.NINE_PATCH_STRETCH # just to save characters
 
-const PREDEFINED_SPRITE_NORMAL:Array[Texture2D] = [
-	preload("res://assets/game/lock/predefined/1Anormal.png"), preload("res://assets/game/lock/predefined/1Aexact.png"),
-	preload("res://assets/game/lock/predefined/2Hnormal.png"), preload("res://assets/game/lock/predefined/2Hexact.png"),
-	preload("res://assets/game/lock/predefined/2Vnormal.png"), preload("res://assets/game/lock/predefined/2Vexact.png"),
-	preload("res://assets/game/lock/predefined/3Hnormal.png"), preload("res://assets/game/lock/predefined/3Hexact.png"),
-	preload("res://assets/game/lock/predefined/3Vnormal.png"), preload("res://assets/game/lock/predefined/3Vexact.png"),
-	preload("res://assets/game/lock/predefined/4Anormal.png"), preload("res://assets/game/lock/predefined/4Aexact.png"),
-	preload("res://assets/game/lock/predefined/4Bnormal.png"), preload("res://assets/game/lock/predefined/4Bexact.png"),
-	preload("res://assets/game/lock/predefined/5Anormal.png"), preload("res://assets/game/lock/predefined/5Aexact.png"),
-	preload("res://assets/game/lock/predefined/5Bnormal.png"), preload("res://assets/game/lock/predefined/5Bexact.png"),
-	preload("res://assets/game/lock/predefined/6Anormal.png"), preload("res://assets/game/lock/predefined/6Aexact.png"),
-	preload("res://assets/game/lock/predefined/6Bnormal.png"), preload("res://assets/game/lock/predefined/6Bexact.png"),
-	preload("res://assets/game/lock/predefined/8Anormal.png"), preload("res://assets/game/lock/predefined/8Aexact.png"),
-	preload("res://assets/game/lock/predefined/12Anormal.png"), preload("res://assets/game/lock/predefined/12Aexact.png"),
-	preload("res://assets/game/lock/predefined/24Anormal.png"), preload("res://assets/game/lock/predefined/24Aexact.png"),
-	# MoreLockConfigs
-	preload("res://assets/game/lock/predefined/7Anormal.png"), preload("res://assets/game/lock/predefined/7Aexact.png"),
-	preload("res://assets/game/lock/predefined/9Anormal.png"), preload("res://assets/game/lock/predefined/9Aexact.png"),
-	preload("res://assets/game/lock/predefined/9Bnormal.png"), preload("res://assets/game/lock/predefined/9Bexact.png"),
-	preload("res://assets/game/lock/predefined/10Anormal.png"), preload("res://assets/game/lock/predefined/10Aexact.png"),
-	preload("res://assets/game/lock/predefined/11Anormal.png"), preload("res://assets/game/lock/predefined/11Aexact.png"),
-	preload("res://assets/game/lock/predefined/13Anormal.png"), preload("res://assets/game/lock/predefined/13Aexact.png"),
-	preload("res://assets/game/lock/predefined/24Bnormal.png"), preload("res://assets/game/lock/predefined/24Bexact.png"),
-]
-const PREDEFINED_SPRITE_IMAGINARY:Array[Texture2D] = [
-	preload("res://assets/game/lock/predefined/1Aimaginary.png"), preload("res://assets/game/lock/predefined/1Aexacti.png"),
-	preload("res://assets/game/lock/predefined/2Himaginary.png"), preload("res://assets/game/lock/predefined/2Hexacti.png"),
-	preload("res://assets/game/lock/predefined/2Vimaginary.png"), preload("res://assets/game/lock/predefined/2Vexacti.png"),
-	preload("res://assets/game/lock/predefined/3Himaginary.png"), preload("res://assets/game/lock/predefined/3Hexacti.png"),
-	preload("res://assets/game/lock/predefined/3Vimaginary.png"), preload("res://assets/game/lock/predefined/3Vexacti.png"),
-]
+static var PREDEFINED_SPRITE_REAL:LockPredefinedTextureLoader = LockPredefinedTextureLoader.new("res://assets/game/lock/predefined/$p.png", PREDEFINED_REAL)
+static var PREDEFINED_SPRITE_IMAGINARY:LockPredefinedTextureLoader = LockPredefinedTextureLoader.new("res://assets/game/lock/predefined/$pi.png", PREDEFINED_IMAGINARY)
+
 static func getPredefinedLockSprite(lockCount:C, lockType:TYPE, lockConfiguration:CONFIGURATION) -> Texture2D:
-	if lockCount.isNonzeroImag(): return PREDEFINED_SPRITE_IMAGINARY[lockConfiguration*2+int(lockType==TYPE.EXACT)]
-	else: return PREDEFINED_SPRITE_NORMAL[lockConfiguration*2+int(lockType==TYPE.EXACT)]
+	if lockCount.isNonzeroImag(): return PREDEFINED_SPRITE_IMAGINARY.current([lockType==TYPE.EXACT,lockConfiguration])
+	else: return PREDEFINED_SPRITE_REAL.current([lockType==TYPE.EXACT,lockConfiguration])
 
 const FRAME_HIGH:Texture2D = preload("res://assets/game/lock/frame/high.png")
 const FRAME_MAIN:Texture2D = preload("res://assets/game/lock/frame/main.png")
@@ -104,61 +80,8 @@ const SYMBOL_EXACTI = preload("res://assets/game/lock/symbols/exacti.png")
 const SYMBOL_ALL = preload("res://assets/game/lock/symbols/all.png")
 const SYMBOL_SIZE:Vector2 = Vector2(32,32)
 
-const GLITCH_FILL:Array[Texture2D] = [
-	preload("res://assets/game/lock/fill/AnySglitch.png"),
-	preload("res://assets/game/lock/fill/AnyHglitch.png"),
-	preload("res://assets/game/lock/fill/AnyVglitch.png"),
-	preload("res://assets/game/lock/fill/AnyMglitch.png"),
-	preload("res://assets/game/lock/fill/AnyLglitch.png"),
-	preload("res://assets/game/lock/fill/AnyXLglitch.png"),
-	preload("res://assets/game/lock/fill/ANYglitch.png")
-]
-
-const GLITCH_FILL_MASTER:Array[Texture2D] = [
-	preload("res://assets/game/lock/fill/AnySglitchMaster.png"),
-	preload("res://assets/game/lock/fill/AnyHglitchMaster.png"),
-	preload("res://assets/game/lock/fill/AnyVglitchMaster.png"),
-	preload("res://assets/game/lock/fill/AnyMglitchMaster.png"),
-	preload("res://assets/game/lock/fill/AnyLglitchMaster.png"),
-	preload("res://assets/game/lock/fill/AnyXLglitchMaster.png"),
-	preload("res://assets/game/lock/fill/ANYglitchMaster.png")
-]
-const GLITCH_FILL_PURE:Array[Texture2D] = [
-	preload("res://assets/game/lock/fill/AnySglitchPure.png"),
-	preload("res://assets/game/lock/fill/AnyHglitchPure.png"),
-	preload("res://assets/game/lock/fill/AnyVglitchPure.png"),
-	preload("res://assets/game/lock/fill/AnyMglitchPure.png"),
-	preload("res://assets/game/lock/fill/AnyLglitchPure.png"),
-	preload("res://assets/game/lock/fill/AnyXLglitchPure.png"),
-	preload("res://assets/game/lock/fill/ANYglitchPure.png")
-]
-const GLITCH_FILL_STONE:Array[Texture2D] = [
-	preload("res://assets/game/lock/fill/AnySglitchStone.png"),
-	preload("res://assets/game/lock/fill/AnyHglitchStone.png"),
-	preload("res://assets/game/lock/fill/AnyVglitchStone.png"),
-	preload("res://assets/game/lock/fill/AnyMglitchStone.png"),
-	preload("res://assets/game/lock/fill/AnyLglitchStone.png"),
-	preload("res://assets/game/lock/fill/AnyXLglitchStone.png"),
-	preload("res://assets/game/lock/fill/ANYglitchStone.png")
-]
-const GLITCH_FILL_DYNAMITE:Array[Texture2D] = [
-	preload("res://assets/game/lock/fill/AnySglitchDynamite.png"),
-	preload("res://assets/game/lock/fill/AnyHglitchDynamite.png"),
-	preload("res://assets/game/lock/fill/AnyVglitchDynamite.png"),
-	preload("res://assets/game/lock/fill/AnyMglitchDynamite.png"),
-	preload("res://assets/game/lock/fill/AnyLglitchDynamite.png"),
-	preload("res://assets/game/lock/fill/AnyXLglitchDynamite.png"),
-	preload("res://assets/game/lock/fill/ANYglitchDynamite.png")
-]
-const GLITCH_FILL_QUICKSILVER:Array[Texture2D] = [
-	preload("res://assets/game/lock/fill/AnySglitchQuicksilver.png"),
-	preload("res://assets/game/lock/fill/AnyHglitchQuicksilver.png"),
-	preload("res://assets/game/lock/fill/AnyVglitchQuicksilver.png"),
-	preload("res://assets/game/lock/fill/AnyMglitchQuicksilver.png"),
-	preload("res://assets/game/lock/fill/AnyLglitchQuicksilver.png"),
-	preload("res://assets/game/lock/fill/AnyXLglitchQuicksilver.png"),
-	preload("res://assets/game/lock/fill/ANYglitchQuicksilver.png")
-]
+static var GLITCH_FILL:LockTextureLoader = LockTextureLoader.new("res://assets/game/lock/fill/$tglitch.png")
+static var GLITCH_FILL_TEXTURE:LockColorsTextureLoader = LockColorsTextureLoader.new("res://assets/game/lock/fill/$tglitch$c.png",Game.TEXTURED_COLORS,false,true)
 
 const ARMAMENT:Array[Texture2D] = [
 	preload("res://assets/game/lock/armament/0.png"),
@@ -265,36 +188,22 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 		RenderingServer.canvas_item_set_transform(lockDrawConfiguration,Transform2D.IDENTITY)
 	# fill
 	if drawFill:
-		var texture:Texture2D
-		var tileTexture:bool = false
-		match lockBaseColor:
-			Game.COLOR.MASTER: texture = Game.masterTex()
-			Game.COLOR.PURE: texture = Game.pureTex()
-			Game.COLOR.STONE: texture = Game.stoneTex()
-			Game.COLOR.DYNAMITE: texture = Game.dynamiteTex(); tileTexture = true
-			Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
-		if texture:
+		if lockBaseColor in Game.TEXTURED_COLORS:
+			var tileTexture:bool = lockBaseColor in Game.TILED_TEXTURED_COLORS
 			if !tileTexture:
 				RenderingServer.canvas_item_set_material(lockDrawScaled,Game.PIXELATED_MATERIAL.get_rid())
 				RenderingServer.canvas_item_set_instance_shader_parameter(lockDrawScaled, &"size", lockSize)
-			RenderingServer.canvas_item_add_texture_rect(lockDrawScaled,rect,texture,tileTexture)
+			RenderingServer.canvas_item_add_texture_rect(lockDrawScaled,rect,Game.COLOR_TEXTURES.current([lockBaseColor]),tileTexture)
 		elif lockBaseColor == Game.COLOR.GLITCH:
 			RenderingServer.canvas_item_set_material(lockDrawGlitch,Game.SCALED_GLITCH_MATERIAL.get_rid())
 			RenderingServer.canvas_item_set_instance_shader_parameter(lockDrawGlitch, &"size", lockSize-Vector2(2,2))
 			RenderingServer.canvas_item_add_rect(lockDrawGlitch,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Game.mainTone[lockBaseColor])
 			if lockGlitchColor != Game.COLOR.GLITCH:
-				var glitchTexture:Texture2D
-				match lockGlitchColor:
-					Game.COLOR.MASTER: glitchTexture = GLITCH_FILL_MASTER[lockSizeType]
-					Game.COLOR.PURE: glitchTexture = GLITCH_FILL_PURE[lockSizeType]
-					Game.COLOR.STONE: glitchTexture = GLITCH_FILL_STONE[lockSizeType]
-					Game.COLOR.DYNAMITE: glitchTexture = GLITCH_FILL_DYNAMITE[lockSizeType]
-					Game.COLOR.QUICKSILVER: glitchTexture = GLITCH_FILL_QUICKSILVER[lockSizeType]
 				if lockSizeType == SIZE_TYPE.ANY:
-					if glitchTexture: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,GLITCH_ANY_RECT,glitchTexture,GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE)
-					else: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,GLITCH_ANY_RECT,GLITCH_FILL[lockSizeType],GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Game.mainTone[lockGlitchColor])
-				elif glitchTexture: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,glitchTexture)
-				else: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,GLITCH_FILL[lockSizeType],false,Game.mainTone[lockGlitchColor])
+					if lockGlitchColor in Game.TEXTURED_COLORS: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,GLITCH_ANY_RECT,GLITCH_FILL_TEXTURE.current([lockGlitchColor,lockType]),GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE)
+					else: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,GLITCH_ANY_RECT,GLITCH_FILL.current([lockSizeType]),GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Game.mainTone[lockGlitchColor])
+				elif lockGlitchColor in Game.TEXTURED_COLORS: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,GLITCH_FILL_TEXTURE.current([lockGlitchColor,lockType]))
+				else: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,GLITCH_FILL.current([lockSizeType]),false,Game.mainTone[lockGlitchColor])
 		elif lockBaseColor in [Game.COLOR.ICE, Game.COLOR.MUD, Game.COLOR.GRAFFITI]:
 			RenderingServer.canvas_item_set_material(lockDrawScaled,Game.NO_MATERIAL.get_rid())
 			RenderingServer.canvas_item_add_rect(lockDrawScaled,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Game.mainTone[lockBaseColor])

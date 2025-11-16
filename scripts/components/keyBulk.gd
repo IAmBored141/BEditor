@@ -5,108 +5,14 @@ const SCENE:PackedScene = preload("res://scenes/objects/keyBulk.tscn")
 const TYPES:int = 9
 enum TYPE {NORMAL, EXACT, STAR, UNSTAR, SIGNFLIP, POSROTOR, NEGROTOR, CURSE, UNCURSE}
 
-const KEYTYPE_TEXTURE_OFFSETS:Array[int] = [0,1,2,3,0,0,0,4,5]
+# colors that use textures
+const TEXTURE_COLORS:Array[Game.COLOR] = [Game.COLOR.MASTER, Game.COLOR.PURE, Game.COLOR.STONE, Game.COLOR.DYNAMITE, Game.COLOR.QUICKSILVER, Game.COLOR.ICE, Game.COLOR.MUD, Game.COLOR.GRAFFITI]
 
-const FILL:Array[Texture2D] = [
-	preload("res://assets/game/key/normal/fill.png"),
-	preload("res://assets/game/key/exact/fill.png"),
-	preload("res://assets/game/key/star/fill.png"),
-	preload("res://assets/game/key/unstar/fill.png"),
-	preload("res://assets/game/key/curse/fill.png"),
-	preload("res://assets/game/key/uncurse/fill.png")
-]
-
-const FRAME:Array[Texture2D] = [
-	preload("res://assets/game/key/normal/frame.png"),
-	preload("res://assets/game/key/exact/frame.png"),
-	preload("res://assets/game/key/star/frame.png"),
-	preload("res://assets/game/key/unstar/frame.png"),
-	preload("res://assets/game/key/curse/frame.png"),
-	preload("res://assets/game/key/uncurse/frame.png")
-]
-
-const FILL_GLITCH:Array[Texture2D] = [
-	preload("res://assets/game/key/normal/fillGlitch.png"),
-	preload("res://assets/game/key/exact/fillGlitch.png"),
-	preload("res://assets/game/key/star/fillGlitch.png"),
-	preload("res://assets/game/key/unstar/fillGlitch.png"),
-	preload("res://assets/game/key/curse/fillGlitch.png"),
-	preload("res://assets/game/key/uncurse/fillGlitch.png")
-]
-
-const FILL_GLITCH_MASTER:Array[Texture2D] = [
-	preload("res://assets/game/key/master/glitchNormal.png"),
-	preload("res://assets/game/key/master/glitchExact.png"),
-	preload("res://assets/game/key/master/glitchStar.png"),
-	preload("res://assets/game/key/master/glitchUnstar.png"),
-	preload("res://assets/game/key/master/glitchCurse.png"),
-	preload("res://assets/game/key/master/glitchUncurse.png")
-]
-const FILL_GLITCH_PURE:Array[Texture2D] = [
-	preload("res://assets/game/key/pure/glitchNormal.png"),
-	preload("res://assets/game/key/pure/glitchExact.png"),
-	preload("res://assets/game/key/pure/glitchStar.png"),
-	preload("res://assets/game/key/pure/glitchUnstar.png"),
-	preload("res://assets/game/key/pure/glitchCurse.png"),
-	preload("res://assets/game/key/pure/glitchUncurse.png")
-]
-const FILL_GLITCH_STONE:Array[Texture2D] = [
-	preload("res://assets/game/key/stone/glitchNormal.png"),
-	preload("res://assets/game/key/stone/glitchExact.png"),
-	preload("res://assets/game/key/stone/glitchStar.png"),
-	preload("res://assets/game/key/stone/glitchUnstar.png"),
-	preload("res://assets/game/key/stone/glitchCurse.png"),
-	preload("res://assets/game/key/stone/glitchUncurse.png")
-]
-const FILL_GLITCH_DYNAMITE:Array[Texture2D] = [
-	preload("res://assets/game/key/dynamite/glitchNormal.png"),
-	preload("res://assets/game/key/dynamite/glitchExact.png"),
-	preload("res://assets/game/key/dynamite/glitchStar.png"),
-	preload("res://assets/game/key/dynamite/glitchUnstar.png"),
-	preload("res://assets/game/key/dynamite/glitchCurse.png"),
-	preload("res://assets/game/key/dynamite/glitchUncurse.png")
-]
-const FILL_GLITCH_QUICKSILVER:Array[Texture2D] = [
-	preload("res://assets/game/key/quicksilver/glitchNormal.png"),
-	preload("res://assets/game/key/quicksilver/glitchExact.png"),
-	preload("res://assets/game/key/quicksilver/glitchStar.png"),
-	preload("res://assets/game/key/quicksilver/glitchUnstar.png"),
-	preload("res://assets/game/key/quicksilver/glitchCurse.png"),
-	preload("res://assets/game/key/quicksilver/glitchUncurse.png")
-]
-const FILL_GLITCH_ICE:Array[Texture2D] = [
-	preload("res://assets/game/key/ice/glitchNormal.png"),
-	preload("res://assets/game/key/ice/glitchExact.png"),
-	preload("res://assets/game/key/ice/glitchStar.png"),
-	preload("res://assets/game/key/ice/glitchUnstar.png"),
-	preload("res://assets/game/key/ice/glitchCurse.png"),
-	preload("res://assets/game/key/ice/glitchUncurse.png")
-]
-const FILL_GLITCH_MUD:Array[Texture2D] = [
-	preload("res://assets/game/key/mud/glitchNormal.png"),
-	preload("res://assets/game/key/mud/glitchExact.png"),
-	preload("res://assets/game/key/mud/glitchStar.png"),
-	preload("res://assets/game/key/mud/glitchUnstar.png"),
-	preload("res://assets/game/key/mud/glitchCurse.png"),
-	preload("res://assets/game/key/mud/glitchUncurse.png")
-]
-const FILL_GLITCH_GRAFFITI:Array[Texture2D] = [
-	preload("res://assets/game/key/graffiti/glitchNormal.png"),
-	preload("res://assets/game/key/graffiti/glitchExact.png"),
-	preload("res://assets/game/key/graffiti/glitchStar.png"),
-	preload("res://assets/game/key/graffiti/glitchUnstar.png"),
-	preload("res://assets/game/key/graffiti/glitchCurse.png"),
-	preload("res://assets/game/key/graffiti/glitchUncurse.png")
-]
-
-const FRAME_GLITCH:Array[Texture2D] = [
-	preload("res://assets/game/key/normal/frameGlitch.png"),
-	preload("res://assets/game/key/exact/frameGlitch.png"),
-	preload("res://assets/game/key/star/frameGlitch.png"),
-	preload("res://assets/game/key/unstar/frameGlitch.png"),
-	preload("res://assets/game/key/curse/frameGlitch.png"),
-	preload("res://assets/game/key/uncurse/frameGlitch.png")
-]
+static var FILL:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/fill.png")
+static var FRAME:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/frame.png")
+static var FILL_GLITCH:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/fillGlitch.png")
+static var FRAME_GLITCH:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/frameGlitch.png")
+static var OUTLINE_MASK:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/outlineMask.png")
 
 const CURSE_FILL_DARK:Texture2D = preload("res://assets/game/key/curse/fillDark.png")
 
@@ -114,6 +20,9 @@ const SIGNFLIP_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/signfli
 const POSROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/posrotor.png")
 const NEGROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/negrotor.png")
 const INFINITE_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/infinite.png")
+
+static var TEXTURE:KeyColorsTextureLoader = KeyColorsTextureLoader.new("res://assets/game/key/$c/$t.png", TEXTURE_COLORS, true, false, {capitalised=false})
+static var GLITCH:KeyColorsTextureLoader = KeyColorsTextureLoader.new("res://assets/game/key/$c/glitch$t.png", TEXTURE_COLORS, false, false, {capitalised=true})
 
 const FKEYBULK:Font = preload("res://resources/fonts/fKeyBulk.fnt")
 
@@ -149,21 +58,19 @@ func _ready() -> void:
 func outlineTex() -> Texture2D: return getOutlineTexture(color, type)
 
 static func getOutlineTexture(keyColor:Game.COLOR, keyType:TYPE=TYPE.NORMAL) -> Texture2D:
-	match keyType:
-		KeyBulk.TYPE.EXACT:
-			if keyColor == Game.COLOR.MASTER: return preload("res://assets/game/key/master/outlineMaskExact.png")
-			else:  return preload("res://assets/game/key/exact/outlineMask.png")
-		KeyBulk.TYPE.STAR: return preload("res://assets/game/key/star/outlineMask.png")
-		KeyBulk.TYPE.UNSTAR: return preload("res://assets/game/key/unstar/outlineMask.png")
-		KeyBulk.TYPE.CURSE: return preload("res://assets/game/key/curse/outlineMask.png")
-		KeyBulk.TYPE.UNCURSE: return preload("res://assets/game/key/uncurse/outlineMask.png")
-		_:
-			match keyColor:
-				Game.COLOR.MASTER:
-					return preload("res://assets/game/key/master/outlineMask.png")
-				Game.COLOR.DYNAMITE: return preload("res://assets/game/key/dynamite/outlineMask.png")
-				Game.COLOR.QUICKSILVER: return preload("res://assets/game/key/quicksilver/outlineMask.png")
-				_: return preload("res://assets/game/key/normal/outlineMask.png")
+	var textureType:KeyTextureLoader.TYPE = keyTextureType(keyType)
+	match keyColor:
+		Game.COLOR.MASTER:
+			match textureType:
+				KeyTextureLoader.TYPE.NORMAL: return preload("res://assets/game/key/master/outlineMask.png")
+				KeyTextureLoader.TYPE.EXACT: return preload("res://assets/game/key/master/outlineMaskExact.png")
+		Game.COLOR.QUICKSILVER:
+			match textureType:
+				KeyTextureLoader.TYPE.NORMAL: return preload("res://assets/game/key/quicksilver/outlineMask.png")
+				KeyTextureLoader.TYPE.EXACT: return preload("res://assets/game/key/quicksilver/outlineMaskExact.png")
+		Game.COLOR.DYNAMITE:
+			if textureType == KeyTextureLoader.TYPE.NORMAL: return preload("res://assets/game/key/dynamite/outlineMask.png")
+	return OUTLINE_MASK.current([textureType])
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawGlitch)
@@ -184,40 +91,30 @@ func _draw() -> void:
 func keycountColor() -> Color: return Color("#363029") if count.sign() < 0 else Color("#ebe3dd")
 func keycountOutlineColor() -> Color: return Color("#d6cfc9") if count.sign() < 0 else Color("#363029")
 
+static func keyTextureType(keyType:TYPE) -> KeyTextureLoader.TYPE:
+	match keyType:
+		TYPE.EXACT: return KeyTextureLoader.TYPE.EXACT
+		TYPE.STAR: return KeyTextureLoader.TYPE.STAR
+		TYPE.UNSTAR: return KeyTextureLoader.TYPE.UNSTAR
+		TYPE.CURSE: return KeyTextureLoader.TYPE.CURSE
+		TYPE.UNCURSE: return KeyTextureLoader.TYPE.UNCURSE
+		_: return KeyTextureLoader.TYPE.NORMAL
+
 static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor:Game.COLOR,keyType:TYPE=TYPE.NORMAL,keyGlitchMimic:Game.COLOR=Game.COLOR.GLITCH) -> void:
-	var texture:Texture2D
 	var rect:Rect2 = Rect2(keyOffset, Vector2(32,32))
-	match keyColor:
-		Game.COLOR.MASTER: texture = Game.masterKeyTex(keyType)
-		Game.COLOR.PURE: texture = Game.pureKeyTex(keyType)
-		Game.COLOR.STONE: texture = Game.stoneKeyTex(keyType)
-		Game.COLOR.DYNAMITE: texture = Game.dynamiteKeyTex(keyType)
-		Game.COLOR.QUICKSILVER: texture = Game.quicksilverKeyTex(keyType)
-		Game.COLOR.ICE: texture = Game.iceKeyTex(keyType)
-		Game.COLOR.MUD: texture = Game.mudKeyTex(keyType)
-		Game.COLOR.GRAFFITI: texture = Game.graffitiKeyTex(keyType)
-	if texture:
-		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,texture)
+	var textureType:KeyTextureLoader.TYPE = keyTextureType(keyType)
+	if keyColor in TEXTURE_COLORS:
+		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,TEXTURE.current([keyColor,textureType]))
 	elif keyColor == Game.COLOR.GLITCH:
-		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,FRAME_GLITCH[KEYTYPE_TEXTURE_OFFSETS[keyType]])
-		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,FILL[KEYTYPE_TEXTURE_OFFSETS[keyType]],false,Game.mainTone[keyColor])
+		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,FRAME_GLITCH.current([textureType]))
+		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,FILL.current([textureType]),false,Game.mainTone[keyColor])
 		if keyType == TYPE.CURSE: RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,CURSE_FILL_DARK,false,Game.darkTone[keyColor])
 		if keyGlitchMimic != Game.COLOR.GLITCH:
-			var glitchTextureSet:Array[Texture2D]
-			match keyGlitchMimic:
-				Game.COLOR.MASTER: glitchTextureSet = FILL_GLITCH_MASTER
-				Game.COLOR.PURE: glitchTextureSet = FILL_GLITCH_PURE
-				Game.COLOR.STONE: glitchTextureSet = FILL_GLITCH_STONE
-				Game.COLOR.DYNAMITE: glitchTextureSet = FILL_GLITCH_DYNAMITE
-				Game.COLOR.QUICKSILVER: glitchTextureSet = FILL_GLITCH_QUICKSILVER
-				Game.COLOR.ICE: glitchTextureSet = FILL_GLITCH_ICE
-				Game.COLOR.MUD: glitchTextureSet = FILL_GLITCH_MUD
-				Game.COLOR.GRAFFITI: glitchTextureSet = FILL_GLITCH_GRAFFITI
-			if glitchTextureSet: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,glitchTextureSet[KEYTYPE_TEXTURE_OFFSETS[keyType]])
-			else: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FILL_GLITCH[KEYTYPE_TEXTURE_OFFSETS[keyType]],false,Game.mainTone[keyGlitchMimic])
+			if keyGlitchMimic in TEXTURE_COLORS: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,GLITCH.current([keyGlitchMimic,textureType]))
+			else: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FILL_GLITCH.current([textureType]),false,Game.mainTone[keyGlitchMimic])
 	else:
-		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FRAME[KEYTYPE_TEXTURE_OFFSETS[keyType]])
-		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FILL[KEYTYPE_TEXTURE_OFFSETS[keyType]],false,Game.mainTone[keyColor])
+		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FRAME.current([textureType]))
+		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FILL.current([textureType]),false,Game.mainTone[keyColor])
 		if keyType == TYPE.CURSE: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,CURSE_FILL_DARK,false,Game.darkTone[keyColor])
 
 func propertyChangedInit(property:StringName) -> void:

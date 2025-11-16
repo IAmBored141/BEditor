@@ -35,12 +35,8 @@ const FROZEN_MATERIAL:ShaderMaterial = preload("res://resources/materials/frozen
 const GLITCH_HIGH:Texture2D = preload("res://assets/game/door/glitch/high.png")
 const GLITCH_MAIN:Texture2D = preload("res://assets/game/door/glitch/main.png")
 const GLITCH_DARK:Texture2D = preload("res://assets/game/door/glitch/dark.png")
-const MASTER_GLITCH:Texture2D = preload("res://assets/game/door/glitch/master.png")
-const PURE_GLITCH:Texture2D = preload("res://assets/game/door/glitch/pure.png")
-const STONE_GLITCH:Texture2D = preload("res://assets/game/door/glitch/stone.png")
-const DYNAMITE_GLITCH:Texture2D = preload("res://assets/game/door/glitch/dynamite.png")
-const QUICKSILVER_GLITCH:Texture2D = preload("res://assets/game/door/glitch/quicksilver.png")
 
+static var GLITCH:ColorsTextureLoader = ColorsTextureLoader.new("res://assets/game/door/glitch/$c.png",Game.TEXTURED_COLORS, false, false, {capitalised=false})
 
 const TEXTURE_RECT:Rect2 = Rect2(Vector2.ZERO,Vector2(64,64)) # size of all the door textures
 const CORNER_SIZE:Vector2 = Vector2(9,9) # size of door ninepatch corners
@@ -157,37 +153,23 @@ static func drawDoor(doorDrawScaled:RID,doorDrawAuraBreaker:RID,doorDrawGlitch:R
 ) -> void:
 	var rect:Rect2 = Rect2(Vector2.ZERO, doorSize)
 	# fill
-	var texture:Texture2D
-	var tileTexture:bool = false
 	if doorType == TYPE.GATE:
 		RenderingServer.canvas_item_add_texture_rect(doorDrawMain,rect,GATE_FILL,true,Color(Color.WHITE,lerp(0.35,1.0,doorGateAlpha)))
 	else:
 		if drawFill:
-			match doorBaseColor:
-				Game.COLOR.MASTER: texture = Game.masterTex()
-				Game.COLOR.PURE: texture = Game.pureTex()
-				Game.COLOR.STONE: texture = Game.stoneTex()
-				Game.COLOR.DYNAMITE: texture = Game.dynamiteTex(); tileTexture = true
-				Game.COLOR.QUICKSILVER: texture = Game.quicksilverTex()
-			if texture:
+			if doorBaseColor in Game.TEXTURED_COLORS:
+				var tileTexture:bool = doorBaseColor in Game.TILED_TEXTURED_COLORS
 				if !tileTexture:
 					RenderingServer.canvas_item_set_material(doorDrawScaled,Game.PIXELATED_MATERIAL.get_rid())
 					RenderingServer.canvas_item_set_instance_shader_parameter(doorDrawScaled, &"size", doorSize)
-				RenderingServer.canvas_item_add_texture_rect(doorDrawScaled,rect,texture,tileTexture)
+				RenderingServer.canvas_item_add_texture_rect(doorDrawScaled,rect,Game.COLOR_TEXTURES.current([doorBaseColor]),tileTexture)
 			elif doorBaseColor == Game.COLOR.GLITCH:
 				RenderingServer.canvas_item_add_nine_patch(doorDrawGlitch,rect,TEXTURE_RECT,SPEND_HIGH,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,Game.highTone[Game.COLOR.GLITCH])
 				RenderingServer.canvas_item_add_nine_patch(doorDrawGlitch,rect,TEXTURE_RECT,SPEND_MAIN,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,Game.mainTone[Game.COLOR.GLITCH])
 				RenderingServer.canvas_item_add_nine_patch(doorDrawGlitch,rect,TEXTURE_RECT,SPEND_DARK,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,Game.darkTone[Game.COLOR.GLITCH])
 				if doorGlitchColor != Game.COLOR.GLITCH:
-					var glitchTexture:Texture2D
-					match doorGlitchColor:
-						Game.COLOR.MASTER: glitchTexture = MASTER_GLITCH
-						Game.COLOR.PURE: glitchTexture = PURE_GLITCH
-						Game.COLOR.STONE: glitchTexture = STONE_GLITCH
-						Game.COLOR.DYNAMITE: glitchTexture = DYNAMITE_GLITCH
-						Game.COLOR.QUICKSILVER: glitchTexture = QUICKSILVER_GLITCH
-					if glitchTexture:
-						RenderingServer.canvas_item_add_nine_patch(doorDrawMain,rect,TEXTURE_RECT,glitchTexture,GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE)
+					if doorGlitchColor in Game.TEXTURED_COLORS:
+						RenderingServer.canvas_item_add_nine_patch(doorDrawMain,rect,TEXTURE_RECT,GLITCH.current([doorGlitchColor]),GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE)
 					else:
 						RenderingServer.canvas_item_add_nine_patch(doorDrawMain,rect,TEXTURE_RECT,GLITCH_HIGH,GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Game.highTone[doorGlitchColor])
 						RenderingServer.canvas_item_add_nine_patch(doorDrawMain,rect,TEXTURE_RECT,GLITCH_MAIN,GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Game.mainTone[doorGlitchColor])
