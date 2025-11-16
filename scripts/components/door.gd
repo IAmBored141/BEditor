@@ -155,6 +155,11 @@ static func drawDoor(doorDrawScaled:RID,doorDrawAuraBreaker:RID,doorDrawGlitch:R
 	# fill
 	if doorType == TYPE.GATE:
 		RenderingServer.canvas_item_add_texture_rect(doorDrawMain,rect,GATE_FILL,true,Color(Color.WHITE,lerp(0.35,1.0,doorGateAlpha)))
+		#outline
+		RenderingServer.canvas_item_add_rect(doorDrawMain,Rect2(Vector2(0,-1),Vector2(doorSize.x,1)),Color.BLACK.blend(Color(Color.WHITE,doorGateAlpha)))
+		RenderingServer.canvas_item_add_rect(doorDrawMain,Rect2(Vector2(0,doorSize.y),Vector2(doorSize.x,1)),Color.BLACK.blend(Color(Color.WHITE,doorGateAlpha)))
+		RenderingServer.canvas_item_add_rect(doorDrawMain,Rect2(Vector2(-1,0),Vector2(1,doorSize.y)),Color.BLACK.blend(Color(Color.WHITE,doorGateAlpha)))
+		RenderingServer.canvas_item_add_rect(doorDrawMain,Rect2(Vector2(doorSize.x,0),Vector2(1,doorSize.y)),Color.BLACK.blend(Color(Color.WHITE,doorGateAlpha)))
 	else:
 		if drawFill:
 			if doorBaseColor in Game.TEXTURED_COLORS:
