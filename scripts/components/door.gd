@@ -360,6 +360,8 @@ var gateBufferCheck:Player = null
 var curseTimer:float = 0
 var drawComplex:bool = false
 
+var justOpened:bool = false # for player jumped off door check
+
 func _process(delta:float) -> void:
 	if cursed and active:
 		curseTimer += delta
@@ -430,6 +432,7 @@ func stop() -> void:
 	drawComplex = false
 	glitchMimic = Game.COLOR.GLITCH
 	curseGlitchMimic = Game.COLOR.GLITCH
+	justOpened = false
 	super()
 
 func tryOpen(player:Player) -> void:
@@ -573,6 +576,7 @@ func destroy() -> void:
 	var color:Game.COLOR = colorAfterCurse()
 	if type == TYPE.SIMPLE: color = locks[0].colorAfterCurse()
 	makeDebris(Debris, color)
+	justOpened = true
 
 func addCopyAnimation() -> void:
 	animState = ANIM_STATE.ADD_COPY

@@ -129,8 +129,18 @@ func _physics_process(_delta:float) -> void:
 	if is_on_floor(): canDoubleJump = true
 	if Input.is_action_just_pressed(&"jump"):
 		if is_on_floor():
+			var jumpedOffOpeningDoor:bool = false
+			var jumpedOffAnything:bool = Game.tiles in %floor.get_overlapping_bodies()
+			for area in %floor.get_overlapping_areas():
+				if area.get_parent() is Door:
+					jumpedOffAnything = true
+					if area.get_parent().justOpened: jumpedOffOpeningDoor = true
+			if !jumpedOffAnything: jumpedOffOpeningDoor = true
 			velocity.y = -JUMP_SPEED*FPS
 			AudioManager.play(preload("res://resources/sounds/player/jump.wav"))
+			if jumpedOffOpeningDoor:
+				velocity.y *= 0.45
+				canDoubleJump = false
 		elif canDoubleJump:
 			velocity.y = -DOUBLE_JUMP_SPEED*FPS
 			canDoubleJump = false
@@ -203,6 +213,7 @@ func _newlyUninteracted(area: Area2D):
 func interacted(area:Area2D) -> void:
 	var object:GameObject = area.get_parent()
 	if object is Door:
+		if object.justOpened: object.justOpened = false
 		object.tryOpen(self)
 	elif object is KeyBulk:
 		cantSave = true

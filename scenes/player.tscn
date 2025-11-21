@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://6yguarjtefnc"]
+[gd_scene load_steps=19 format=3 uid="uid://6yguarjtefnc"]
 
 [ext_resource type="Script" uid="uid://bdaplq37fmdoo" path="res://scripts/singletons/game/player.gd" id="1_jej6c"]
 [ext_resource type="Texture2D" uid="uid://bau8k25wjq37" path="res://assets/game/player/lily/fall0.png" id="2_f1ej7"]
@@ -82,6 +82,9 @@ size = Vector2(12, 21)
 [sub_resource type="CircleShape2D" id="CircleShape2D_f1ej7"]
 radius = 23.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f1ej7"]
+size = Vector2(12, 1)
+
 [node name="player" type="CharacterBody2D"]
 script = ExtResource("1_jej6c")
 
@@ -106,11 +109,18 @@ shape = SubResource("RectangleShape2D_jej6c")
 
 [node name="near" type="Area2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(1, 0)
 collision_layer = 0
 
 [node name="collision" type="CollisionShape2D" parent="near"]
 shape = SubResource("CircleShape2D_f1ej7")
+
+[node name="floor" type="Area2D" parent="."]
+unique_name_in_owner = true
+collision_layer = 0
+
+[node name="collision" type="CollisionShape2D" parent="floor"]
+position = Vector2(0, 9.5)
+shape = SubResource("RectangleShape2D_f1ej7")
 
 [connection signal="area_entered" from="interact" to="." method="_newlyInteracted"]
 [connection signal="area_exited" from="interact" to="." method="_newlyUninteracted"]
