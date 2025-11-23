@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_e7w15"]
 [ext_resource type="FontFile" uid="uid://c1cbi8by5johg" path="res://resources/fonts/fTalk.fnt" id="2_exci4"]
-[ext_resource type="Script" uid="uid://bc2wf2d4dku2r" path="res://scripts/singletons/mods/openWindow.gd" id="2_r7d2n"]
+[ext_resource type="Script" uid="uid://cmgvc7ym006jo" path="res://scripts/singletons/saving/openWindow.gd" id="2_r7d2n"]
 [ext_resource type="Texture2D" uid="uid://niktq60f6rr3" path="res://assets/filled.png" id="2_syp5u"]
 [ext_resource type="FontFile" uid="uid://bdml4ely61msn" path="res://resources/fonts/fTalkSmall.fnt" id="3_huca0"]
 [ext_resource type="Texture2D" uid="uid://d10g6pdt4sjs2" path="res://assets/ui/mods/iconSmall/Refactored.png" id="6_bnkpf"]
@@ -19,6 +19,7 @@ font_size = 10
 [node name="openWindow" type="Window"]
 oversampling_override = 1.0
 title = "Opening Level"
+position = Vector2i(0, 36)
 size = Vector2i(480, 200)
 transient = true
 exclusive = true
@@ -81,6 +82,7 @@ layout_mode = 2
 texture = ExtResource("2_syp5u")
 
 [node name="c2" type="HBoxContainer" parent="c/c"]
+custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 theme_override_constants/separation = 4
 

@@ -22,7 +22,7 @@ func _ready() -> void:
 	%image.texture = ImageTexture.create_from_image(screenshot)
 	if modpack: %modpack.texture = modpack.iconSmall
 	else: %modpack.visible = false
-	if mods: %mods.text = ", ".join(mods)
+	if mods: %mods.text = ", ".join(mods.map(func(mod): return Mods.mods[mod].name))
 	if levelStart == -1:
 		%play.disabled = true
 		%play.text = "Play (disabled; no level start)"
@@ -43,6 +43,7 @@ func resolve() -> void:
 	Saving.clear()
 	Saving.savePath = path
 	level.activate()
+	if Game.editor: Game.editor.screenshot = screenshot
 	for mod in mods: Mods.mods[mod].active = true
 	Mods.activeModpack = modpack
 	Mods.activeVersion = version
