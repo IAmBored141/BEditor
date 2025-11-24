@@ -345,7 +345,7 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 			# dragging up/left
 			toPosition += snappedTrunc(dragHandlePosition - dragPivotRect.position, Vector2(tileSize)) * Vector2.ZERO.max(sign(dragPivotRect.position - dragHandlePosition))
 			# dragging down/right (we add another tileSize because itd otherwise be at the top left corner)
-			toPosition += (dragPivotRect.size * abs(dragHandle) + snappedTrunc(dragHandlePosition - dragPivotRect.end, Vector2(tileSize)) + Vector2(tileSize)) * Vector2.ZERO.max(sign(dragHandlePosition - dragPivotRect.position))
+			toPosition += (dragPivotRect.size + snappedTrunc(dragHandlePosition - dragPivotRect.end, Vector2(tileSize)) + Vector2(tileSize)) * Vector2.ZERO.max(sign(dragHandlePosition - dragPivotRect.position))
 			
 			# keycounter has only a few possible widths
 			if componentDragged is KeyCounter:
@@ -359,11 +359,12 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 				toPosition += dragPivotRect.position
 
 			# keep in bounds
+			var clampedToPosition:Vector2 = toPosition
 			if !allowOutOfBounds:
-				toPosition += Vector2.ZERO.max(sign(dragHandle)) * snappedAway(Vector2.ZERO.max(innerBounds.position - toPosition), Vector2(tileSize))
-				toPosition -= Vector2.ZERO.max(-sign(dragHandle)) * snappedAway(Vector2.ZERO.max(toPosition - innerBounds.end), Vector2(tileSize))
+				clampedToPosition += Vector2.ZERO.max(sign(dragHandle)) * snappedAway(Vector2.ZERO.max(innerBounds.position - toPosition), Vector2(tileSize))
+				clampedToPosition -= Vector2.ZERO.max(-sign(dragHandle)) * snappedAway(Vector2.ZERO.max(toPosition - innerBounds.end), Vector2(tileSize))
 			
-			var toRect:Rect2 = dragPivotRect.expand(toPosition)
+			var toRect:Rect2 = dragPivotRect.expand(clampedToPosition).expand(toPosition)
 			if componentDragged is Door:
 				for lock in componentDragged.locks:
 					var doorInnerBounds:Rect2 = Rect2(lock.getOffset(), componentDragged.size).grow(-1)
