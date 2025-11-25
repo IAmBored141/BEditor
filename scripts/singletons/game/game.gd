@@ -310,6 +310,7 @@ func play() -> void:
 func playSaved(fromOpenWindow:OpenWindow=null) -> void:
 	editorWindowMode = get_window().mode
 	editorWindowSize = get_window().size
+	editor.remove_child(fromOpenWindow)
 	get_tree().change_scene_to_file("res://scenes/playGame.tscn")
 	get_window().mode = Window.MODE_WINDOWED
 	if !OS.has_feature("web"): get_window().size = Vector2(800,608)

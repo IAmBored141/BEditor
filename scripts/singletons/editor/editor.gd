@@ -364,7 +364,8 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 				clampedToPosition += Vector2.ZERO.max(sign(dragHandle)) * snappedAway(Vector2.ZERO.max(innerBounds.position - toPosition), Vector2(tileSize))
 				clampedToPosition -= Vector2.ZERO.max(-sign(dragHandle)) * snappedAway(Vector2.ZERO.max(toPosition - innerBounds.end), Vector2(tileSize))
 			
-			var toRect:Rect2 = dragPivotRect.expand(clampedToPosition).expand(toPosition)
+			var toRect:Rect2 = dragPivotRect.expand(clampedToPosition)
+			if componentDragged is not KeyCounter: toRect = toRect.expand(toPosition)
 			if componentDragged is Door:
 				for lock in componentDragged.locks:
 					var doorInnerBounds:Rect2 = Rect2(lock.getOffset(), componentDragged.size).grow(-1)
