@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://uojm0pynavni"]
+[gd_scene load_steps=14 format=3 uid="uid://uojm0pynavni"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_c8k7n"]
 [ext_resource type="Script" uid="uid://cp1r75v1n7qs1" path="res://scripts/singletons/editor/settingsMenu.gd" id="2_onm7i"]
@@ -30,6 +30,28 @@ thickness = 2
 [sub_resource type="LabelSettings" id="LabelSettings_tyaol"]
 font_size = 10
 font_color = Color(0.79482806, 0.794828, 0.794828, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dkncv"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.13319641, 0.13319641, 0.13319638, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0, 0.4, 1)
+corner_detail = 5
+
+[sub_resource type="Theme" id="Theme_dkncv"]
+ConflictedHotkeySettingButton/base_type = &"RadioButtonText"
+ConflictedHotkeySettingButton/styles/normal = SubResource("StyleBoxFlat_dkncv")
+MarginContainer/constants/margin_bottom = 0
+MarginContainer/constants/margin_left = 32
+MarginContainer/constants/margin_right = 0
+MarginContainer/constants/margin_top = 0
+VBoxContainer/constants/separation = 2
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_tyaol"]
 
@@ -179,19 +201,31 @@ texture = ExtResource("5_iswfj")
 
 [node name="hotkeys" type="VBoxContainer" parent="c/editorSettings/c"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme = SubResource("Theme_dkncv")
 
 [node name="editStartPlaytest" parent="c/editorSettings/c/hotkeys" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Start Playtest"
 action = &"editStartPlaytest"
 
-[node name="editPausePlaytest" parent="c/editorSettings/c/hotkeys" instance=ExtResource("6_dkncv")]
+[node name="l" type="Label" parent="c/editorSettings/c/hotkeys"]
+layout_mode = 2
+text = "Playtesting"
+label_settings = SubResource("LabelSettings_tyaol")
+vertical_alignment = 2
+
+[node name="c" type="MarginContainer" parent="c/editorSettings/c/hotkeys"]
+layout_mode = 2
+
+[node name="c" type="VBoxContainer" parent="c/editorSettings/c/hotkeys/c"]
+layout_mode = 2
+
+[node name="editPausePlaytest" parent="c/editorSettings/c/hotkeys/c/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Pause Playtest"
 action = &"editPausePlaytest"
 
-[node name="editStopPlaytest" parent="c/editorSettings/c/hotkeys" instance=ExtResource("6_dkncv")]
+[node name="editStopPlaytest" parent="c/editorSettings/c/hotkeys/c/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Stop Playtest"
 action = &"editStopPlaytest"

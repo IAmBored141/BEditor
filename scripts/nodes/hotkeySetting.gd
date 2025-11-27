@@ -6,6 +6,7 @@ class_name HotkeySetting
 var input:InputEvent
 
 var default:Array[InputEvent]
+var buttons:Array[HotkeySettingButton]
 
 func _ready() -> void:
 	%label.text = label
@@ -14,12 +15,14 @@ func _ready() -> void:
 		var button:HotkeySettingButton = HotkeySettingButton.new(self)
 		button.event = event
 		%buttons.add_child(button)
+		buttons.append(button)
 
 func _add():
 	var button:HotkeySettingButton = HotkeySettingButton.new(self)
 	button._startSet()
 	%buttons.add_child(button)
 	%buttons.move_child(button, 1)
+	buttons.append(button)
 
 func updateReset() -> void:
 	%reset.disabled = equalToDefault()
@@ -28,25 +31,28 @@ func equalToDefault() -> bool:
 	var events:Array[InputEvent] = InputMap.action_get_events(action)
 	if len(default) != len(events): return false
 	for i in len(default):
-		if default[i].as_text_physical_keycode() != events[i].as_text_physical_keycode(): return false
+		if !default[i].is_match(events[i]): return false
 	return true
 
 func _reset():
-	for button in %buttons.get_children():
-		if button is HotkeySettingButton: button.queue_free()
+	for button in buttons.duplicate(): button.remove()
+	buttons.clear()
 	InputMap.action_erase_events(action)
 	for event in default:
 		InputMap.action_add_event(action, event)
 		var button:HotkeySettingButton = HotkeySettingButton.new(self)
 		button.event = event
 		%buttons.add_child(button)
+		buttons.append(button)
 	%reset.disabled = true
 
 class HotkeySettingButton extends Button:
 	var hotkey:HotkeySetting
 	var event:InputEvent
 
-	var setting:bool = false
+	var changed:bool = false
+	var setting:bool = false # current changing this one
+	var conflictingButtons:Array[HotkeySettingButton] = []
 
 	func _init(_hotkey:HotkeySetting) -> void:
 		hotkey = _hotkey
@@ -74,11 +80,13 @@ class HotkeySettingButton extends Button:
 	func _cancelSet() -> void:
 		button_pressed = false
 		setting = false
-		if !event: queue_free()
+		if !event: remove()
 		else:
 			InputMap.action_add_event(hotkey.action, event)
 			setText()
-		hotkey.updateReset()
+		if changed:
+			changed = false
+			check()
 
 	func _gui_input(_event:InputEvent) -> void:
 		if _event is InputEventMouseButton and _event.pressed:
@@ -89,9 +97,8 @@ class HotkeySettingButton extends Button:
 					MOUSE_BUTTON_RIGHT:
 						if event:
 							InputMap.action_erase_event(hotkey.action, event)
-							hotkey.updateReset()
-						mouse_exited.disconnect(_cancelSet) # sneaky
-						queue_free()
+							check()
+						remove()
 			else:
 				_cancelSet()
  
@@ -102,7 +109,34 @@ class HotkeySettingButton extends Button:
 		_event.unicode = 0
 		_event.pressed = false
 		for checkEvent in InputMap.action_get_events(hotkey.action):
-			if checkEvent.as_text_physical_keycode() == _event.as_text_physical_keycode(): return
+			if checkEvent.is_match(_event): return
 		event = _event
+		changed = true
 		get_viewport().set_input_as_handled()
 		_cancelSet()
+
+	func remove() -> void:
+		mouse_exited.disconnect(_cancelSet) # sneaky
+		clearConflicts()
+		hotkey.buttons.erase(self)
+		queue_free()
+
+	func check() -> void:
+		hotkey.updateReset()
+		clearConflicts()
+		for checkHotkey in hotkey.get_parent().get_children():
+			if checkHotkey is not HotkeySetting: continue
+			for button in checkHotkey.buttons:
+				if button == self: continue
+				if button.event.is_match(event):
+					conflictingButtons.append(button)
+					button.conflictingButtons.append(self)
+					theme_type_variation = &"ConflictedHotkeySettingButton"
+					button.theme_type_variation = &"ConflictedHotkeySettingButton"
+
+	func clearConflicts() -> void:
+		for button in conflictingButtons:
+			button.conflictingButtons.erase(self)
+			if len(button.conflictingButtons) == 0: button.theme_type_variation = &"RadioButtonText"
+		theme_type_variation = &"RadioButtonText"
+		conflictingButtons.clear()
