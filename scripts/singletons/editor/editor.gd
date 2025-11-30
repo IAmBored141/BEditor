@@ -373,7 +373,7 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 			var toRect:Rect2 = effectiveDragPivotRect.expand(toPosition)
 			if componentDragged is Door:
 				for lock in componentDragged.locks:
-					var doorInnerBounds:Rect2 = Rect2(lock.getOffset(), componentDragged.size).grow(-1)
+					var doorInnerBounds:Rect2 = Rect2(lock.getOffset(), toRect.size).grow(-1)
 					var lockGoingTo:Rect2 = Rect2(lock.position-toRect.position+componentDragged.position, lock.size) # keep relative position even if the door moves
 					lockGoingTo.position += snappedAway(Vector2.ZERO.max(doorInnerBounds.position - lockGoingTo.end) - Vector2.ZERO.max(lockGoingTo.position - doorInnerBounds.end), Vector2(tileSize)) # keep in bounds
 					Changes.addChange(Changes.PropertyChange.new(lock,&"position",lockGoingTo.position))
@@ -403,7 +403,7 @@ func _input(event:InputEvent) -> void:
 			if focusDialog.focused and focusDialog.receiveKey(event): return
 			if eventIs(event, &"editStartPlaytest") and !topBar.play.disabled: await get_tree().process_frame; Game.playTest(Game.levelStart)
 			elif eventIs(event, &"editStartPlaytestFromState") and !topBar.play.disabled: await get_tree().process_frame; Game.playTest(Game.latestSpawn)
-			elif eventIs(event, &"editStopPlaytest") and Game.playstate == Game.PLAY_STATE.PAUSED: Game.stopTest()
+			elif eventIs(event, &"editStopPlaytest") and Game.playState == Game.PLAY_STATE.PAUSED: Game.stopTest()
 			elif eventIs(event, &"editModeSelect"): modes.setMode(MODE.SELECT); focusDialog.defocus(); componentDragged = null; multiselect.deselect()
 			elif eventIs(event, &"editModeTile"): modes.setMode(MODE.TILE)
 			elif eventIs(event, &"editModeKey"): modes.setMode(MODE.KEY)

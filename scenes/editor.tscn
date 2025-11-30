@@ -68,23 +68,20 @@ resource_name = "modes"
 
 [sub_resource type="Resource" id="Resource_1abrv"]
 script = ExtResource("17_bn54a")
-hotkeys = Dictionary[String, String]({
-"Space": "Playtest level"
-})
+explanation = "[%s]Start Playtest"
+hotkeys = Array[StringName]([&"editStartPlaytest"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="Resource" id="Resource_bn54a"]
 script = ExtResource("17_bn54a")
-hotkeys = Dictionary[String, String]({
-"P": "Pause playtest"
-})
+explanation = "[%s]Pause Playtest"
+hotkeys = Array[StringName]([&"editPausePlaytest"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="Resource" id="Resource_6lm8n"]
 script = ExtResource("17_bn54a")
-hotkeys = Dictionary[String, String]({
-"O": "Stop playtest"
-})
+explanation = "[%s]Stop Playtest"
+hotkeys = Array[StringName]([&"editStopPlaytest"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3vi5u"]
@@ -103,9 +100,6 @@ shader_parameter/tileSize = Vector2(32, 32)
 
 [sub_resource type="Resource" id="Resource_jke8t"]
 script = ExtResource("17_bn54a")
-hotkeys = Dictionary[String, String]({
-"Shift+Esc": "Open Settings"
-})
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [node name="editor" type="Control"]
@@ -392,6 +386,7 @@ layout_mode = 1
 [node name="description" type="MarginContainer" parent="c/gameCont"]
 unique_name_in_owner = true
 visible = false
+z_index = 2
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
@@ -520,6 +515,7 @@ icon = ExtResource("27_1abrv")
 metadata/explanation = SubResource("Resource_jke8t")
 
 [node name="screenshotViewportCont" type="SubViewportContainer" parent="."]
+visible = false
 layout_mode = 0
 offset_top = -608.0
 offset_right = 800.0
@@ -528,7 +524,7 @@ offset_right = 800.0
 unique_name_in_owner = true
 handle_input_locally = false
 size = Vector2i(800, 608)
-render_target_update_mode = 4
+render_target_update_mode = 0
 
 [node name="screenshotCamera" type="Camera2D" parent="screenshotViewportCont/screenshotViewport"]
 unique_name_in_owner = true

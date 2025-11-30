@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3 uid="uid://8bth374yqwpe"]
+[gd_scene load_steps=52 format=3 uid="uid://8bth374yqwpe"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_eqegh"]
 [ext_resource type="Script" uid="uid://dm8t82nhqkdlc" path="res://scripts/singletons/focusDialog/focusDialog.gd" id="2_k8bto"]
@@ -40,29 +40,30 @@
 [ext_resource type="Script" uid="uid://2iqmgcrc5wpq" path="res://scripts/nodes/focusDialog/doorsHandler.gd" id="31_xwnfa"]
 [ext_resource type="Script" uid="uid://b0shfyjnfk7ih" path="res://scripts/singletons/focusDialog/goalDialog.gd" id="33_di8ev"]
 
+[sub_resource type="Resource" id="Resource_hdjws"]
+script = ExtResource("22_s5h3h")
+explanation = "[%s]Toggle infinite"
+hotkeys = Array[StringName]([&"focusKeyInfinite"])
+metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
+
 [sub_resource type="ButtonGroup" id="ButtonGroup_oii3e"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_e2stj"]
 
 [sub_resource type="Resource" id="Resource_jx0iq"]
 script = ExtResource("22_s5h3h")
-hotkeys = Dictionary[String, String]({
-"L": "Toggle colorlink"
-})
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="Resource" id="Resource_q8u4b"]
 script = ExtResource("22_s5h3h")
-hotkeys = Dictionary[String, String]({
-"Shift+N": "Toggle negated"
-})
+explanation = "[%s]Toggle negated"
+hotkeys = Array[StringName]([&"focusLockNegated"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="Resource" id="Resource_mscoq"]
 script = ExtResource("22_s5h3h")
-hotkeys = Dictionary[String, String]({
-"Shift+A": "Toggle armament"
-})
+explanation = "[%s]Toggle armament"
+hotkeys = Array[StringName]([&"focusLockArmament"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_di8ev"]
@@ -75,16 +76,14 @@ thickness = 2
 
 [sub_resource type="Resource" id="Resource_s5h3h"]
 script = ExtResource("22_s5h3h")
-hotkeys = Dictionary[String, String]({
-"-": "Toggle sign"
-})
+explanation = "[%s]×-1"
+hotkeys = Array[StringName]([&"numberNegate"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="Resource" id="Resource_rmnx8"]
 script = ExtResource("22_s5h3h")
-hotkeys = Dictionary[String, String]({
-"I": "Toggle axis"
-})
+explanation = "[%s]×i"
+hotkeys = Array[StringName]([&"numberTimesI"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_xwnfa"]
@@ -150,12 +149,13 @@ metadata/_custom_type_script = "uid://dgllodap6540"
 layout_mode = 2
 theme_type_variation = &"VSeperatorHigh"
 
-[node name="keyInfiniteToggle" type="Button" parent="keyDialog/c/c/c/c"]
+[node name="keyInfiniteToggle" type="Button" parent="keyDialog/c/c/c/c" groups=["explained"]]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 toggle_mode = true
 icon = ExtResource("6_4u2vc")
+metadata/explanation = SubResource("Resource_hdjws")
 
 [node name="keyCountEdit" parent="keyDialog/c/c/c" instance=ExtResource("5_qjvko")]
 unique_name_in_owner = true

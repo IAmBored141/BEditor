@@ -1,15 +1,12 @@
 extends Resource
 class_name ControlExplanation
 
-@export var name:String
-@export var hotkeys:Dictionary[String,String]
+@export var explanation:String
+@export var hotkeys:Array[StringName]
 
-func _init(_name:String="", _hotkeys:Dictionary[String,String]={}) -> void:
-	name = _name
+func _init(_explanation:String="", _hotkeys:Array[StringName]=[]) -> void:
+	explanation = _explanation
 	hotkeys = _hotkeys
 
 func _to_string() -> String:
-	return name + ("(" if name else "") + " ".join(hotkeys.keys().map(func(hotkey):
-		if "[img]" in hotkey: return hotkey + hotkeys[hotkey]
-		else: return "[" + hotkey + "]" + hotkeys[hotkey]
-	))+ (")" if name else "")
+	return explanation % hotkeys.map(Explainer.hotkeyMap)

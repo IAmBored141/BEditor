@@ -23,6 +23,7 @@ const ICONS:Array[Texture2D] = [
 
 const OPTIONS:int = 9
 enum OPTION {SpecificA, SpecificB, AnyS, AnyH, AnyV, AnyM, AnyL, AnyXL, ANY }
+const OPTION_NAMES:Array[String] = ["α/h configuration", "β/v configuration", "small sizing", "horizontal sizing", "vertical sizing", "medium sizing", "large sizing", "extra-large sizing"]
 
 var manuallySetting:bool = false # dont send signal (hacky)
 var buttonGroup:ButtonGroup = ButtonGroup.new()
@@ -42,6 +43,9 @@ func _ready() -> void:
 		if option == OPTION.SpecificB:
 			add_child(separator)
 	buttonGroup.connect("pressed", _select)
+	for button in buttons:
+		if button.option == OPTION.ANY: continue
+		Explainer.addControl(button,QuicksetExplanation.new("[%s+$q]Set "+OPTION_NAMES[button.option], [&"quicksetLockSize"], LockSizeQuicksetSetting.matches, button.option))
 
 func setSelect(option:OPTION) -> void:
 	manuallySetting = true

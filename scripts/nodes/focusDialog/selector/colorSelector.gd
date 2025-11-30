@@ -11,6 +11,8 @@ func _ready() -> void:
 	defaultValue = Game.COLOR.WHITE
 	buttonType = ColorSelectorButton
 	super()
+	for button in buttons:
+		Explainer.addControl(button,QuicksetExplanation.new("[%s+$q]Set "+Game.COLOR_NAMES[button.value].to_lower()+" color", [&"quicksetColor"], ColorQuicksetSetting.matches, button.value))
 
 func onlyFlatColors() -> void:
 	for color in Game.NONFLAT_COLORS: buttons[color].visible = false

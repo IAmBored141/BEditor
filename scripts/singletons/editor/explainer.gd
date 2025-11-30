@@ -41,12 +41,12 @@ func updateText() -> void:
 	if editor.focusDialog.focused:
 		if editor.focusDialog.componentFocused:
 				match editor.focusDialog.componentFocused.get_script():
-					Lock: string += "Lock / "+control+"[C]Set color "
-					KeyCounterElement: string += "Key Counter Element / "+control+"[C]Set color "
+					Lock: string += "Lock / " + control
+					KeyCounterElement: string += "Key Counter Element / " + control
 		else:
 			match editor.focusDialog.focused.get_script():
-				KeyBulk: string += "Key / "+control+"[C]Set color "
-				Door: string += "Door / "+control+"[C]Set spend color "
+				KeyBulk: string += "Key / " + control
+				Door: string += "Door / " + control
 				PlayerSpawn: string += "Player Spawn / "+control
 				Goal: string += "Goal / "+control
 				KeyCounter: string += "Key Counter / "+control
@@ -69,5 +69,9 @@ func updateText() -> void:
 			Editor.MODE.DOOR: string += LMB+"Place door"
 			Editor.MODE.OTHER: string += LMB+"Place object"
 			Editor.MODE.PASTE: string += LMB+"Paste"
-		string += " "+MMB+ARROWS+"Move/zoom camera [H]Home camera"
+		string += " "+MMB+ARROWS+"Move/zoom camera [%s]Home camera" % hotkeyMap(&"editHome")
 	editor.explainText.text = string
+
+static func hotkeyMap(hotkey:StringName) -> String:
+	var events:Array[InputEvent] = InputMap.action_get_events(hotkey)
+	return " or ".join(events.map(func(event): return event.as_text_physical_keycode()))

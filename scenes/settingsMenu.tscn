@@ -396,6 +396,28 @@ metadata/_custom_type_script = "uid://b43xpe67iop1m"
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="l4" type="Label" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c"]
+layout_mode = 2
+text = "Number Input Selected"
+label_settings = SubResource("LabelSettings_tyaol")
+vertical_alignment = 2
+
+[node name="numberInputSelected" type="MarginContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c"]
+layout_mode = 2
+
+[node name="c" type="VBoxContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/numberInputSelected"]
+layout_mode = 2
+
+[node name="numberNegate" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/numberInputSelected/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Multiply By -1"
+action = &"numberNegate"
+
+[node name="numberTimesI" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/numberInputSelected/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Multiply By i"
+action = &"numberTimesI"
+
 [node name="l" type="Label" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c"]
 layout_mode = 2
 text = "Key Focused"
@@ -500,30 +522,30 @@ layout_mode = 2
 [node name="c" type="VBoxContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties"]
 layout_mode = 2
 
-[node name="focusLockNormalType" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
+[node name="focusLockNormal" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Set Normal Type"
-action = &"focusLockNormalType"
+action = &"focusLockNormal"
 
-[node name="focusLockBlankType" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
+[node name="focusLockBlank" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Set Blank Type"
-action = &"focusLockBlankType"
+action = &"focusLockBlank"
 
-[node name="focusLockBlastType" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
+[node name="focusLockBlast" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Set Blast Type"
-action = &"focusLockBlastType"
+action = &"focusLockBlast"
 
-[node name="focusLockAllType" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
+[node name="focusLockAll" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Set All Type"
-action = &"focusLockAllType"
+action = &"focusLockAll"
 
-[node name="focusLockExactType" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
+[node name="focusLockExact" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Set Exact Type"
-action = &"focusLockExactType"
+action = &"focusLockExact"
 prerequisite = &"C3"
 
 [node name="focusLockNegated" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]

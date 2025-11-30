@@ -41,7 +41,7 @@ func setSelect(index:int) -> void:
 	manuallySetting = false
 	selected = index
 
-func _select(button:Button) -> void: # not necessarily HandlerButton since lockhandler's buttongroup is shared with %spend
+func _select(button:Button) -> void: # not necessarily HandlerButton since lockhandler's buttongroup is shared with [%s]pend
 	selected = button.index
 
 static func buttonType() -> GDScript: return HandlerButton

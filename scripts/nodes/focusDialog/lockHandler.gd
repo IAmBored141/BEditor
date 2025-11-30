@@ -7,7 +7,7 @@ var door:Door
 
 func _ready() -> void:
 	super()
-	Explainer.addControl(add,ControlExplanation.new("",{"Ctrl+L":"Add lock"}))
+	Explainer.addControl(add,ControlExplanation.new("[%s]Add lock",[&"focusDoorAddLock"]))
 
 func setup(_door:Door) -> void:
 	door = _door

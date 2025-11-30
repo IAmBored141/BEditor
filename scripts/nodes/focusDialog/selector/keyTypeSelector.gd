@@ -16,13 +16,13 @@ func _ready() -> void:
 	buttonType = KeyTypeSelectorButton
 	super()
 	for button in buttons:
-		var explanation:ControlExplanation = ControlExplanation.new()
+		var explanation:ControlExplanation
 		match button.value:
-			KeyBulk.TYPE.NORMAL: explanation.hotkeys["N"] = "Set normal key type"
-			KeyBulk.TYPE.EXACT: explanation.hotkeys["E"] = "Set exact key type"
-			KeyBulk.TYPE.STAR: explanation.hotkeys["S"] = "Toggle star key type"
-			KeyBulk.TYPE.ROTOR: explanation.hotkeys["R"] = "Rotate signflip/rotor key type"
-			KeyBulk.TYPE.CURSE: explanation.hotkeys["U"] = "Toggle curse key type"
+			KeyBulk.TYPE.NORMAL: explanation = ControlExplanation.new("[%s]Set normal key type", [&"focusKeyNormal"])
+			KeyBulk.TYPE.EXACT: explanation = ControlExplanation.new("[%s]Set exact key type", [&"focusKeyExact"])
+			KeyBulk.TYPE.STAR: explanation = ControlExplanation.new("[%s]Toggle star key type", [&"focusKeyStar"])
+			KeyBulk.TYPE.ROTOR: explanation = ControlExplanation.new("[%s]Advance rotor key type", [&"focusKeyRotor"])
+			KeyBulk.TYPE.CURSE: explanation = ControlExplanation.new("[%s]Toggle curse key type", [&"focusKeyCurse"])
 		Explainer.addControl(button,explanation)
 
 func changedMods() -> void:
