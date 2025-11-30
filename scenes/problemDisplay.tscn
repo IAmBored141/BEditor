@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_pmnjt"]
 [ext_resource type="Texture2D" uid="uid://uinajrcprpk6" path="res://assets/ui/mods/show.png" id="2_7gd02"]
-[ext_resource type="Script" uid="uid://cjy5irir8dcvb" path="res://scripts/nodes/problemDisplay.gd" id="2_n6fsw"]
+[ext_resource type="Script" uid="uid://cjy5irir8dcvb" path="res://scripts/nodes/mods/problemDisplay.gd" id="2_n6fsw"]
 
 [node name="problemDisplay" type="VBoxContainer"]
 offset_right = 40.0

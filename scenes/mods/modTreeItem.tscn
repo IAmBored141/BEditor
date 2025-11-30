@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://rndsu7u1c37m"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_qs7eh"]
-[ext_resource type="Script" uid="uid://dxdpu2eoknvr6" path="res://scripts/nodes/modTreeItem.gd" id="2_bp2j1"]
+[ext_resource type="Script" uid="uid://dxdpu2eoknvr6" path="res://scripts/nodes/mods/modTreeItem.gd" id="2_bp2j1"]
 [ext_resource type="Texture2D" uid="uid://cr2it5ofnc1gl" path="res://resources/modTree/unchecked.tres" id="2_rlln3"]
 [ext_resource type="FontFile" uid="uid://cjub6sxbu8elx" path="res://resources/fonts/RobotoMono-SemiBold.ttf" id="3_bp2j1"]
 [ext_resource type="Texture2D" uid="uid://o5pfoemsivxw" path="res://assets/ui/mods/disclosatory.png" id="5_bp2j1"]

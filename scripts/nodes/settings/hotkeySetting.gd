@@ -65,7 +65,7 @@ class HotkeySettingButton extends Button:
 	func _init(_hotkey:HotkeySetting) -> void:
 		hotkey = _hotkey
 		theme_type_variation = &"RadioButtonText"
-		custom_minimum_size.x = 150
+		custom_minimum_size.x = 180
 		toggle_mode = true
 		mouse_filter = Control.MOUSE_FILTER_PASS
 
@@ -73,9 +73,17 @@ class HotkeySettingButton extends Button:
 		mouse_entered.connect(func(): if !setting: text = "(RMB to remove)")
 		mouse_exited.connect(_cancelSet)
 		setText()
-	
+
+	func _process(_delta:float) -> void:
+		if setting: setText()
+
 	func setText() -> void:
-		if setting: text = "(Unhover to cancel)"
+		if setting:
+			text = ""
+			if Input.is_key_pressed(KEY_CTRL): text += "Ctrl+"
+			if Input.is_key_pressed(KEY_SHIFT): text += "Shift+"
+			if Input.is_key_pressed(KEY_ALT): text += "Alt+"
+			if !text: text = "(Unhover to cancel)"
 		else:
 			assert(event is InputEventKey)
 			text = event.as_text_physical_keycode()
@@ -99,7 +107,6 @@ class HotkeySettingButton extends Button:
 
 	func _gui_input(_event:InputEvent) -> void:
 		if _event is InputEventMouseButton and _event.pressed:
-			get_viewport().set_input_as_handled()
 			if !setting:
 				match _event.button_index:
 					MOUSE_BUTTON_LEFT: _startSet()
@@ -108,8 +115,9 @@ class HotkeySettingButton extends Button:
 							InputMap.action_erase_event(hotkey.action, event)
 							check()
 						remove()
-			else:
-				_cancelSet()
+					_: return
+			else: _cancelSet()
+			get_viewport().set_input_as_handled()
  
 	func _input(_event:InputEvent) -> void:
 		if !setting or _event is InputEventMouse or !_event.pressed: return
@@ -133,6 +141,7 @@ class HotkeySettingButton extends Button:
 	func check() -> void:
 		hotkey.updateReset()
 		clearConflicts()
+		if !hotkey.visible: return
 		for checkHotkey in hotkey.get_parent().get_children():
 			if checkHotkey is not HotkeySetting: continue
 			if !checkHotkey.visible: continue

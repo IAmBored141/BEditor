@@ -1,10 +1,6 @@
 extends RichTextLabel
 class_name QuickSet
 
-const COLORS:Array[String] = [
-	"Q", "W", "E", "R", "T", "A", "S", "D", "F", "G", "Z", "X", "V", "B", "QW", "EQ", "RQ", "DQ", "FQ", "EW", "RW", "AW", "ER"
-]
-
 @onready var editor:Editor = get_node("/root/editor")
 
 var component:GameComponent
@@ -37,7 +33,7 @@ func applyOrCancel() -> void:
 		&"quicksetColor":
 			var sorted = input.split()
 			sorted.sort()
-			var found:int = COLORS.find("".join(sorted))
+			var found:int = ColorQuicksetSetting.matches.find("".join(sorted))
 			if found in Mods.colors():
 				match component.get_script():
 					KeyBulk: editor.focusDialog.keyDialog._keyColorSelected(found)

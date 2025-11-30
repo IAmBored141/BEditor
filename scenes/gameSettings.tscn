@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_tmlsq"]
 [ext_resource type="Script" uid="uid://dtw6afpsoarco" path="res://scripts/singletons/editor/gameSettings.gd" id="2_nrqkd"]
-[ext_resource type="Script" uid="uid://c70juj2p5s6yd" path="res://scripts/nodes/focusDialog/colorSelector.gd" id="3_vtnhb"]
+[ext_resource type="Script" uid="uid://c70juj2p5s6yd" path="res://scripts/nodes/focusDialog/selector/colorSelector.gd" id="3_vtnhb"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_vtnhb"]
 

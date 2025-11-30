@@ -34,7 +34,7 @@ func changedMods() -> void:
 class ColorSelectorButton extends SelectorButton:
 	var drawMain:RID
 
-	func _init(_value:Game.COLOR, _selector:ColorSelector):
+	func _init(_value:Game.COLOR, _selector:Selector):
 		custom_minimum_size = Vector2(20,20)
 		z_index = 1
 		super(_value, _selector)

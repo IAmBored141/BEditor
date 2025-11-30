@@ -1,10 +1,11 @@
+@abstract
 extends GridContainer
 class_name Selector # configurationSelector is not a selector
 
 @onready var editor:Editor = get_node("/root/editor") if has_node("/root/editor") else null
 
 var defaultValue:Variant
-var buttonType:Variant = SelectorButton
+var buttonType:GDScript = SelectorButton
 
 var options:Array[Variant] = []
 

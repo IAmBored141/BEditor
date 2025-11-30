@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://hkrgvpay27fr"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_3r4ol"]
-[ext_resource type="Script" uid="uid://b16jdtb55wnxx" path="res://scripts/nodes/modTreeSubTree.gd" id="2_4np6p"]
+[ext_resource type="Script" uid="uid://b16jdtb55wnxx" path="res://scripts/nodes/mods/modTreeSubTree.gd" id="2_4np6p"]
 
 [sub_resource type="DPITexture" id="DPITexture_4np6p"]
 _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"none\" stroke=\"#b2b2b2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-opacity=\".45\" stroke-width=\"2\" d=\"m5 7 3 3 3-3\"/></svg>
