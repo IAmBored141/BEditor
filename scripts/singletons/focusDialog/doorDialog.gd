@@ -118,9 +118,9 @@ func receiveKey(event:InputEvent) -> bool:
 			if Mods.active(&"C5"): _lockArmamentSet(!%lockArmament.button_pressed)
 		elif main.focused is RemoteLock:
 			if Editor.eventIs(event, &"focusRemoteLockAddConnection"): %doorsHandler.addComponent()
-			elif Editor.eventIs(event, &"focusRemoteLockFrozen"): _frozenSet(!main.focused.frozen)
-			elif Editor.eventIs(event, &"focusRemoteLockCrumbled"): _crumbledSet(!main.focused.crumbled)
-			elif Editor.eventIs(event, &"focusRemoteLockPainted"): _paintedSet(!main.focused.painted)
+			elif Editor.eventIs(event, &"focusDoorFrozen"): _frozenSet(!main.focused.frozen)
+			elif Editor.eventIs(event, &"focusDoorCrumbled"): _crumbledSet(!main.focused.crumbled)
+			elif Editor.eventIs(event, &"focusDoorPainted"): _paintedSet(!main.focused.painted)
 			else: return false
 		else:
 			if Editor.eventIs(event, &"quicksetLockSize"): editor.quickSet.startQuick(&"quicksetLockSize", main.componentFocused)

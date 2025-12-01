@@ -51,7 +51,9 @@ func defocus() -> void:
 	defocusComponent()
 
 func focusComponent(component:GameComponent) -> void:
-	if !component: return
+	if !component:
+		assert(false)
+		return
 	var new:bool = component != componentFocused
 	componentFocused = component
 	if focused != component.parent: focus(component.parent)

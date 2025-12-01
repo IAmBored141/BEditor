@@ -73,5 +73,4 @@ func updateText() -> void:
 	editor.explainText.text = string
 
 static func hotkeyMap(hotkey:StringName) -> String:
-	var events:Array[InputEvent] = InputMap.action_get_events(hotkey)
-	return " or ".join(events.map(func(event): return event.as_text_physical_keycode()))
+	return InputMap.action_get_events(hotkey)[0].as_text_physical_keycode()

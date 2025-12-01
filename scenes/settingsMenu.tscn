@@ -610,7 +610,7 @@ vertical_alignment = 2
 [node name="clarifier" type="TextureRect" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/c4"]
 layout_mode = 2
 size_flags_vertical = 0
-tooltip_text = "\"Editing Lock Properties\" hotkeys also apply and take priority."
+tooltip_text = "Relevant hotkeys from \"Editing Door Properties\" and \"Editing Lock Properties\" also apply and take priority."
 texture = ExtResource("5_iswfj")
 
 [node name="remoteLockFocused" type="MarginContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c"]
@@ -623,21 +623,6 @@ layout_mode = 2
 layout_mode = 2
 label = "Add Connection"
 action = &"focusRemoteLockAddConnection"
-
-[node name="focusRemoteLockFrozen" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/remoteLockFocused/c" instance=ExtResource("6_dkncv")]
-layout_mode = 2
-label = "Toggle Frozen"
-action = &"focusRemoteLockFrozen"
-
-[node name="focusRemoteLockCrumbled" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/remoteLockFocused/c" instance=ExtResource("6_dkncv")]
-layout_mode = 2
-label = "Toggle Crumbled"
-action = &"focusRemoteLockCrumbled"
-
-[node name="focusRemoteLockPainted" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/remoteLockFocused/c" instance=ExtResource("6_dkncv")]
-layout_mode = 2
-label = "Toggle Painted"
-action = &"focusRemoteLockPainted"
 
 [node name="gameSettings" parent="c" instance=ExtResource("6_tyaol")]
 unique_name_in_owner = true

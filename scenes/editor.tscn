@@ -100,6 +100,8 @@ shader_parameter/tileSize = Vector2(32, 32)
 
 [sub_resource type="Resource" id="Resource_jke8t"]
 script = ExtResource("17_bn54a")
+explanation = "[%s]Open Settings"
+hotkeys = Array[StringName]([&"editOpenSettings"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [node name="editor" type="Control"]
