@@ -384,8 +384,7 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 					Changes.addChange(Changes.PropertyChange.new(lock,&"position",lockGoingTo.position))
 			previousDragPosition += Vector2i(dragOffset)
 			if componentDragged == levelBoundsComponent:
-				Game.level.position = toRect.position
-				Game.level.size = toRect.size
+				Changes.addChange(Changes.LevelResizeChange.new(toRect))
 			else:
 				Changes.addChange(Changes.PropertyChange.new(componentDragged,&"position",toRect.position))
 				Changes.addChange(Changes.PropertyChange.new(componentDragged,&"size",toRect.size))

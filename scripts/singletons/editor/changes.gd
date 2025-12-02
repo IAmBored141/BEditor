@@ -555,3 +555,23 @@ class ComponentArrayPopAtChange extends Change:
 
 	func _to_string() -> String:
 		return "<ComponentArrayPopAtChange:"+str(id)+"."+str(array)+"-="+str(index)+">"
+
+class LevelResizeChange extends Change:
+	var before:Rect2
+	var after:Rect2
+
+	func _init(_after:Rect2) -> void:
+		before = Game.levelBounds
+		after = _after
+		do()
+	
+	func do() -> void:
+		Game.level.position = after.position
+		Game.level.size = after.size
+	
+	func undo() -> void:
+		Game.level.position = before.position
+		Game.level.size = before.size
+	
+	func _to_string() -> String:
+		return "<LeveLResizeChange:"+str(before)+"->"+str(after)+">"
