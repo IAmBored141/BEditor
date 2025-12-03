@@ -74,4 +74,4 @@ class LockHandlerButton extends HandlerButton:
 		else: RenderingServer.canvas_item_set_material(drawMain, Game.NO_MATERIAL)
 		if lock.color in Game.TEXTURED_COLORS: RenderingServer.canvas_item_add_texture_rect(drawMain,rect,Game.COLOR_TEXTURES.current([lock.color]))
 		else: RenderingServer.canvas_item_add_rect(drawMain,rect,Game.mainTone[lock.color])
-		icon = ICONS[lock.type*2 + int(lock.count.isNonzeroImag())]
+		icon = ICONS[lock.type*2 + int(M.isNonzeroImag(lock.count))]

@@ -44,7 +44,7 @@ func defocus() -> void:
 	if !focused: return
 	var object:GameObject = focused
 	editor.quickSet.applyOrCancel()
-	if object is Door and !Mods.active(&"ZeroCopies") and object.copies.eq(0): Changes.addChange(Changes.PropertyChange.new(object,&"copies",C.new(1)))
+	if object is Door and !Mods.active(&"ZeroCopies") and M.nex(object.copies): Changes.addChange(Changes.PropertyChange.new(object,&"copies",M.ONE))
 	focused = null
 	if object is RemoteLock: object.queue_redraw()
 	deinteract()
@@ -62,7 +62,7 @@ func focusComponent(component:GameComponent) -> void:
 
 func defocusComponent() -> void:
 	if !componentFocused: return
-	if componentFocused is Lock and !Mods.active(&"ZeroCostLock") and !(Mods.active(&"C3") and componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]) and componentFocused.count.eq(0): Changes.addChange(Changes.PropertyChange.new(componentFocused,&"count",C.new(1)))
+	if componentFocused is Lock and !Mods.active(&"ZeroCostLock") and !(Mods.active(&"C3") and componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]) and M.nex(componentFocused.count): Changes.addChange(Changes.PropertyChange.new(componentFocused,&"count",M.ONE))
 	componentFocused = null
 	deinteract()
 
@@ -76,7 +76,7 @@ func deinteract() -> void:
 	if !interacted: return
 	interacted.theme_type_variation = &"NumberEditPanelContainer"
 	if interacted is NumberEdit: interacted.bufferedNegative = false
-	elif interacted is AxialNumberEdit and !interacted.isZeroI: interacted.bufferedSign = C.ONE
+	elif interacted is AxialNumberEdit and !interacted.isZeroI: interacted.bufferedSign = M.ONE
 	interacted.setValue(interacted.value,true)
 	interacted = null
 

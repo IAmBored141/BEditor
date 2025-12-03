@@ -42,7 +42,7 @@ func undo() -> bool:
 	return true # unreachable
 
 func copy(value:Variant) -> Variant:
-	if value is C || value is Q: return value.copy()
+	if value is PackedInt64Array: return value.duplicate()
 	else: return value
 
 class Change extends RefCounted:

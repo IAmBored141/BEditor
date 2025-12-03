@@ -61,7 +61,7 @@ func _draw() -> void:
 		RenderingServer.canvas_item_add_texture_rect(drawStar,Rect2(Vector2(-25.6,-25.6),Vector2(51.2,51.2)),STAR,false,STAR_COLOR)
 	KeyBulk.drawKey(drawGlitch,drawMain,Vector2.ZERO,color)
 	Game.FKEYNUM.draw_string(drawMain,Vector2(38,14),"x",HORIZONTAL_ALIGNMENT_LEFT,-1,22,TEXT_COLOR)
-	Game.FKEYNUM.draw_string(drawMain,Vector2(58,14),"0" if !Game.player else str(Game.player.key[color]),HORIZONTAL_ALIGNMENT_LEFT,-1,22,TEXT_COLOR)
+	Game.FKEYNUM.draw_string(drawMain,Vector2(58,14),"0" if !Game.player else M.str(Game.player.key[color]),HORIZONTAL_ALIGNMENT_LEFT,-1,22,TEXT_COLOR)
 
 func getDrawPosition() -> Vector2: return position + parent.position
 

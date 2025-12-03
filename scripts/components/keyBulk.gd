@@ -37,7 +37,7 @@ static var ARRAYS:Dictionary[StringName,GDScript] = {}
 
 var color:Game.COLOR = Game.COLOR.WHITE
 var type:TYPE = TYPE.NORMAL
-var count:C = C.ONE
+var count:PackedInt64Array = M.ONE
 var infinite:bool = false
 var un:bool = false # whether a star or curse key is an unstar or uncurse key
 
@@ -89,15 +89,15 @@ func _draw() -> void:
 	if animState == ANIM_STATE.FLASH: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,outlineTex(),false,Color(Color.WHITE,animAlpha))
 	match type:
 		KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT:
-			if !count.eq(1): TextDraw.outlined2(FKEYBULK,drawSymbol,str(count),keycountColor(),keycountOutlineColor(),14,Vector2(1,25))
+			if !M.eq(count, M.ONE): TextDraw.outlined2(FKEYBULK,drawSymbol,M.str(count),keycountColor(),keycountOutlineColor(),14,Vector2(1,25))
 		KeyBulk.TYPE.ROTOR:
-			if count.eq(-1): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,SIGNFLIP_SYMBOL)
-			elif count.eq(C.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,POSROTOR_SYMBOL)
-			elif count.eq(C.nI): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,NEGROTOR_SYMBOL)
+			if M.eq(count, M.nONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,SIGNFLIP_SYMBOL)
+			elif M.eq(count, M.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,POSROTOR_SYMBOL)
+			elif M.eq(count, M.nI): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,NEGROTOR_SYMBOL)
 	if infinite: RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,INFINITE_SYMBOL)
 
-func keycountColor() -> Color: return Color("#363029") if count.sign() < 0 else Color("#ebe3dd")
-func keycountOutlineColor() -> Color: return Color("#d6cfc9") if count.sign() < 0 else Color("#363029")
+func keycountColor() -> Color: return Color("#363029") if M.negative(M.sign(count)) else Color("#ebe3dd")
+func keycountOutlineColor() -> Color: return Color("#d6cfc9") if M.negative(M.sign(count)) else Color("#363029")
 
 static func keyTextureType(keyType:TYPE, keyUn:bool) -> KeyTextureLoader.TYPE:
 	match keyType:
@@ -125,8 +125,8 @@ static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor
 
 func propertyChangedInit(property:StringName) -> void:
 	if property == &"type":
-		if type not in [TYPE.NORMAL, TYPE.EXACT] and count.neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.ONE))
-		if type == TYPE.ROTOR and (count.abs().neq(1) or count.eq(1)): Changes.addChange(Changes.PropertyChange.new(self,&"count",C.nONE))
+		if type not in [TYPE.NORMAL, TYPE.EXACT] and M.neq(count, M.ONE): Changes.addChange(Changes.PropertyChange.new(self,&"count",M.ONE))
+		if type == TYPE.ROTOR and (M.neq(M.abs(count), M.ONE) or M.eq(count, M.ONE)): Changes.addChange(Changes.PropertyChange.new(self,&"count",M.nONE))
 		if type not in [TYPE.STAR, TYPE.CURSE] and un: Changes.addChange(Changes.PropertyChange.new(self,&"un",false))
 
 # ==== PLAY ==== #
@@ -150,9 +150,9 @@ func stop() -> void:
 
 func collect(player:Player) -> void:
 	match type:
-		TYPE.NORMAL: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), player.key[effectiveColor()].plus(count)))
+		TYPE.NORMAL: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), M.add(player.key[effectiveColor()], count)))
 		TYPE.EXACT: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), count))
-		TYPE.ROTOR: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), player.key[effectiveColor()].times(count)))
+		TYPE.ROTOR: GameChanges.addChange(GameChanges.KeyChange.new(effectiveColor(), M.times(player.key[effectiveColor()], count)))
 		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(effectiveColor(), !un))
 		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new(effectiveColor(), !un))
 		
@@ -169,7 +169,7 @@ func collect(player:Player) -> void:
 				if un: AudioManager.play(preload("res://resources/sounds/key/unstar.wav"))
 				else: AudioManager.play(preload("res://resources/sounds/key/star.wav"))
 			_:
-				if count.sign() < 0: AudioManager.play(preload("res://resources/sounds/key/negative.wav"))
+				if M.negative(M.sign(count)): AudioManager.play(preload("res://resources/sounds/key/negative.wav"))
 				else: AudioManager.play(preload("res://resources/sounds/key/normal.wav"))
 
 func setGlitch(setColor:Game.COLOR) -> void:

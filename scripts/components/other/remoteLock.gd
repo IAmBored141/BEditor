@@ -26,10 +26,10 @@ var color:Game.COLOR = Game.COLOR.WHITE
 var type:Lock.TYPE = Lock.TYPE.NORMAL
 var configuration:Lock.CONFIGURATION = Lock.CONFIGURATION.spr1A
 var sizeType:Lock.SIZE_TYPE = Lock.SIZE_TYPE.AnyS
-var count:C = C.ONE
+var count:PackedInt64Array = M.ONE
 var zeroI:bool = false
 var isPartial:bool = false # for partial blast
-var denominator:C = C.ONE # for partial blast
+var denominator:PackedInt64Array = M.ONE # for partial blast
 var negated:bool = false
 var armament:bool = false
 var frozen:bool = false
@@ -172,7 +172,7 @@ var curseColor:Game.COLOR
 var glitchMimic:Game.COLOR = Game.COLOR.GLITCH
 var curseGlitchMimic:Game.COLOR = Game.COLOR.GLITCH
 var satisfied:bool = false
-var cost:C = C.ZERO
+var cost:PackedInt64Array = M.ZERO
 var gameFrozen:bool = false
 var gameCrumbled:bool = false
 var gamePainted:bool = false
@@ -205,22 +205,22 @@ func stop() -> void:
 	glitchMimic = Game.COLOR.GLITCH
 	curseGlitchMimic = Game.COLOR.GLITCH
 	satisfied = false
-	cost = C.ZERO
+	cost = M.ZERO
 	curseTimer = 0
 
 func check(player:Player) -> void:
 	if gameFrozen or gameCrumbled or gamePainted:
 		if colorAfterGlitch() == Game.COLOR.PURE: return
 		if int(gameFrozen) + int(gameCrumbled) + int(gamePainted) > 1: return
-		if gameFrozen and player.key[Game.COLOR.ICE].eq(0): return
-		if gameCrumbled and player.key[Game.COLOR.MUD].eq(0): return
-		if gamePainted and player.key[Game.COLOR.GRAFFITI].eq(0): return
+		if gameFrozen and M.nex(player.key[Game.COLOR.ICE]): return
+		if gameCrumbled and M.nex(player.key[Game.COLOR.MUD]): return
+		if gamePainted and M.nex(player.key[Game.COLOR.GRAFFITI]): return
 	var satisfiedBefore:bool = satisfied
-	var costBefore:C = cost.copy()
+	var costBefore:PackedInt64Array = cost
 	GameChanges.addChange(GameChanges.PropertyChange.new(self,&"satisfied",canOpen(player)))
 	GameChanges.addChange(GameChanges.PropertyChange.new(self,&"cost",getCost(player)))
 	if colorAfterAurabreaker() == Game.COLOR.NONE and !satisfied: Game.crash(); return
-	if !(satisfiedBefore == satisfied and costBefore.eq(cost)):
+	if !(satisfiedBefore == satisfied and M.eq(costBefore, cost)):
 		if satisfied: AudioManager.play(preload("res://resources/sounds/remoteLock/success.wav"))
 		else: AudioManager.play(preload("res://resources/sounds/remoteLock/fail.wav"))
 		for door in doors: if door.type == Door.TYPE.GATE: door.gateCheck(player)
@@ -233,7 +233,7 @@ func blinkAnim() -> void:
 
 func canOpen(player:Player) -> bool: return Lock.getLockCanOpen(self, player)
 
-func getCost(player:Player) -> C: return Lock.getLockCost(self,player,C.ONE)
+func getCost(player:Player) -> PackedInt64Array: return Lock.getLockCost(self,player,M.ONE)
 
 func colorAfterCurse() -> Game.COLOR:
 	if cursed and curseColor != Game.COLOR.PURE: return curseColor
@@ -254,12 +254,12 @@ func colorAfterAurabreaker() -> Game.COLOR:
 
 func isNegative() -> bool:
 	if type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]:
-		if count.isComplex() or denominator.isComplex(): return false
-		return effectiveDenominator().sign() < 0
-	return effectiveCount().sign() < 0
+		if M.isComplex(count) or M.isComplex(denominator): return false
+		return M.negative(M.sign(effectiveDenominator()))
+	return M.negative(M.sign(effectiveCount()))
 
-func effectiveCount(_ipow:C=C.ONE) -> C: return count
-func effectiveDenominator(_ipow:C=C.ONE) -> C: return denominator
+func effectiveCount(_ipow:PackedInt64Array=M.ONE) -> PackedInt64Array: return count
+func effectiveDenominator(_ipow:PackedInt64Array=M.ONE) -> PackedInt64Array: return denominator
 
 func checkDoors() -> void:
 	var any:bool = false

@@ -57,8 +57,8 @@ static var ARRAYS:Dictionary[StringName,GDScript] = {
 }
 
 var colorSpend:Game.COLOR = Game.COLOR.WHITE
-var copies:C = C.ONE
-var infCopies:C = C.ZERO # axes with infinite copies
+var copies:PackedInt64Array = M.ONE
+var infCopies:PackedInt64Array = M.ZERO # axes with infinite copies
 var type:TYPE = TYPE.SIMPLE
 var frozen:bool = false
 var crumbled:bool = false
@@ -129,8 +129,8 @@ func _draw() -> void:
 	drawDoor(drawScaled,drawAuraBreaker,drawGlitch,drawMain,
 		size,colorAfterCurse(),colorAfterGlitch(),type,
 		gateAlpha,
-		len(locks) > 0 and (locks[0].isNegative() if type == TYPE.SIMPLE else ipow().sign() < 0),
-		drawComplex or (Game.playState == Game.PLAY_STATE.EDIT and copies.eq(0)),
+		len(locks) > 0 and (locks[0].isNegative() if type == TYPE.SIMPLE else M.negative(M.sign(ipow()))),
+		drawComplex or (Game.playState == Game.PLAY_STATE.EDIT and M.nex(copies)),
 		animState != ANIM_STATE.RELOCK or animPart > 2
 	)
 	var rect:Rect2 = Rect2(Vector2.ZERO, size)
@@ -145,9 +145,9 @@ func _draw() -> void:
 	elif animState == ANIM_STATE.RELOCK: RenderingServer.canvas_item_add_rect(drawCopies,rect,Color(Color.WHITE,animAlpha)) # just to be on top of everything else
 	# copies
 	if Game.playState == Game.PLAY_STATE.EDIT:
-		if copies.neq(1) or infCopies.neq(0): TextDraw.outlinedCentered(Game.FKEYX,drawCopies,"×"+copies.strWithInf(infCopies),COPIES_COLOR,COPIES_OUTLINE_COLOR,20,Vector2(size.x/2,-8))
+		if M.neq(copies, M.ONE) or M.ex(infCopies): TextDraw.outlinedCentered(Game.FKEYX,drawCopies,"×"+M.strWithInf(copies,infCopies),COPIES_COLOR,COPIES_OUTLINE_COLOR,20,Vector2(size.x/2,-8))
 	else:
-		if gameCopies.neq(1) or infCopies.neq(0): TextDraw.outlinedCentered(Game.FKEYX,drawCopies,"×"+gameCopies.strWithInf(infCopies),COPIES_COLOR,COPIES_OUTLINE_COLOR,20,Vector2(size.x/2,-8))
+		if M.neq(gameCopies, M.ONE) or M.ex(infCopies): TextDraw.outlinedCentered(Game.FKEYX,drawCopies,"×"+M.strWithInf(gameCopies,infCopies),COPIES_COLOR,COPIES_OUTLINE_COLOR,20,Vector2(size.x/2,-8))
 
 
 static func drawDoor(doorDrawScaled:RID,doorDrawAuraBreaker:RID,doorDrawGlitch:RID,doorDrawMain:RID,
@@ -264,14 +264,14 @@ func propertyChangedInit(property:StringName) -> void:
 				if !Mods.active(&"NstdLockSize"):
 					for lock in locks: lock._coerceSize()
 				Changes.addChange(Changes.PropertyChange.new(self,&"colorSpend",Game.COLOR.WHITE))
-				Changes.addChange(Changes.PropertyChange.new(self,&"copies",C.ONE))
+				Changes.addChange(Changes.PropertyChange.new(self,&"copies",M.ONE))
 				Changes.addChange(Changes.PropertyChange.new(self,&"frozen",false))
 				Changes.addChange(Changes.PropertyChange.new(self,&"crumbled",false))
 				Changes.addChange(Changes.PropertyChange.new(self,&"painted",false))
-	if property == &"size" and type == TYPE.SIMPLE and len(locks)>0: locks[0]._simpleDoorUpdate() # ghhghghhh TODO: figure this out
-	if property in [&"copies", &"infCopies"] and copies.acrabs().across(infCopies).neq(infCopies):
-		if infCopies.r.eq(1) and copies.r.abs().neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"copies",C.new(1 if copies.r.eq(0) else copies.r.sign(),copies.i)))
-		if infCopies.i.eq(1) and copies.i.abs().neq(1): Changes.addChange(Changes.PropertyChange.new(self,&"copies",C.new(copies.r,1 if copies.i.eq(0) else copies.i.sign())))
+	if property == &"size" and type == TYPE.SIMPLE and len(locks) > 0: locks[0]._simpleDoorUpdate() # ghhghghhh TODO: figure this out
+	if property in [&"copies", &"infCopies"] and M.neq(M.across(M.acrabs(copies), infCopies), infCopies):
+		if M.ex(M.r(infCopies)) and M.nex(M.r(copies)): Changes.addChange(Changes.PropertyChange.new(self,&"copies", M.Ncn(M.saxis(M.r(copies)), M.ir(copies))))
+		if M.ex(M.i(infCopies)) and M.nex(M.i(copies)): Changes.addChange(Changes.PropertyChange.new(self,&"copies",M.Ncn(M.r(copies), M.saxis(M.ir(copies)))))
 
 func propertyChangedDo(property:StringName) -> void:
 	super(property)
@@ -340,7 +340,7 @@ func reindexLocks() -> void:
 		iter += 1
 
 # ==== PLAY ==== #
-var gameCopies:C = C.ONE
+var gameCopies:PackedInt64Array = M.ONE
 var gameFrozen:bool = false
 var gameCrumbled:bool = false
 var gamePainted:bool = false
@@ -408,7 +408,7 @@ func _process(delta:float) -> void:
 		elif gateOpen and gateAlpha > 0:
 			gateAlpha = max(gateAlpha-delta*6, 0)
 			queue_redraw()
-	if drawComplex or (Game.playState == Game.PLAY_STATE.EDIT and copies.eq(0)): queue_redraw()
+	if drawComplex or (Game.playState == Game.PLAY_STATE.EDIT and M.nex(copies)): queue_redraw()
 
 func start() -> void:
 	gameCopies = copies
@@ -442,15 +442,15 @@ func tryOpen(player:Player) -> void:
 	if gameFrozen or gameCrumbled or gamePainted:
 		if hasColor(Game.COLOR.PURE): return
 		if int(gameFrozen) + int(gameCrumbled) + int(gamePainted) > 1: return
-		if gameFrozen and player.key[Game.COLOR.ICE].eq(0): return
-		if gameCrumbled and player.key[Game.COLOR.MUD].eq(0): return
-		if gamePainted and player.key[Game.COLOR.GRAFFITI].eq(0): return
+		if gameFrozen and M.nex(player.key[Game.COLOR.ICE]): return
+		if gameCrumbled and M.nex(player.key[Game.COLOR.MUD]): return
+		if gamePainted and M.nex(player.key[Game.COLOR.GRAFFITI]): return
 	else:
 		if player.explodey and tryDynamiteOpen(player): return
 		if player.masterCycle == 1 and tryMasterOpen(player): return
 		if player.masterCycle == 2 and tryQuicksilverOpen(player): return
 
-	if gameCopies.neq(0): # although nothing (yet) can make a door 0 copy without destroying it
+	if M.ex(gameCopies): # although nothing (yet) can make a door 0 copy without destroying it
 		var willCrash:bool = false
 		var wontOpen:bool = false
 		for lock in locks:
@@ -462,14 +462,14 @@ func tryOpen(player:Player) -> void:
 			if !lock.satisfied: return
 		if willCrash: Game.crash(); return
 		if wontOpen: return
-	var cost:C = C.ZERO
+	var cost:PackedInt64Array = M.ZERO
 	for lock in locks:
-		cost = cost.plus(lock.getCost(player))
+		cost = M.add(cost, lock.getCost(player))
 	for lock in remoteLocks:
-		cost = cost.plus(lock.cost)
+		cost = M.add(cost, lock.cost)
 	
-	GameChanges.addChange(GameChanges.KeyChange.new(colorAfterAurabreaker(), player.key[colorAfterAurabreaker()].minus(cost)))
-	GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", gameCopies.minus(ipow().across(C.new(1,1).minus(infCopies)))))
+	GameChanges.addChange(GameChanges.KeyChange.new(colorAfterAurabreaker(), M.sub(player.key[colorAfterAurabreaker()],cost)))
+	GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", M.sub(gameCopies, M.across(ipow(), M.sub(M.allAxes(), infCopies)))))
 	
 	if gameFrozen or gameCrumbled or gamePainted: AudioManager.play(preload("res://resources/sounds/door/deaura.wav"))
 	else:
@@ -481,7 +481,7 @@ func tryOpen(player:Player) -> void:
 			TYPE.COMBO: AudioManager.play(preload("res://resources/sounds/door/combo.wav"))
 		Game.setGlitch(colorAfterAurabreaker())
 
-	if gameCopies.eq(0): destroy()
+	if M.nex(gameCopies): destroy()
 	else: relockAnimation()
 	GameChanges.bufferSave()
 
@@ -489,13 +489,13 @@ func tryMasterOpen(player:Player) -> bool:
 	if hasColor(Game.COLOR.MASTER): return false
 	if hasColor(Game.COLOR.PURE): return false
 
-	var openedForwards:bool = gameCopies.across(player.masterMode).sign() > 0
-	GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", gameCopies.minus(player.masterMode.across(C.new(1,1).minus(infCopies)))))
-	GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.MASTER, player.key[Game.COLOR.MASTER].minus(player.masterMode)))
+	var openedForwards:bool = M.positive(M.sign(M.across(gameCopies, player.masterMode)))
+	GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", M.sub(gameCopies, M.across(player.masterMode, M.sub(M.allAxes(), infCopies)))))
+	GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.MASTER, M.minus(player.key[Game.COLOR.MASTER], player.masterMode)))
 	
 	if openedForwards:
 		AudioManager.play(preload("res://resources/sounds/door/master.wav"))
-		if gameCopies.eq(0): destroy()
+		if M.nex(gameCopies): destroy()
 		else: relockAnimation()
 	else:
 		AudioManager.play(preload("res://resources/sounds/door/masterNegative.wav"))
@@ -509,14 +509,14 @@ func tryQuicksilverOpen(player:Player) -> bool:
 	if hasColor(Game.COLOR.QUICKSILVER): return false
 	if hasColor(Game.COLOR.PURE): return false
 
-	var cost:C = C.ZERO
+	var cost:PackedInt64Array = M.ZERO
 	for lock in locks:
-		cost = cost.plus(lock.getCost(player, player.masterMode))
+		cost = M.add(cost, lock.getCost(player, player.masterMode))
 	for lock in remoteLocks:
-		cost = cost.plus(lock.cost.times(player.masterMode))
+		cost = M.add(cost, lock.cost)
 
-	GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.QUICKSILVER, player.key[Game.COLOR.QUICKSILVER].minus(player.masterMode)))
-	GameChanges.addChange(GameChanges.KeyChange.new(colorAfterGlitch(), player.key[colorAfterGlitch()].minus(cost)))
+	GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.QUICKSILVER, M.sub(player.key[Game.COLOR.QUICKSILVER], player.masterMode)))
+	GameChanges.addChange(GameChanges.KeyChange.new(colorAfterGlitch(), M.sub(player.key[colorAfterGlitch()], cost)))
 
 	AudioManager.play(preload("res://resources/sounds/door/master.wav"))
 	relockAnimation()
@@ -535,22 +535,22 @@ func tryDynamiteOpen(player:Player) -> bool:
 	var openedForwards:bool
 	var openedBackwards:bool
 
-	if player.key[Game.COLOR.DYNAMITE].across(gameCopies.axis()).minus(gameCopies.abs()).nonNegative() and infCopies.eq(0):
+	if M.nonNegative(M.sub(M.along(player.key[Game.COLOR.DYNAMITE], gameCopies), M.acrabs(gameCopies))) and M.nex(infCopies):
 		# if the door can open, open it
-		GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.DYNAMITE, player.key[Game.COLOR.DYNAMITE].minus(gameCopies)))
-		GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", C.ZERO))
+		GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.DYNAMITE, M.sub(player.key[Game.COLOR.DYNAMITE], gameCopies)))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", M.ZERO))
 		
 		openedForwards = true
 	else:
-		openedForwards = player.key[Game.COLOR.DYNAMITE].across(gameCopies.axis()).hasPositive()
-		openedBackwards = player.key[Game.COLOR.DYNAMITE].across(gameCopies.axis()).hasNonPositive()
+		openedForwards = M.hasPositive(M.along(player.key[Game.COLOR.DYNAMITE], gameCopies))
+		openedBackwards = M.hasNonPositive(M.along(player.key[Game.COLOR.DYNAMITE], gameCopies))
 
-		GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", gameCopies.minus(player.key[Game.COLOR.DYNAMITE].across(C.new(1,1).minus(infCopies)))))
-		GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.DYNAMITE, C.ZERO))
+		GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", M.minus(gameCopies, M.across(player.key[Game.COLOR.DYNAMITE], M.minus(M.allAxes(),infCopies)))))
+		GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.DYNAMITE, M.ZERO))
 
 	if openedForwards:
 		AudioManager.play(preload("res://resources/sounds/door/explode.wav"))
-		if gameCopies.eq(0): destroy()
+		if M.nex(gameCopies): destroy()
 		else: relockAnimation()
 		add_child(ExplosionParticle.new(size/2,1))
 	if openedBackwards:
@@ -712,13 +712,15 @@ func colorAfterAurabreaker() -> Game.COLOR:
 	if gamePainted: return Game.COLOR.GRAFFITI
 	return colorAfterGlitch()
 
-func ipow() -> C: # for complex view
-	if Game.playState == Game.PLAY_STATE.EDIT: return C.ONE
-	if gameCopies.across(Game.player.complexMode).neq(0): return gameCopies.across(Game.player.complexMode).axis()
-	return gameCopies.across(Game.player.complexMode.times(C.I).axibs()).axis()
+func ipow() -> PackedInt64Array: # for complex view
+	if Game.playState == Game.PLAY_STATE.EDIT: return M.ONE
+	# if extant, return current
+	if M.ex(M.across(gameCopies, Game.player.complexMode)): return M.axis(M.across(gameCopies, Game.player.complexMode))
+	# return the other axis
+	return M.axis(M.across(gameCopies, M.axibs(M.rotate(Game.player.complexMode))))
 
 func complexCheck() -> void:
-	drawComplex = Game.playState != Game.PLAY_STATE.EDIT and ipow().across(Game.player.complexMode).eq(0)
+	drawComplex = Game.playState != Game.PLAY_STATE.EDIT and M.nex(M.across(ipow(), Game.player.complexMode))
 	queue_redraw()
 
 func setGlitch(setColor:Game.COLOR) -> void:

@@ -17,10 +17,10 @@ func _ready() -> void:
 	buttonType = KeyRotorSelectorButton
 	super()
 
-func setValue(count:C) -> void:
-	if count.eq(-1): setSelect(VALUE.SIGNFLIP)
-	elif count.eq(C.I): setSelect(VALUE.POSROTOR)
-	elif count.eq(C.nI): setSelect(VALUE.NEGROTOR)
+func setValue(count:PackedInt64Array) -> void:
+	if M.eq(count, M.nONE): setSelect(VALUE.SIGNFLIP)
+	elif M.eq(count, M.I): setSelect(VALUE.POSROTOR)
+	elif M.eq(count, M.nI): setSelect(VALUE.NEGROTOR)
 
 class KeyRotorSelectorButton extends SelectorButton:
 	var drawMain:RID

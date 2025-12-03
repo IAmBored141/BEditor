@@ -5,26 +5,26 @@ class_name ComplexNumberEdit
 @onready var realEdit:NumberEdit = %realEdit
 @onready var imaginaryEdit:NumberEdit = %imaginaryEdit
 
-signal valueSet(value:C)
+signal valueSet(value:PackedInt64Array)
 
-var value:C
+var value:PackedInt64Array
 
 func _ready() -> void:
 	realEdit.purpose = NumberEdit.PURPOSE.REAL
 	imaginaryEdit.purpose = NumberEdit.PURPOSE.IMAGINARY
 
-func setValue(_value:C,manual:bool=false) -> void:
+func setValue(_value:PackedInt64Array,manual:bool=false) -> void:
 	value = _value
-	realEdit.setValue(C.new(value.r), true)
-	imaginaryEdit.setValue(C.new(value.i), true)
+	realEdit.setValue(M.r(value), true)
+	imaginaryEdit.setValue(M.i(value), true)
 
 	if !manual: valueSet.emit(value)
 
-func _realSet(r:int) -> void:
-	setValue(C.new(r,value.i))
+func _realSet(r:PackedInt64Array) -> void:
+	setValue(M.Ncn(r,M.ir(value)))
 
-func _imaginarySet(i:int) -> void:
-	setValue(C.new(value.r,i))
+func _imaginarySet(i:PackedInt64Array) -> void:
+	setValue(M.Ncn(M.r(value),i))
 
 func rotate() -> void:
-	setValue(value.times(C.new(0,-1 if Input.is_key_pressed(KEY_SHIFT) else 1)))
+	setValue(M.rotate(value))

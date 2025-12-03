@@ -2,15 +2,15 @@ extends CharacterBody2D
 class_name Player
 
 const HELD_SHINE:Texture2D = preload("res://assets/game/player/held/shine.png")
-func getMasterShineColor() -> Color: return Color("#b4b432") if masterMode.sign() > 0 else Color("#3232b4")
+func getMasterShineColor() -> Color: return Color("#b4b432") if M.positive(sign(masterMode)) else Color("#3232b4")
 
 const HELD_MASTER:Texture2D = preload("res://assets/game/player/held/master.png")
 const HELD_QUICKSILVER:Texture2D = preload("res://assets/game/player/held/quicksilver.png")
 const HELD_MASTER_NEGATIVE:Texture2D = preload("res://assets/game/player/held/masterNegative.png")
 const HELD_QUICKSILVER_NEGATIVE:Texture2D = preload("res://assets/game/player/held/quicksilverNegative.png")
 func getHeldKeySprite() -> Texture2D:
-	if masterCycle == 1: return HELD_MASTER if masterMode.sign() > 0 else HELD_MASTER_NEGATIVE
-	else: return HELD_QUICKSILVER if masterMode.sign() > 0 else HELD_QUICKSILVER_NEGATIVE
+	if masterCycle == 1: return HELD_MASTER if M.positive(sign(masterMode)) else HELD_MASTER_NEGATIVE
+	else: return HELD_QUICKSILVER if M.positive(sign(masterMode)) else HELD_QUICKSILVER_NEGATIVE
 
 const AURA_RED:Texture2D = preload("res://assets/game/player/aura/red.png")
 const AURA_GREEN:Texture2D = preload("res://assets/game/player/aura/green.png")
@@ -29,17 +29,17 @@ const GRAVITY:float = 0.4
 const Y_MAXSPEED:float = 9
 
 var canDoubleJump:bool = true
-var key:Array[C] = []
+var key:Array[PackedInt64Array] = []
 var star:Array[bool]
 var curse:Array[bool]
 
 var cantSave:bool = false # cant save if near a door
 
-var masterMode:C = C.ZERO
+var masterMode:PackedInt64Array = M.ZERO
 var masterCycle:int = 0 # 0 = None, 1 = Master, 2 = Silver
 const MASTER_CYCLE_COLORS:Array[Game.COLOR] = [Game.COLOR.WHITE, Game.COLOR.MASTER, Game.COLOR.QUICKSILVER]
 
-var complexMode:C = C.ONE # C(1,0) for real view, C(0,1) for i-view
+var complexMode:PackedInt64Array = M.ONE # C(1,0) for real view, C(0,1) for i-view
 
 var drawDropShadow:RID
 
@@ -109,7 +109,7 @@ func _ready() -> void:
 
 	for color in Game.COLORS:
 		# if color == Game.COLOR.STONE:
-		key.append(C.ZERO)
+		key.append(M.ZERO)
 		star.append(false)
 		curse.append(color == Game.COLOR.BROWN)
 	
@@ -241,19 +241,19 @@ func cycleMaster() -> void:
 	var armamentImmunities:Array[Game.COLOR] = getArmamentImmunities()
 
 	if masterCycle < 1 and Game.COLOR.MASTER not in armamentImmunities: # MASTER
-		var relevantCount:C = key[Game.COLOR.MASTER].across(complexMode)
-		if relevantCount.neq(0):
+		var relevantCount:PackedInt64Array = M.across(key[Game.COLOR.MASTER], complexMode)
+		if M.ex(relevantCount):
 			masterCycle = 1
-			masterMode = relevantCount.axis()
-			if relevantCount.sign() > 0: AudioManager.play(preload("res://resources/sounds/player/masterEquip.wav"))
+			masterMode = M.axis(relevantCount)
+			if M.positive(M.sign(relevantCount)): AudioManager.play(preload("res://resources/sounds/player/masterEquip.wav"))
 			else: AudioManager.play(preload("res://resources/sounds/player/masterNegativeEquip.wav"))
 			return
 	if masterCycle < 2 and Game.COLOR.QUICKSILVER not in armamentImmunities: # QUICKSILVER
-		var relevantCount:C = key[Game.COLOR.QUICKSILVER].across(complexMode)
-		if relevantCount.neq(0):
+		var relevantCount:PackedInt64Array = M.across(key[Game.COLOR.MASTER], complexMode)
+		if M.ex(relevantCount):
 			masterCycle = 2
-			masterMode = relevantCount.axis()
-			if relevantCount.sign() > 0: AudioManager.play(preload("res://resources/sounds/player/masterEquip.wav"))
+			masterMode = M.axis(relevantCount)
+			if M.positive(M.sign(relevantCount)): AudioManager.play(preload("res://resources/sounds/player/masterEquip.wav"))
 			else: AudioManager.play(preload("res://resources/sounds/player/masterNegativeEquip.wav"))
 			return
 	if masterCycle != 0:
@@ -261,7 +261,7 @@ func cycleMaster() -> void:
 	dropMaster()
 
 func dropMaster() -> void:
-	masterMode = C.ZERO
+	masterMode = M.ZERO
 	masterCycle = 0
 
 func getArmamentImmunities() -> Array[Game.COLOR]:
@@ -276,44 +276,42 @@ func getArmamentImmunities() -> Array[Game.COLOR]:
 func checkKeys() -> void:
 	var armamentImmunities:Array[Game.COLOR] = getArmamentImmunities()
 
-	match masterCycle:
-		1: if !key[Game.COLOR.MASTER].across(masterMode).sign() > 0 or Game.COLOR.MASTER in armamentImmunities: dropMaster()
-		2: if !key[Game.COLOR.QUICKSILVER].across(masterMode).sign() > 0 or Game.COLOR.QUICKSILVER in armamentImmunities: dropMaster()
+	if !M.positive(M.reduce(M.sign(M.across(key[MASTER_CYCLE_COLORS[masterCycle]],masterMode)))) or MASTER_CYCLE_COLORS[masterCycle] in armamentImmunities: dropMaster()
 
-	auraRed = key[Game.COLOR.RED].gt(0) and !key[Game.COLOR.RED].minus(key[Game.COLOR.MAROON]).lt(1) and Game.COLOR.RED not in armamentImmunities
-	auraGreen = key[Game.COLOR.GREEN].gt(0) and !key[Game.COLOR.GREEN].minus(key[Game.COLOR.FOREST]).lt(5) and Game.COLOR.GREEN not in armamentImmunities
-	auraBlue = key[Game.COLOR.BLUE].gt(0) and !key[Game.COLOR.BLUE].minus(key[Game.COLOR.NAVY]).lt(3) and Game.COLOR.BLUE not in armamentImmunities
-	auraMaroon = key[Game.COLOR.MAROON].gt(0) and !key[Game.COLOR.MAROON].minus(key[Game.COLOR.RED]).lt(1) and Game.COLOR.MAROON not in armamentImmunities
-	auraForest = key[Game.COLOR.FOREST].gt(0) and !key[Game.COLOR.FOREST].minus(key[Game.COLOR.GREEN]).lt(5) and Game.COLOR.FOREST not in armamentImmunities
-	auraNavy = key[Game.COLOR.NAVY].gt(0) and !key[Game.COLOR.NAVY].minus(key[Game.COLOR.BLUE]).lt(3) and Game.COLOR.NAVY not in armamentImmunities
+	auraRed = M.positive(key[Game.COLOR.RED]) and M.gte(M.minus(key[Game.COLOR.RED], key[Game.COLOR.MAROON]), M.N(1)) and Game.COLOR.RED not in armamentImmunities
+	auraGreen = M.positive(key[Game.COLOR.GREEN]) and M.gte(M.minus(key[Game.COLOR.GREEN], key[Game.COLOR.FOREST]), M.N(5)) and Game.COLOR.GREEN not in armamentImmunities
+	auraBlue = M.positive(key[Game.COLOR.BLUE]) and M.gte(M.minus(key[Game.COLOR.BLUE], key[Game.COLOR.NAVY]), M.N(3)) and Game.COLOR.BLUE not in armamentImmunities
+	auraMaroon = M.positive(key[Game.COLOR.MAROON]) and M.gte(M.minus(key[Game.COLOR.MAROON], key[Game.COLOR.RED]), M.N(1)) and Game.COLOR.MAROON not in armamentImmunities
+	auraForest = M.positive(key[Game.COLOR.FOREST]) and M.gte(M.minus(key[Game.COLOR.FOREST], key[Game.COLOR.GREEN]), M.N(5)) and Game.COLOR.FOREST not in armamentImmunities
+	auraNavy = M.positive(key[Game.COLOR.NAVY]) and M.gte(M.minus(key[Game.COLOR.NAVY], key[Game.COLOR.BLUE]), M.N(3)) and Game.COLOR.NAVY not in armamentImmunities
 
-	explodey = key[Game.COLOR.DYNAMITE].neq(0) and Game.COLOR.DYNAMITE not in armamentImmunities
+	explodey = M.ex(key[Game.COLOR.DYNAMITE]) and Game.COLOR.DYNAMITE not in armamentImmunities
 
 	curseMode = 0
-	var highestSeen:C = C.ZERO
+	var highestSeen:PackedInt64Array = M.ZERO
 	if Game.COLOR.PURE not in armamentImmunities:
 		for color in Game.COLORS:
-			if !curse[color] or key[color].r.eq(0) or color in armamentImmunities: continue
+			if !curse[color] or M.nex(M.r(key[color])) or color in armamentImmunities: continue
 			# tie
-			if key[color].across(1).abs().eq(highestSeen): curseMode = 0
-			elif key[color].across(1).abs().gt(highestSeen):
-				highestSeen = C.new(key[color].r.abs())
-				curseMode = key[color].r.sign()
+			if M.eq(M.abs(M.r(key[color])), highestSeen): curseMode = 0
+			elif M.gt(M.abs(M.r(key[color])), highestSeen):
+				highestSeen = M.abs(M.r(key[color]))
+				curseMode = M.toInt(M.sign(M.r(key[color])))
 				curseColor = color as Game.COLOR
 
 func complexSwitch() -> void:
-	if complexMode.eq(1): complexMode = C.I
-	else: complexMode = C.ONE
+	if M.eq(complexMode, M.ONE): complexMode = M.I
+	else: complexMode = M.ONE
 
 	AudioManager.play(preload("res://resources/sounds/player/camera.wav"))
 	AudioManager.play(preload("res://resources/sounds/key/signflip.wav"))
 	complexSwitchAnim = true
 	complexSwitchAngle = 0
 
-	if complexMode.eq(C.I) and masterCycle and key[MASTER_CYCLE_COLORS[masterCycle]].across(C.I).neq(0):
-		masterMode = key[MASTER_CYCLE_COLORS[masterCycle]].across(C.I).axis()
-	elif complexMode.eq(1) and masterCycle and key[MASTER_CYCLE_COLORS[masterCycle]].across(1).neq(0):
-		masterMode = key[MASTER_CYCLE_COLORS[masterCycle]].across(1).axis()
+	if M.eq(complexMode, M.I) and masterCycle and M.ex(M.i(key[MASTER_CYCLE_COLORS[masterCycle]])):
+		masterMode = M.axis(M.i(key[MASTER_CYCLE_COLORS[masterCycle]]))
+	elif M.eq(complexMode, M.ONE) and masterCycle and M.ex(M.r(key[MASTER_CYCLE_COLORS[masterCycle]])):
+		masterMode = M.axis(M.r(key[MASTER_CYCLE_COLORS[masterCycle]]))
 	elif masterCycle:
 		AudioManager.play(preload("res://resources/sounds/player/masterUnequip.wav"))
 		dropMaster()
@@ -356,7 +354,7 @@ func _draw() -> void:
 		var masterDrawOpacity:Color = Color(Color.WHITE,masterShineScale*0.6)
 		RenderingServer.canvas_item_add_texture_rect(drawMasterShine,Rect2(Vector2(-32,-32)*masterShineScale,Vector2(64,64)*masterShineScale),HELD_SHINE,false,getMasterShineColor())
 		RenderingServer.canvas_item_add_texture_rect(drawMasterKey,Rect2(Vector2(-16,-16),Vector2(32,32)),getHeldKeySprite(),false,masterDrawOpacity)
-	if complexMode.eq(C.I):
+	if M.eq(complexMode, M.I):
 		TextDraw.outlinedCentered(Game.FTALK,drawComplexModeText,"I-View",Color.from_hsv(Game.complexViewHue,0.4901960784,1),Color.BLACK,12,Vector2(0,-10))
 	# complex switch
 	if complexSwitchAnim:

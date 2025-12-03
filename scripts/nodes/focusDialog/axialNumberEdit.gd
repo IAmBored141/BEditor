@@ -3,12 +3,12 @@ class_name AxialNumberEdit
 
 @onready var editor:Editor = get_node("/root/editor")
 
-signal valueSet(value:C)
+signal valueSet(value:PackedInt64Array)
 
 var newlyInteracted:bool = false
 
-var value:C = C.ZERO
-var bufferedSign:C = C.ONE # since -0 (and 0i and -0i) cant exist, activate it when the number is set
+var value:PackedInt64Array = M.ZERO
+var bufferedSign:PackedInt64Array = M.ONE # since -0 (and 0i and -0i) cant exist, activate it when the number is set
 var purpose:NumberEdit.PURPOSE = NumberEdit.PURPOSE.AXIAL
 
 var zeroIValid:bool = false # whether or not zeroI is a vaild state
@@ -20,19 +20,19 @@ func _ready() -> void:
 func _gui_input(event:InputEvent) -> void:
 	if Editor.isLeftClick(event): editor.focusDialog.interact(self)
 
-func setValue(_value:C, manual:bool=false) -> void:
+func setValue(_value:PackedInt64Array, manual:bool=false) -> void:
 	value = _value
 	isZeroI = false
-	if bufferedSign.neq(1) and value.neq(0):
-		bufferedSign = C.ONE
-	if bufferedSign.eq(-1): %drawText.text = "-0"
-	elif bufferedSign.eq(0,1): %drawText.text = "0i"; isZeroI = zeroIValid
-	elif bufferedSign.eq(0,-1): %drawText.text = "-0i"
-	else: %drawText.text = str(value)
+	if M.neq(bufferedSign, M.ONE) and M.ex(value):
+		bufferedSign = M.ONE
+	if M.eq(bufferedSign, M.nONE): %drawText.text = "-0"
+	elif M.eq(bufferedSign, M.I): %drawText.text = "0i"; isZeroI = zeroIValid
+	elif M.eq(bufferedSign, M.nI): %drawText.text = "-0i"
+	else: %drawText.text = M.str(value)
 	if !manual: valueSet.emit(value)
 
-func increment() -> void: setValue(value.plus(1))
-func decrement() -> void: setValue(value.minus(1))
+func increment() -> void: setValue(M.plus(value, M.ONE))
+func decrement() -> void: setValue(M.minus(value, M.ONE))
 
 func deNew():
 	newlyInteracted = false
@@ -41,11 +41,11 @@ func deNew():
 func receiveKey(key:InputEventKey):
 	var number:int = -1
 	if Editor.eventIs(key, &"numberNegate"):
-		if value.eq(0): bufferedSign = bufferedSign.times(-1)
-		setValue(value.times(-1))
+		if M.nex(value): bufferedSign = M.negate(bufferedSign)
+		setValue(M.negate(value))
 	elif Editor.eventIs(key, &"numberTimesI"):
-		if value.eq(0): bufferedSign = bufferedSign.times(C.new(0,-1 if Input.is_key_pressed(KEY_SHIFT) else 1))
-		setValue(value.times(C.I))
+		if M.nex(value): bufferedSign = M.rotate(bufferedSign)
+		setValue(M.rotate(value))
 	else:
 		match key.keycode:
 			KEY_TAB: editor.focusDialog.tabbed(self)
@@ -61,13 +61,11 @@ func receiveKey(key:InputEventKey):
 			KEY_9, KEY_KP_9: number = 9
 			KEY_BACKSPACE:
 				theme_type_variation = &"NumberEditPanelContainerSelected"
-				if Input.is_key_pressed(KEY_CTRL) or newlyInteracted: setValue(C.ZERO)
+				if Input.is_key_pressed(KEY_CTRL) or newlyInteracted: setValue(M.ZERO)
 				else:
-					if (value.r.gt(-10) and value.r.lt(0)): bufferedSign = C.nONE
-					elif (value.i.gt(0) and value.i.lt(10)): bufferedSign = C.I
-					elif (value.i.gt(-10) and value.i.lt(0)): bufferedSign = C.nI
-					if value.eq(0): bufferedSign = C.ONE
-					setValue(C.new(value.divint(10)))
+					var axis:PackedInt64Array = M.axis(value)
+					setValue(M.divint(value, M.N(10)))
+					if M.nex(value): bufferedSign = axis
 				deNew()
 			KEY_UP: increment(); deNew()
 			KEY_DOWN: decrement(); deNew()
@@ -75,14 +73,14 @@ func receiveKey(key:InputEventKey):
 			_: return false
 	if number != -1:
 		if newlyInteracted:
-			bufferedSign = value.axis()
-			if bufferedSign.eq(0): bufferedSign = C.ONE
-			setValue(C.ZERO,true)
+			bufferedSign = M.axis(value)
+			if M.nex(bufferedSign): bufferedSign = M.ONE
+			setValue(M.ZERO,true)
 		deNew()
-		if value.axis().eq(0): setValue(bufferedSign.times(number))
-		else: setValue(value.times(10).plus(value.axis().times(bufferedSign).times(number)))
+		if M.nex(value): setValue(M.times(M.N(number), bufferedSign))
+		else: setValue(M.add(M.times(value, M.N(10)), M.times(M.N(number), M.times(M.axis(value), bufferedSign))))
 	return true
 
 func setZeroI() -> void:
-	bufferedSign = C.I
-	setValue(C.ZERO, true)
+	bufferedSign = M.I
+	setValue(M.ZERO, true)

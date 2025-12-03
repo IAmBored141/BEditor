@@ -52,8 +52,7 @@ func redo() -> void:
 		stackPosition += 1
 
 func copy(value:Variant) -> Variant:
-	if value is C || value is Q: return value.copy()
-	elif value is Array: return value.duplicate()
+	if value is Array or value is PackedInt64Array: return value.duplicate()
 	else: return value
 
 class Change extends RefCounted:

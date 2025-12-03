@@ -13,33 +13,34 @@ const PREDEFINED_IMAGINARY:Array[CONFIGURATION] = [CONFIGURATION.spr1A, CONFIGUR
 
 func getAvailableConfigurations() -> Array[Array]: return availableConfigurations(effectiveCount(), type)
 
-static func availableConfigurations(lockCount:C, lockType:TYPE) -> Array[Array]:
+static func availableConfigurations(lockCount:PackedInt64Array, lockType:TYPE) -> Array[Array]:
 	# returns Array[Array[SIZE_TYPE, CONFIGURATION]]
 	# SpecificA/H first, then SpecificB/V
 	var available:Array[Array] = []
 	if lockType != TYPE.NORMAL and lockType != TYPE.EXACT: return available
-	if lockCount.isNonzeroReal():
-		if lockCount.r.abs().eq(1): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
-		elif lockCount.r.abs().eq(2): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr2H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr2V])
-		elif lockCount.r.abs().eq(3): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr3H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr3V])
-		elif lockCount.r.abs().eq(4): available.append([SIZE_TYPE.AnyM, CONFIGURATION.spr4A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr4B])
-		elif lockCount.r.abs().eq(5): available.append([SIZE_TYPE.AnyM, CONFIGURATION.spr5A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr5B])
-		elif lockCount.r.abs().eq(6): available.append([SIZE_TYPE.AnyM, CONFIGURATION.spr6A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr6B])
-		elif lockCount.r.abs().eq(8): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr8A])
-		elif lockCount.r.abs().eq(12): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr12A])
-		elif lockCount.r.abs().eq(24):
+	var absCount:PackedInt64Array = M.acrabs(lockCount)
+	if M.isNonzeroReal(lockCount):
+		if M.eq(absCount, M.ONE): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
+		elif M.eq(absCount, M.N(2)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr2H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr2V])
+		elif M.eq(absCount, M.N(3)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr3H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr3V])
+		elif M.eq(absCount, M.N(4)): available.append([SIZE_TYPE.AnyM, CONFIGURATION.spr4A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr4B])
+		elif M.eq(absCount, M.N(5)): available.append([SIZE_TYPE.AnyM, CONFIGURATION.spr5A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr5B])
+		elif M.eq(absCount, M.N(6)): available.append([SIZE_TYPE.AnyM, CONFIGURATION.spr6A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr6B])
+		elif M.eq(absCount, M.N(8)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr8A])
+		elif M.eq(absCount, M.N(12)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr12A])
+		elif M.eq(absCount, M.N(24)):
 			available.append([SIZE_TYPE.AnyXL, CONFIGURATION.spr24A])
 			if Mods.active("MoreLockConfigs"): available.append([SIZE_TYPE.AnyXL, CONFIGURATION.spr24B])
 		elif Mods.active("MoreLockConfigs"):
-			if lockCount.r.abs().eq(7): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr7A])
-			elif lockCount.r.abs().eq(9): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr9A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr9B])
-			elif lockCount.r.abs().eq(10): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr10A])
-			elif lockCount.r.abs().eq(11): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr11A])
-			elif lockCount.r.abs().eq(13): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr13A])
-	elif lockCount.isNonzeroImag():
-		if lockCount.i.abs().eq(1): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
-		elif lockCount.i.abs().eq(2): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr2H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr2V])
-		elif lockCount.i.abs().eq(3): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr3H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr3V])
+			if M.eq(absCount, M.N(7)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr7A])
+			elif M.eq(absCount, M.N(9)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr9A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr9B])
+			elif M.eq(absCount, M.N(10)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr10A])
+			elif M.eq(absCount, M.N(11)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr11A])
+			elif M.eq(absCount, M.N(13)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr13A])
+	elif M.isNonzeroImag(lockCount):
+		if M.eq(absCount, M.I): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
+		elif M.eq(absCount, M.Ni(2)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr2H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr2V])
+		elif M.eq(absCount, M.Ni(3)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr3H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr3V])
 	return available
 
 const ANY_RECT:Rect2 = Rect2(Vector2.ZERO,Vector2(50,50)) # rect of ANY
@@ -52,8 +53,8 @@ const STRETCH:RenderingServer.NinePatchAxisMode = RenderingServer.NinePatchAxisM
 static var PREDEFINED_SPRITE_REAL:LockPredefinedTextureLoader = LockPredefinedTextureLoader.new("res://assets/game/lock/predefined/$p.png", PREDEFINED_REAL)
 static var PREDEFINED_SPRITE_IMAGINARY:LockPredefinedTextureLoader = LockPredefinedTextureLoader.new("res://assets/game/lock/predefined/$pi.png", PREDEFINED_IMAGINARY)
 
-static func getPredefinedLockSprite(lockCount:C, lockType:TYPE, lockConfiguration:CONFIGURATION) -> Texture2D:
-	if lockCount.isNonzeroImag(): return PREDEFINED_SPRITE_IMAGINARY.current([lockType==TYPE.EXACT,lockConfiguration])
+static func getPredefinedLockSprite(lockCount:PackedInt64Array, lockType:TYPE, lockConfiguration:CONFIGURATION) -> Texture2D:
+	if M.isNonzeroImag(lockCount): return PREDEFINED_SPRITE_IMAGINARY.current([lockType==TYPE.EXACT,lockConfiguration])
 	else: return PREDEFINED_SPRITE_REAL.current([lockType==TYPE.EXACT,lockConfiguration])
 
 const FRAME_HIGH:Texture2D = preload("res://assets/game/lock/frame/high.png")
@@ -115,10 +116,10 @@ var color:Game.COLOR = Game.COLOR.WHITE
 var type:TYPE = TYPE.NORMAL
 var configuration:CONFIGURATION = CONFIGURATION.spr1A
 var sizeType:SIZE_TYPE = SIZE_TYPE.AnyS
-var count:C = C.ONE
+var count:PackedInt64Array = M.ONE
 var zeroI:bool = false # if the count is zeroI, for exact locks
 var isPartial:bool = false # for partial blast
-var denominator:C = C.ONE # for partial blast
+var denominator:PackedInt64Array = M.ONE # for partial blast
 var negated:bool = false
 var armament:bool = false
 var index:int
@@ -163,7 +164,7 @@ func _draw() -> void:
 		getFrameDarkColor(isNegative(), negated),
 		isNegative(),
 		parent.animState != Door.ANIM_STATE.RELOCK or parent.animPart > 2,
-		Game.playState != Game.PLAY_STATE.EDIT and parent.ipow().across(Game.player.complexMode).eq(0)
+		Game.playState != Game.PLAY_STATE.EDIT and M.nex(M.across(parent.ipow(),Game.player.complexMode))
 	)
 
 static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch:RID, lockDrawMain:RID, lockDrawConfiguration:RID,
@@ -172,7 +173,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 	lockType:TYPE,
 	lockConfiguration:CONFIGURATION,
 	lockSizeType:SIZE_TYPE,
-	lockCount:C,
+	lockCount:PackedInt64Array,
 	lockZeroI:bool,
 	lockIsPartial:bool,
 	lockDenominator,
@@ -222,15 +223,15 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 	if lockConfiguration == CONFIGURATION.NONE:
 		match lockType:
 			TYPE.NORMAL,TYPE.EXACT:
-				var string:String = str(lockCount.abs())
+				var string:String = M.str(abs(lockCount))
 				if string == "1": string = ""
-				if lockCount.isNonzeroImag() and lockType == TYPE.NORMAL: string += "i"
+				if M.isNonzeroImag(lockCount) and lockType == TYPE.NORMAL: string += "i"
 				var lockOffsetX:float = 0
-				var showLock:bool = lockType == TYPE.EXACT || (!lockCount.isNonzeroImag() && (lockSize != Vector2(18,18) || string == ""))
+				var showLock:bool = lockType == TYPE.EXACT || (!M.isNonzeroImag(lockCount) && (lockSize != Vector2(18,18) || string == ""))
 				if lockType == TYPE.EXACT and !showLock: string = "=" + string
 				var vertical:bool = lockSize.x == 18 && lockSize.y != 18 && string != ""
 
-				var symbolLast:bool = lockType == TYPE.EXACT and lockCount.isNonzeroImag() and !vertical
+				var symbolLast:bool = lockType == TYPE.EXACT and M.isNonzeroImag(lockCount) and !vertical
 				if showLock and !vertical:
 					if lockType == TYPE.EXACT:
 						if symbolLast: lockOffsetX = 6
@@ -252,7 +253,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 					else: lockRect = Rect2(Vector2(startX+lockOffsetX/2,lockSize.y/2)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
 					var lockSymbol:Texture2D
 					if lockType == TYPE.NORMAL: lockSymbol = SYMBOL_NORMAL
-					elif lockCount.isNonzeroImag() or lockZeroI: lockSymbol = SYMBOL_EXACTI
+					elif M.isNonzeroImag(lockCount) or lockZeroI: lockSymbol = SYMBOL_EXACTI
 					else: lockSymbol = SYMBOL_EXACT
 					if lockNegated: lockRect = Rect2(lockSize-lockRect.position-lockRect.size-offsetFromType(lockSizeType)*2,lockRect.size)
 					RenderingServer.canvas_item_add_texture_rect(lockDrawConfiguration,lockRect,lockSymbol,false,getConfigurationColor(negative))
@@ -262,10 +263,10 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 			TYPE.BLAST, TYPE.ALL:
 				var numerator:String
 				var ipow:int = 0
-				if lockDenominator.isComplex() or lockCount.isComplex() or lockDenominator.eq(0): numerator = str(lockCount)
+				if M.isComplex(lockDenominator) or M.isComplex(lockCount) or M.nex(lockDenominator): numerator = M.str(lockCount)
 				else:
-					numerator = str(lockCount.over(lockDenominator.axisOrOne()))
-					ipow = lockDenominator.axis().toIpow()
+					numerator = M.str(M.divide(lockCount, M.axisOrOne(lockDenominator)))
+					ipow = M.toIpow(M.axis(lockDenominator))
 				if numerator == "1": numerator = ""
 				
 				const symbolOffsetX:float = 10
@@ -275,8 +276,8 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 				
 				if lockIsPartial:
 					var denom:String
-					if lockDenominator.isComplex() or lockCount.isComplex(): denom = str(lockDenominator)
-					else: denom = str(lockDenominator.abs())
+					if M.isComplex(lockDenominator) or M.isComplex(lockCount): denom = M.str(lockDenominator)
+					else: denom = M.str(M.abs(lockDenominator))
 					var denomWidth:float = Game.FTALK.get_string_size(denom,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 					var denomStartX = round((lockSize.x - denomWidth)/2)
 					var denomStartY = startY + 10
@@ -390,25 +391,24 @@ func propertyChangedInit(property:StringName) -> void:
 
 static func lockPropertyChangedInit(lock:GameComponent, property:StringName) -> void:
 	if property == &"type":
-		if (lock.type == TYPE.BLANK or (lock.type == TYPE.ALL and !Mods.active(&"C3"))) and lock.count.neq(1):
-			Changes.addChange(Changes.PropertyChange.new(lock,&"count",C.ONE))
+		if (lock.type == TYPE.BLANK or (lock.type == TYPE.ALL and !Mods.active(&"C3"))) and M.neq(lock.count, M.ONE):
+			Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.ONE))
 		if lock.type != TYPE.EXACT and lock.zeroI:
 			Changes.addChange(Changes.PropertyChange.new(lock,&"zeroI",false))
 		if lock.type == TYPE.BLAST:
 			if !Mods.active(&"C3"):
-				if lock.count.abs().neq(1): Changes.addChange(Changes.PropertyChange.new(lock,&"count",C.ONE if lock.count.eq(0) else lock.count.axis()))
-				if lock.denominator.axis().neq(lock.count.axis()): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator", lock.count.axis()))
+				if M.neq(M.abs(lock.count), M.ONE): Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.saxis(lock.count)))
+				if M.neq(M.axis(lock.denominator), M.axis(lock.count)): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator", M.axis(lock.count)))
 		elif lock.type == TYPE.ALL:
-			if !lock.isPartial and lock.denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",C.ONE))
+			if !lock.isPartial and M.neq(lock.denominator, M.ONE): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.ONE))
 		else:
-			if lock.denominator.neq(1): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",C.ONE))
+			if M.neq(lock.denominator, M.ONE): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.ONE))
 			if lock.isPartial: Changes.addChange(Changes.PropertyChange.new(lock,&"isPartial",false))
-			if lock.count.isComplex():
-				if lock.count.i.abs().gt(lock.count.r.abs()): Changes.addChange(Changes.PropertyChange.new(lock,&"count",C.new(0,lock.count.i)))
-				else: Changes.addChange(Changes.PropertyChange.new(lock,&"count",C.new(lock.count.r)))
+			if M.isComplex(lock.count):
+				Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.r(lock.count)))
 
 	if property == &"isPartial" and !lock.isPartial:
-		Changes.addChange(Changes.PropertyChange.new(lock,&"denominator", C.ONE if lock.count.isComplex() or lock.count.eq(0) or lock.type == TYPE.ALL else lock.count.axis()))
+		Changes.addChange(Changes.PropertyChange.new(lock,&"denominator", M.ONE if M.isComplex(lock.count) or M.nex(lock.count) or lock.type == TYPE.ALL else M.axis(lock.count)))
 
 func propertyChangedDo(property:StringName) -> void:
 	if property in [&"count", &"denominator"] and parent: parent.queue_redraw()
@@ -437,7 +437,7 @@ func colorAfterAurabreaker() -> Game.COLOR:
 
 func effectiveConfiguration() -> CONFIGURATION:
 	if Game.simpleLocks: return CONFIGURATION.NONE
-	if parent.ipow().neq(1):
+	if M.neq(parent.ipow(), M.ONE):
 		if parent.type == Door.TYPE.SIMPLE: return getAutoConfiguration(self)
 		else: return CONFIGURATION.NONE
 	else: return configuration
@@ -446,50 +446,50 @@ func canOpen(player:Player) -> bool: return getLockCanOpen(self, player)
 
 static func getLockCanOpen(lock:GameComponent,player:Player) -> bool:
 	var can:bool = true
-	var keyCount:C = player.key[lock.colorAfterAurabreaker()]
+	var keyCount:PackedInt64Array = player.key[lock.colorAfterAurabreaker()]
 	match lock.type:
-		TYPE.NORMAL: can = !keyCount.across(lock.effectiveCount().axis()).reduce().lt(lock.effectiveCount().abs())
-		TYPE.BLANK: can = keyCount.eq(0)
+		TYPE.NORMAL: can = M.nonNegative(M.minus(M.along(keyCount, lock.effectiveCount()), M.acrabs(lock.effectiveCount())))
+		TYPE.BLANK: can = M.nex(keyCount)
 		TYPE.BLAST:
-			if lock.effectiveDenominator().eq(0): can = false
-			elif lock.effectiveDenominator().r.neq(0) and !keyCount.r.times(lock.effectiveDenominator().r).gt(0): can = false
-			elif lock.effectiveDenominator().i.neq(0) and !keyCount.i.times(lock.effectiveDenominator().i).gt(0): can = false
+			if M.nex(lock.effectiveDenominator()): can = false
+			elif M.ex(M.r(lock.effectiveDenominator())) and M.nonPositive(M.times(M.r(keyCount), M.r(lock.effectiveDenominator()))): can = false
+			elif M.ex(M.i(lock.effectiveDenominator())) and M.nonPositive(M.times(M.ir(keyCount), M.ir(lock.effectiveDenominator()))): can = false
 			elif lock.isPartial:
-				if lock.effectiveDenominator().r.neq(0) and !keyCount.r.divides(lock.effectiveDenominator().r): can = false
-				elif lock.effectiveDenominator().i.neq(0) and !keyCount.i.divides(lock.effectiveDenominator().i): can = false
+				if M.ex(M.r(lock.effectiveDenominator())) and !M.divides(M.r(keyCount), M.r(lock.effectiveDenominator())): can = false
+				elif  M.ex(M.i(lock.effectiveDenominator())) and !M.divides(M.i(keyCount), M.i(lock.effectiveDenominator())): can = false
 		TYPE.ALL:
-			if lock.effectiveDenominator().eq(0): can = false
-			elif keyCount.eq(0): can = false
+			if M.nex(lock.effectiveDenominator()): can = false
+			elif M.nex(keyCount): can = false
 			elif lock.isPartial:
-				if keyCount.modulo(lock.effectiveDenominator()).neq(0): can = false
+				if !M.divides(keyCount, lock.effectiveDenominator()): can = false
 		TYPE.EXACT:
-			if lock.effectiveCount().eq(0):
-				if lock.zeroI: can = keyCount.i.eq(0)
-				else: can = keyCount.r.eq(0)
-			else: can = keyCount.across(lock.effectiveCount().axibs()).eq(lock.effectiveCount())
+			if M.nex(lock.effectiveCount()):
+				if lock.zeroI: can = M.nex(M.i(keyCount))
+				else: can = M.nex(M.r(keyCount))
+			else: can = M.eq(M.along(keyCount, lock.effectiveCount()), M.acrabs(lock.effectiveCount()))
 	return can != lock.negated
 
-func getCost(player:Player, ipow:C=parent.ipow()) -> C: return getLockCost(self, player, ipow)
+func getCost(player:Player, ipow:PackedInt64Array=parent.ipow()) -> PackedInt64Array: return getLockCost(self, player, ipow)
 
-static func getLockCost(lock:GameComponent, player:Player, ipow:C) -> C:
-	var cost:C = C.ZERO
+static func getLockCost(lock:GameComponent, player:Player, ipow:PackedInt64Array) -> PackedInt64Array:
+	var cost:PackedInt64Array = M.ZERO
 	match lock.type:
 		TYPE.NORMAL, TYPE.EXACT: cost = lock.effectiveCount(ipow)
-		TYPE.BLAST: if lock.effectiveDenominator(ipow).neq(0): cost = player.key[lock.colorAfterAurabreaker()].across(lock.effectiveDenominator(ipow).axibs()).times(lock.effectiveCount(ipow)).over(lock.effectiveDenominator(ipow))
-		TYPE.ALL: if lock.effectiveDenominator(ipow).neq(0): cost = player.key[lock.colorAfterAurabreaker()].times(lock.effectiveCount(ipow)).over(lock.effectiveDenominator(ipow))
-	if lock.negated: return cost.times(-1)
+		TYPE.BLAST: if M.ex(lock.effectiveDenominator(ipow)): cost = M.over(M.times(M.across(player.key[lock.colorAfterAurabreaker()], M.acrabs(lock.effectiveCount(ipow))), lock.effectiveCount(ipow)),lock.effectiveDenominator(ipow))
+		TYPE.ALL: if M.ex(lock.effectiveDenominator(ipow)): cost = M.over(M.times(player.key[lock.colorAfterAurabreaker()], lock.effectiveCount(ipow)),lock.effectiveDenominator(ipow))
+	if lock.negated: return M.negate(cost)
 	return cost
 
-func effectiveCount(ipow:C=parent.ipow()) -> C:
-	return count.times(ipow)
+func effectiveCount(ipow:PackedInt64Array=parent.ipow()) -> PackedInt64Array:
+	return M.times(count, ipow)
 
-func effectiveDenominator(ipow:C=parent.ipow()) -> C:
-	return denominator.times(ipow)
+func effectiveDenominator(ipow:PackedInt64Array=parent.ipow()) -> PackedInt64Array:
+	return M.times(denominator, ipow)
 
-func effectiveZeroI() -> bool: return zeroI != parent.ipow().isNonzeroImag()
+func effectiveZeroI() -> bool: return zeroI != M.isNonzeroImag(parent.ipow())
 
 func isNegative() -> bool:
 	if type in [TYPE.BLAST, TYPE.ALL]:
-		if count.isComplex() or denominator.isComplex(): return false
-		return effectiveDenominator().sign() < 0
-	return effectiveCount().sign() < 0
+		if M.isComplex(count) or M.isComplex(denominator): return false
+		return M.negative(M.sign(effectiveDenominator()))
+	return M.negative(M.sign(effectiveCount()))

@@ -34,6 +34,12 @@ func Ni(n:int) -> PackedInt64Array:
 func Nc(a:int,b:int) -> PackedInt64Array:
 	return [a, b]
 
+func Ncn(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
+	return [a[0], b[0]]
+
+func allAxes() -> PackedInt64Array:
+	return [1,1]
+
 # operators
 
 func add(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
@@ -57,8 +63,13 @@ func divide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	return [(a[0]*b[0]+a[1]*b[1])%(a[1]*a[1]*b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])%(a[1]*a[1]*b[1]*b[1])]
 
-func along(a:PackedInt64Array, bAxial:PackedInt64Array) -> PackedInt64Array:
-	return times(a, naxis(bAxial))
+func along(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: return across(a, axis(b))
+
+func negate(n:PackedInt64Array) -> PackedInt64Array:
+	return [-n[0], -n[1]]
+
+func rotate(n:PackedInt64Array) -> PackedInt64Array:
+	return [-n[1], n[0]]
 
 # reducers
 
@@ -67,6 +78,9 @@ func r(n:PackedInt64Array) -> PackedInt64Array:
 
 func i(n:PackedInt64Array) -> PackedInt64Array:
 	return [0 ,n[1]]
+
+func ir(n:PackedInt64Array) -> PackedInt64Array:
+	return [n[1], 0]
 
 func sign(n:PackedInt64Array) -> PackedInt64Array:
 	return [sign(n[0])+sign(n[1]), 0]
@@ -78,10 +92,6 @@ func reduce(n:PackedInt64Array) -> PackedInt64Array:
 	return [n[0]+n[1], 0]
 
 func axis(n:PackedInt64Array) -> PackedInt64Array:
-	return [sign(n[0]), sign(n[1])]
-
-# "not axis"; n:Axial, naxis(n) = 1/axis(n)
-func naxis(n:PackedInt64Array) -> PackedInt64Array:
 	return [sign(n[0]), sign(n[1])]
 
 # "safe axis"; 1 if would be 0
@@ -118,7 +128,16 @@ func ilt(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 
 func ilte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return !igt(a, b)
 
+func divides(a:PackedInt64Array, b:PackedInt64Array) -> bool: return nex(divide(a,b))
+
 # deciders
+
+# "exists"
+func ex(n:PackedInt64Array) -> bool:
+	return neq(n, ZERO)
+
+func nex(n:PackedInt64Array) -> bool:
+	return eq(n, ZERO)
 
 func isNonzeroReal(n:PackedInt64Array) -> bool:
 	return n[0] and !n[1]
@@ -133,16 +152,16 @@ func isComplex(n:PackedInt64Array) -> bool:
 	return n[0] and n[1]
 
 func positive(n:PackedInt64Array) -> bool:
-	return n[0] > 0 and n[1] > 0
+	return n[0] > 0
 
 func negative(n:PackedInt64Array) -> bool:
-	return n[0] < 0 and n[1] < 0
+	return n[0] < 0
 
 func nonPositive(n:PackedInt64Array) -> bool:
-	return n[0] <= 0 and n[1] <= 0
+	return n[0] <= 0
 
 func nonNegative(n:PackedInt64Array) -> bool:
-	return n[0] >= 0 and n[1] >= 0
+	return n[0] >= 0
 
 func hasPositive(n:PackedInt64Array) -> bool:
 	return n[0] > 0 or n[1] > 0
@@ -164,6 +183,10 @@ func toIPow(n:PackedInt64Array) -> int:
 	elif eq(n, nONE): return 2
 	elif eq(n, nI): return 3
 	else: assert(false); return 0
+
+# needs to work for 1 and -1
+func toInt(n:PackedInt64Array) -> int:
+	return n[0]
 
 func str(n:PackedInt64Array) -> String:
 	return strWithInf(n,ZERO)

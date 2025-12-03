@@ -19,8 +19,8 @@ func focus(focused:GameObject, new:bool, dontRedirect:bool) -> void: # Door or R
 		%frozen.button_pressed = focused.frozen
 		%crumbled.button_pressed = focused.crumbled
 		%painted.button_pressed = focused.painted
-		%realInfiniteCopy.button_pressed = focused.infCopies.r.eq(1)
-		%imaginaryInfiniteCopy.button_pressed = focused.infCopies.i.eq(1)
+		%realInfiniteCopy.button_pressed = M.ex(M.r(focused.infCopies))
+		%imaginaryInfiniteCopy.button_pressed = M.ex(M.i(focused.infCopies))
 		if !main.componentFocused:
 			%lockSettings.visible = false
 			%doorAxialNumberEdit.visible = false
@@ -66,8 +66,8 @@ func focusComponent(component:GameComponent, _new:bool) -> void: # Lock or Remot
 	if component is Lock: %doorAuraSettings.visible = false
 
 	%blastLockSettings.visible = component.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]
-	%blastLockSign.button_pressed = component.denominator.sign() < 0
-	%blastLockAxis.button_pressed = component.denominator.isNonzeroImag()
+	%blastLockSign.button_pressed = M.negative(M.sign(component.denominator))
+	%blastLockAxis.button_pressed = M.isNonzeroImag(component.denominator)
 	
 	%partialBlastSettings.visible = Mods.active(&"C3")
 	%isPartial.visible = Mods.active(&"C3")
@@ -162,12 +162,12 @@ func _doorColorSelected(color:Game.COLOR) -> void:
 		Changes.addChange(Changes.PropertyChange.new(main.focused,&"color",color))
 	Changes.bufferSave()
 
-func _doorCopiesSet(value:C) -> void:
+func _doorCopiesSet(value:PackedInt64Array) -> void:
 	if main.focused is not Door: return
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"copies",value))
 	Changes.bufferSave()
 
-func _doorAxialNumberSet(value:C) -> void:
+func _doorAxialNumberSet(value:PackedInt64Array) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
 	Changes.addChange(Changes.PropertyChange.new(lock,&"count",value))
@@ -233,13 +233,13 @@ func _lockNegatedSet(value:bool) -> void:
 	Changes.addChange(Changes.PropertyChange.new(lock,&"negated",value))
 	Changes.bufferSave()
 
-func partialBlastNumeratorSet(value:C) -> void:
+func partialBlastNumeratorSet(value:PackedInt64Array) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
 	Changes.addChange(Changes.PropertyChange.new(lock,&"count",value))
 	Changes.bufferSave()
 
-func partialBlastDenominatorSet(value:C) -> void:
+func partialBlastDenominatorSet(value:PackedInt64Array) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
 	Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",value))
@@ -254,27 +254,27 @@ func _isPartialSet(value:bool) -> void:
 func _blastLockSignSet(value:bool) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	if lock.denominator.sign() < 0 == value: return
-	Changes.addChange(Changes.PropertyChange.new(lock,&"count",lock.count.times(-1)))
-	Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",lock.denominator.times(-1)))
+	if M.negative(M.sign(lock.denominator)) == value: return
+	Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.negate(lock.count)))
+	Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.negate(lock.denominator)))
 	Changes.bufferSave()
 
 func _blastLockAxisSet(value:bool) -> void:
 	if main.componentFocused is not Lock and main.focused is not RemoteLock: return
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
-	if lock.denominator.isNonzeroImag() == value: return
-	Changes.addChange(Changes.PropertyChange.new(lock,&"count",lock.count.times(C.I if value else C.nI)))
-	Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",lock.denominator.times(C.I if value else C.nI)))
+	if M.isNonzeroImag(lock.denominator) == value: return
+	Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.times(lock.count, M.I if value else M.nI)))
+	Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.times(lock.denominator, M.I if value else M.nI)))
 	Changes.bufferSave()
 
 func _doorRealInfiniteSet(value:bool) -> void:
 	if main.focused is not Door: return
-	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infCopies",C.new(int(value), main.focused.infCopies.i)))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infCopies",M.Ncn(M.N(int(value)), M.ir(main.focused.infCopies))))
 	Changes.bufferSave()
 
 func _doorImaginaryInfiniteSet(value:bool) -> void:
 	if main.focused is not Door: return
-	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infCopies",C.new(main.focused.infCopies.r, int(value))))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infCopies",M.Ncn(M.r(main.focused.infCopies), M.N(int(value)))))
 	Changes.bufferSave()
 
 func _lockArmamentSet(value:bool) -> void:

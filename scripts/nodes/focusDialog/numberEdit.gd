@@ -5,11 +5,11 @@ enum PURPOSE {SINGLE, REAL, IMAGINARY, AXIAL}
 
 @onready var editor:Editor = get_node("/root/editor")
 
-signal valueSet(value:int)
+signal valueSet(value:M)
 
 var newlyInteracted:bool = false
 
-var value:C = C.new(0)
+var value:PackedInt64Array = M.ZERO
 var bufferedNegative:bool = false # since -0 cant exist, activate it when the number is set
 var purpose:PURPOSE = PURPOSE.SINGLE
 
@@ -19,16 +19,16 @@ func _ready() -> void:
 func _gui_input(event:InputEvent) -> void:
 	if Editor.isLeftClick(event): editor.focusDialog.interact(self)
 
-func setValue(_value:C, manual:bool=false) -> void:
+func setValue(_value:PackedInt64Array, manual:bool=false) -> void:
 	value = _value
-	if bufferedNegative and value.n != 0:
+	if bufferedNegative and M.ex(value):
 		bufferedNegative = false
 	if bufferedNegative: %drawText.text = "-0"
-	else: %drawText.text = str(value)
-	if !manual: valueSet.emit(value.r.n)
+	else: %drawText.text = M.str(value)
+	if !manual: valueSet.emit(value)
 
-func increment() -> void: setValue(value.plus(1))
-func decrement() -> void: setValue(value.minus(1))
+func increment() -> void: setValue(M.plus(value, M.ONE))
+func decrement() -> void: setValue(M.minus(value, M.ONE))
 
 func deNew():
 	newlyInteracted = false
@@ -39,8 +39,8 @@ func receiveKey(key:InputEventKey):
 	if Editor.eventIs(key, &"numberTimesI"):
 		if get_parent() is ComplexNumberEdit: get_parent().rotate()
 	elif Editor.eventIs(key, &"numberNegate"):
-		if value.n == 0: bufferedNegative = !bufferedNegative
-		setValue(value.times(-1))
+		if M.nex(value): bufferedNegative = !bufferedNegative
+		setValue(M.negate(value))
 	else:
 		match key.keycode:
 			KEY_TAB: editor.focusDialog.tabbed(self)
@@ -58,11 +58,11 @@ func receiveKey(key:InputEventKey):
 			KEY_9, KEY_KP_9: number = 9
 			KEY_BACKSPACE:
 				theme_type_variation = &"NumberEditPanelContainerSelected"
-				if Input.is_key_pressed(KEY_CTRL) or newlyInteracted: setValue(C.new(0))
+				if Input.is_key_pressed(KEY_CTRL) or newlyInteracted: setValue(M.ZERO)
 				else:
-					if value.gt(-10) and value.lt(0): bufferedNegative = true
-					if value.eq(0): bufferedNegative = false
-					setValue(value.divint(10))
+					var negative:bool = M.negative(value)
+					setValue(M.divint(value,M.N(10)))
+					if M.nex(value): bufferedNegative = negative
 				deNew()
 			KEY_UP: increment(); deNew()
 			KEY_DOWN: decrement(); deNew()
@@ -70,9 +70,9 @@ func receiveKey(key:InputEventKey):
 			_: return false
 	if number != -1:
 		if newlyInteracted:
-			if value.lt(0): bufferedNegative = true
-			setValue(C.new(0),true)
+			if M.negative(value): bufferedNegative = true
+			setValue(M.ZERO,true)
 		deNew()
-		if value.lt(0) || bufferedNegative: setValue(value.times(10).minus(number))
-		else: setValue(value.times(10).plus(number))
+		if M.negative(value) != bufferedNegative: setValue(M.sub(M.times(value,M.N(10)), M.N(number)))
+		else: setValue(M.add(M.times(value,M.N(10)), M.N(number)))
 	return true

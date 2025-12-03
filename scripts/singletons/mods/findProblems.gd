@@ -88,22 +88,22 @@ func findProblems(component:GameComponent) -> void:
 						Lock.CONFIGURATION.spr24B
 					])
 			if &"ZeroCostLock" in modsWindow.modsRemoved:
-				noteProblem(&"ZeroCostLock", &"ZeroCostLock", component, component.count.eq(0))
+				noteProblem(&"ZeroCostLock", &"ZeroCostLock", component, M.nex(component.count))
 			if &"C1" in modsWindow.modsRemoved:
 				noteProblem(&"C1", &"RemoteLock", component, component is RemoteLock)
 				noteProblem(&"C1", &"LockNegated", component, component.negated)
 			if &"C3" in modsWindow.modsRemoved:
 				noteProblem(&"C3", &"ExactLock", component, component.type == Lock.TYPE.EXACT)
-				noteProblem(&"C3", &"PartialBlastLock", component, component.type == Lock.TYPE.BLAST and (component.isPartial or component.count.neq(component.denominator)))
-				noteProblem(&"C3", &"PartialBlastLock", component, component.type == Lock.TYPE.ALL and (component.isPartial or component.count.neq(1) or component.denominator.neq(1)))
+				noteProblem(&"C3", &"PartialBlastLock", component, component.type == Lock.TYPE.BLAST and (component.isPartial or M.neq(component.count, component.denominator)))
+				noteProblem(&"C3", &"PartialBlastLock", component, component.type == Lock.TYPE.ALL and (component.isPartial or M.neq(component.count, M.ONE) or M.neq(component.denominator, M.ONE)))
 			if &"C5" in modsWindow.modsRemoved:
 				noteProblem(&"C5", &"LockArmament", component, component.armament)
 		Door:
 			findColorProblems(component, component.colorSpend)
 			if &"ZeroCopies" in modsWindow.modsRemoved:
-				noteProblem(&"ZeroCopies", &"ZeroCopies", component, component.copies.eq(0))
+				noteProblem(&"ZeroCopies", &"ZeroCopies", component, M.nex(component.copies))
 			if &"InfCopies" in modsWindow.modsRemoved:
-				noteProblem(&"InfCopies", &"InfCopies", component, component.infCopies.neq(0))
+				noteProblem(&"InfCopies", &"InfCopies", component, M.ex(component.infCopies))
 		KeyCounterElement:
 			findColorProblems(component, component.color)
 
