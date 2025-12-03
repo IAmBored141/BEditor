@@ -5,11 +5,11 @@ enum PURPOSE {SINGLE, REAL, IMAGINARY, AXIAL}
 
 @onready var editor:Editor = get_node("/root/editor")
 
-signal valueSet(value:Q)
+signal valueSet(value:int)
 
 var newlyInteracted:bool = false
 
-var value:Q = Q.new(0)
+var value:C = C.new(0)
 var bufferedNegative:bool = false # since -0 cant exist, activate it when the number is set
 var purpose:PURPOSE = PURPOSE.SINGLE
 
@@ -19,13 +19,13 @@ func _ready() -> void:
 func _gui_input(event:InputEvent) -> void:
 	if Editor.isLeftClick(event): editor.focusDialog.interact(self)
 
-func setValue(_value:Q, manual:bool=false) -> void:
+func setValue(_value:C, manual:bool=false) -> void:
 	value = _value
 	if bufferedNegative and value.n != 0:
 		bufferedNegative = false
 	if bufferedNegative: %drawText.text = "-0"
-	else: %drawText.text = str(value.n)
-	if !manual: valueSet.emit(value.n)
+	else: %drawText.text = str(value)
+	if !manual: valueSet.emit(value.r.n)
 
 func increment() -> void: setValue(value.plus(1))
 func decrement() -> void: setValue(value.minus(1))
@@ -58,11 +58,11 @@ func receiveKey(key:InputEventKey):
 			KEY_9, KEY_KP_9: number = 9
 			KEY_BACKSPACE:
 				theme_type_variation = &"NumberEditPanelContainerSelected"
-				if Input.is_key_pressed(KEY_CTRL) or newlyInteracted: setValue(Q.new(0))
+				if Input.is_key_pressed(KEY_CTRL) or newlyInteracted: setValue(C.new(0))
 				else:
-					if value.n > -10 and value.n < 0: bufferedNegative = true
-					if value.n == 0: bufferedNegative = false
-					@warning_ignore("integer_division") setValue(Q.new(value.n/10))
+					if value.gt(-10) and value.lt(0): bufferedNegative = true
+					if value.eq(0): bufferedNegative = false
+					setValue(value.divint(10))
 				deNew()
 			KEY_UP: increment(); deNew()
 			KEY_DOWN: decrement(); deNew()
@@ -71,8 +71,8 @@ func receiveKey(key:InputEventKey):
 	if number != -1:
 		if newlyInteracted:
 			if value.lt(0): bufferedNegative = true
-			setValue(Q.new(0),true)
+			setValue(C.new(0),true)
 		deNew()
-		if value.n < 0 || bufferedNegative: setValue(Q.new(value.n*10-number))
-		else: setValue(Q.new(value.n*10+number))
+		if value.lt(0) || bufferedNegative: setValue(value.times(10).minus(number))
+		else: setValue(value.times(10).plus(number))
 	return true

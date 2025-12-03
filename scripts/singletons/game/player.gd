@@ -290,14 +290,14 @@ func checkKeys() -> void:
 	explodey = key[Game.COLOR.DYNAMITE].neq(0) and Game.COLOR.DYNAMITE not in armamentImmunities
 
 	curseMode = 0
-	var highestSeen:Q = Q.ZERO
+	var highestSeen:C = C.ZERO
 	if Game.COLOR.PURE not in armamentImmunities:
 		for color in Game.COLORS:
 			if !curse[color] or key[color].r.eq(0) or color in armamentImmunities: continue
 			# tie
 			if key[color].r.abs().eq(highestSeen): curseMode = 0
 			elif key[color].r.abs().gt(highestSeen):
-				highestSeen = key[color].r.abs()
+				highestSeen = C.new(key[color].r.abs())
 				curseMode = key[color].r.sign()
 				curseColor = color as Game.COLOR
 

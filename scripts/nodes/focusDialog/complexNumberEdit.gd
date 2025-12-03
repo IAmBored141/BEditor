@@ -15,8 +15,8 @@ func _ready() -> void:
 
 func setValue(_value:C,manual:bool=false) -> void:
 	value = _value
-	realEdit.setValue(value.r, true)
-	imaginaryEdit.setValue(value.i, true)
+	realEdit.setValue(C.new(value.r), true)
+	imaginaryEdit.setValue(C.new(value.i), true)
 
 	if !manual: valueSet.emit(value)
 
