@@ -783,5 +783,6 @@ toneButtonGroup = SubResource("ButtonGroup_tyaol")
 [connection signal="focus_exited" from="c/levelSettings/c/followWorld/c/c/levelAuthor" to="." method="_defocus"]
 [connection signal="text_changed" from="c/levelSettings/c/followWorld/c/c/levelAuthor" to="." method="_levelAuthorSet"]
 [connection signal="text_changed" from="c/levelSettings/c/followWorld/description/c/c/c/levelDescription" to="." method="_levelDescriptionSet"]
+[connection signal="text_changed" from="c/levelSettings/c/followWorld/description/c/c2/levelShortNumber" to="." method="_levelShortNumberSet"]
 [connection signal="toggled" from="c/editorSettings/c2/c/fileDialogWorkaroundCont/fileDialogWorkaround" to="." method="_fileDialogWorkaroundSet"]
 [connection signal="toggled" from="c/editorSettings/c2/c/fullscreen" to="." method="_fullscreenSet"]

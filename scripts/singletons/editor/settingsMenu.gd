@@ -65,6 +65,15 @@ func _levelAuthorSet(string:String) -> void:
 	Game.anyChanges = true
 	queue_redraw()
 
+func _levelDescriptionSet():
+	Game.level.description = %levelDescription.text
+	Game.anyChanges = true
+
+func _levelShortNumberSet(string:String) -> void:
+	Game.level.shortNumber = string
+	Game.anyChanges = true
+	queue_redraw()
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(textDraw)
 	if %levelSettings.visible:
@@ -81,12 +90,12 @@ func _defocus() -> void:
 
 func opened() -> void:
 	updateLevelSettingsPosition()
-	configFile.load("user://config.ini")
 	%levelNumber.text = Game.level.number
 	%levelName.text = Game.level.name
 	%levelAuthor.text = Game.level.author
 	%levelDescription.text = Game.level.description
 	%levelShortNumber.text = Game.level.shortNumber
+	configFile.load("user://config.ini")
 	%fileDialogWorkaround.button_pressed = configFile.get_value("editor", "fileDialogWorkaround", false)
 	%fullscreen.button_pressed = configFile.get_value("editor", "fullscreen", false)
 	for setting in get_tree().get_nodes_in_group("hotkeySetting"):
@@ -113,7 +122,3 @@ func _fileDialogWorkaroundSet(toggled_on:bool) -> void:
 
 func _fullscreenSet(toggled_on:bool) -> void:
 	get_window().mode = Window.MODE_FULLSCREEN if toggled_on else Window.MODE_WINDOWED
-
-func _levelDescriptionSet():
-	Game.level.description = %levelDescription.text
-	Game.anyChanges = true

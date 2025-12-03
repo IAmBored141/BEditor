@@ -29,6 +29,7 @@ AudioManager="*res://scripts/singletons/game/audioManager.gd"
 Saving="*res://scripts/singletons/saving/saving.gd"
 Explainer="*res://scripts/singletons/editor/explainer.gd"
 Game="*res://scripts/singletons/game/game.gd"
+M="*res://scripts/singletons/math.gd"
 
 [display]
 

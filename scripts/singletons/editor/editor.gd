@@ -524,10 +524,6 @@ func _draw() -> void:
 			Color(Color.BLACK,autoRunAlpha),12,Vector2(4,20)
 		)
 
-func _levelShortNumberSet(string:String) -> void:
-	Game.level.shortNumber = string
-	queue_redraw()
-
 func autoRun() -> void:
 	Game.autoRun = !Game.autoRun
 	AudioManager.play(preload("res://resources/sounds/autoRun.wav"), 1.0, 1.0 if Game.autoRun else 0.7)
