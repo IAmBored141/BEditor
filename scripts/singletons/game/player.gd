@@ -81,6 +81,7 @@ var crashAnimVal:float = 0
 
 var cameraMode:bool = false
 var cameraAnimVal:float = 0
+var cameraZoomTarget:float = 1
 
 func _ready() -> void:
 	drawDropShadow = RenderingServer.canvas_item_create()
@@ -133,8 +134,8 @@ func _physics_process(_delta:float) -> void:
 		if cameraAnimVal > 0.99: cameraAnimVal = 1
 		Game.camera.position.x += Input.get_axis(&"gameLeft", &"gameRight") * 5
 		Game.camera.position.y += Input.get_axis(&"gameUp", &"gameDown") * 5
-		var screenSize:Vector2 = Vector2(800, 608)
-		if Game.editor: screenSize = Game.editor.gameCont.size
+		var screenSize:Vector2 = Vector2(800, 608) / Game.camera.zoom
+		if Game.editor: screenSize = Game.editor.gameCont.size / Game.camera.zoom
 		@warning_ignore("narrowing_conversion") var levelBoundsInner:Rect2 = Game.levelBounds.grow_individual(-0.5*screenSize.x,-0.5*screenSize.y,-0.5*screenSize.x,-0.5*screenSize.y)
 		Game.camera.position = Game.camera.position.clamp(levelBoundsInner.position, levelBoundsInner.end)
 	else:
@@ -143,6 +144,8 @@ func _physics_process(_delta:float) -> void:
 			cameraAnimVal = 0
 			if Game.playGame: Game.playGame.queue_redraw()
 		Game.camera.position = position
+	var scaleFactor:float = (cameraZoomTarget/Game.camera.zoom.x)**0.1
+	Game.camera.zoom *= scaleFactor
 
 	var xSpeed:float = 6
 	if Input.is_action_pressed(&"gameWalk"): xSpeed = 1
@@ -220,7 +223,19 @@ func receiveKey(event:InputEventKey):
 	elif Editor.eventIs(event, &"editStopPlaytest") and Game.editor: Game.stopTest()
 	elif Editor.eventIs(event, &"gameRestart"): Game.restart()
 	elif Editor.eventIs(event, &"gameUndo") and !cameraMode and GameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav"), 1, 0.6)
-	elif Editor.eventIs(event, &"gameAction"): cycleMaster()
+	elif Editor.eventIs(event, &"gameAction"):
+		if cameraMode:
+			if Game.levelBounds.size == Vector2i(800, 608): return
+			if cameraZoomTarget == 1:
+				AudioManager.play(preload("res://resources/sounds/player/camera.wav"),1,1.5)
+				var screenSize:Vector2 = Vector2(800, 608)
+				if Game.editor: screenSize = Game.editor.gameCont.size
+				var screenWidths:Vector2 = Vector2(Game.levelBounds.size)/screenSize
+				cameraZoomTarget = 1/min(screenWidths.x, screenWidths.y)
+			else:
+				AudioManager.play(preload("res://resources/sounds/player/camera.wav"),1,0.75)
+				cameraZoomTarget = 1
+		else: cycleMaster()
 	elif Editor.eventIs(event, &"gameComplexSwitch") and !cameraMode: complexSwitch()
 	elif Editor.eventIs(event, &"gameCamera") and Game.levelBounds.size != Vector2i(800,608): toggleCamera()
 	match event.keycode:
@@ -386,4 +401,5 @@ func _draw() -> void:
 
 func toggleCamera() -> void:
 	cameraMode = !cameraMode
+	cameraZoomTarget = 1
 	AudioManager.play(preload("res://resources/sounds/player/camera.wav"))

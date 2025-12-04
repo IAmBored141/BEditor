@@ -251,6 +251,7 @@ func fasterAnims() -> void:
 func playTest(spawn:PlayerSpawn) -> void:
 	var starting:bool = false
 	if playState == PLAY_STATE.EDIT:
+		camera.zoom = Vector2.ONE
 		starting = true
 		player = preload("res://scenes/player.tscn").instantiate()
 		world.add_child(player)
