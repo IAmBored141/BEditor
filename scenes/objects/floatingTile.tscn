@@ -12,5 +12,6 @@ metadata/_custom_type_script = "uid://bkp3fklu8mlnk"
 [node name="collision" type="StaticBody2D" parent="."]
 
 [node name="shape" type="CollisionShape2D" parent="collision"]
+unique_name_in_owner = true
 position = Vector2(16, 16)
 shape = SubResource("RectangleShape2D_simke")

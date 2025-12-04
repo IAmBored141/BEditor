@@ -125,7 +125,7 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawCopies)
 	RenderingServer.canvas_item_clear(drawNegative)
 	if !active and Game.playState == Game.PLAY_STATE.PLAY: return
-	RenderingServer.canvas_item_add_rect(drawDropShadow,Rect2(Vector2(3,3),size),Game.DROP_SHADOW_COLOR)
+	if type != TYPE.GATE: RenderingServer.canvas_item_add_rect(drawDropShadow,Rect2(Vector2(3,3),size),Game.DROP_SHADOW_COLOR)
 	drawDoor(drawScaled,drawAuraBreaker,drawGlitch,drawMain,
 		size,colorAfterCurse(),colorAfterGlitch(),type,
 		gateAlpha,

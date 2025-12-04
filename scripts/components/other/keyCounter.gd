@@ -44,7 +44,7 @@ func _ready() -> void:
 	drawMain = RenderingServer.canvas_item_create()
 	drawGlitch = RenderingServer.canvas_item_create()
 	RenderingServer.canvas_item_set_material(drawGlitch,Game.GLITCH_MATERIAL.get_rid())
-	RenderingServer.canvas_item_set_z_index(drawDropShadow,-2)
+	RenderingServer.canvas_item_set_z_index(drawDropShadow,0)
 	RenderingServer.canvas_item_set_parent(drawDropShadow,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawGlitch,get_canvas_item())

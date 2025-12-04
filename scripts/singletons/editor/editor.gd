@@ -311,6 +311,7 @@ func startSizeDrag(component:GameComponent, handle:Vector2=Vector2(1,1)) -> void
 	if component is Door: minSize = Vector2(32,32)
 	elif component is Lock or component is RemoteLock: minSize = Vector2(18,18)
 	elif component is KeyCounter: minSize = Vector2(107,63)
+	elif component is FloatingTile: minSize = Vector2(16,16)
 	elif component == levelBoundsComponent: minSize = Vector2(800, 608)
 	if handle.x and handle.y: dragMode = DRAG_MODE.SIZE_DIAG
 	elif handle.x: dragMode = DRAG_MODE.SIZE_HORIZ; minSize.y = componentDragged.size.y
