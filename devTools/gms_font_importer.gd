@@ -13,6 +13,7 @@ const fonts_path := "res://resources/fonts/"
 	set(val):
 		if convert_font == val: return
 		convert_font = val
+		print("here")
 		_convert()
 
 func _ready() -> void:

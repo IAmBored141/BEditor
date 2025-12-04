@@ -40,6 +40,7 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawMain, %drawParent.get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawAutoRunGradient, %drawParent.get_canvas_item())
 	Game.playGame = self
+	Game.camera = playCamera
 
 func _process(delta:float) -> void:
 	textWiggleAngle += 5.8643062867*delta # 5.6 degrees per frame, 60fps
@@ -108,6 +109,7 @@ func _process(delta:float) -> void:
 		autoRunTimer += delta
 		queue_redraw()
 		if autoRunTimer >= 2: autoRunTimer = 2
+	if Game.player.cameraAnimVal > 0: queue_redraw()
 	if !paused: Game.playTime += delta
 	var objectHovered:GameObject
 	var mouseWorldPosition = %world.get_local_mouse_position()
@@ -150,6 +152,19 @@ func _draw() -> void:
 			Color(Color("#e6c896") if Game.autoRun else Color("#64dc8c"),autoRunAlpha),
 			Color(Color.BLACK,autoRunAlpha),12,Vector2(4,20)
 		)
+	if Game.player.cameraAnimVal > 0:
+		var topLeft:Vector2 = - Vector2(8,8) + Vector2(16,16)*Game.player.cameraAnimVal
+		var bottomRight:Vector2 = Vector2(808,616) - Vector2(16,16)*Game.player.cameraAnimVal
+		RenderingServer.canvas_item_add_polyline(drawMain, [
+			topLeft, Vector2(bottomRight.x, topLeft.y), bottomRight, Vector2(topLeft.x, bottomRight.y), topLeft, topLeft+Vector2(1,0)
+		], [Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK])
+		topLeft -= Vector2(4,4)
+		bottomRight += Vector2(4,4)
+		RenderingServer.canvas_item_add_polyline(drawMain, [
+			topLeft, Vector2(bottomRight.x, topLeft.y), bottomRight, Vector2(topLeft.x, bottomRight.y), topLeft, topLeft+Vector2(1,0)
+		], [Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK])
+		TextDraw.outlined(Game.FPRESENTS, drawMain, "[%s] to zoom" % Explainer.hotkeyMap(&"gameAction"),Color(Color.WHITE,Game.player.cameraAnimVal),Color(Color.BLACK,Game.player.cameraAnimVal),14,Vector2(11,592))
+		TextDraw.outlined(Game.FPRESENTS, drawMain, "[%s] to exit" % Explainer.hotkeyMap(&"gameCamera"),Color(Color.WHITE,Game.player.cameraAnimVal),Color(Color.BLACK,Game.player.cameraAnimVal),14,Vector2(692,592),true)
 
 func _input(event:InputEvent) -> void:
 	if event is InputEventKey and event.is_pressed():

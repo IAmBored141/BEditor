@@ -55,7 +55,7 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawGlitch)
 	var rect:Rect2 = Rect2(Vector2.ZERO, size)
 	var textureRect:Rect2 = Rect2(Vector2.ZERO, Vector2(size.x, 63))
-	RenderingServer.canvas_item_add_rect(drawDropShadow,Rect2(Vector2(3,3),size),Game.DROP_SHADOW_COLOR)
+	RenderingServer.canvas_item_add_nine_patch(drawMain,Rect2(Vector2(2,2),size),textureRect,getSprite(),TOP_LEFT,BOTTOM_RIGHT,TILE,TILE,true,Color("#808080"))
 	RenderingServer.canvas_item_add_nine_patch(drawMain,rect,textureRect,getSprite(),TOP_LEFT,BOTTOM_RIGHT,TILE,TILE,true)
 
 func receiveMouseInput(event:InputEventMouse) -> bool:

@@ -79,6 +79,9 @@ var crashAnimHue:float = 0
 var crashAnimSat:float = 0
 var crashAnimVal:float = 0
 
+var cameraMode:bool = false
+var cameraAnimVal:float = 0
+
 func _ready() -> void:
 	drawDropShadow = RenderingServer.canvas_item_create()
 	drawWarp = RenderingServer.canvas_item_create()
@@ -125,11 +128,28 @@ func _physics_process(_delta:float) -> void:
 		else: %sprite.pause()
 		return
 	
+	if cameraMode:
+		cameraAnimVal += (1-cameraAnimVal) * 0.1
+		if cameraAnimVal > 0.99: cameraAnimVal = 1
+		Game.camera.position.x += Input.get_axis(&"gameLeft", &"gameRight") * 5
+		Game.camera.position.y += Input.get_axis(&"gameUp", &"gameDown") * 5
+		var screenSize:Vector2 = Vector2(800, 608)
+		if Game.editor: screenSize = Game.editor.gameCont.size
+		@warning_ignore("narrowing_conversion") var levelBoundsInner:Rect2 = Game.levelBounds.grow_individual(-0.5*screenSize.x,-0.5*screenSize.y,-0.5*screenSize.x,-0.5*screenSize.y)
+		Game.camera.position = Game.camera.position.clamp(levelBoundsInner.position, levelBoundsInner.end)
+	else:
+		cameraAnimVal += (0-cameraAnimVal) * 0.1
+		if cameraAnimVal < 0.01:
+			cameraAnimVal = 0
+			if Game.playGame: Game.playGame.queue_redraw()
+		Game.camera.position = position
+
 	var xSpeed:float = 6
 	if Input.is_action_pressed(&"gameWalk"): xSpeed = 1
 	elif !is_on_floor() or (Input.is_action_pressed(&"gameRun") == Game.autoRun): xSpeed = 3
 	var moveDirection:float = Input.get_axis(&"gameLeft", &"gameRight")
-	velocity.x = xSpeed*FPS*moveDirection
+	if cameraMode: velocity.x = 0
+	else: velocity.x = xSpeed*FPS*moveDirection
 
 	if pauseFrame:
 		pauseFrame = false
@@ -169,11 +189,11 @@ func _physics_process(_delta:float) -> void:
 
 	move_and_slide()
 
-	if moveDirection: %sprite.flip_h = moveDirection < 0
+	if moveDirection and !cameraMode: %sprite.flip_h = moveDirection < 0
 
 	if velocity.y <= -0.05*FPS: %sprite.play("jump")
 	elif velocity.y >= 0.05*FPS: %sprite.play("fall")
-	elif moveDirection: %sprite.play("run")
+	elif moveDirection and !cameraMode: %sprite.play("run")
 	else: %sprite.play("idle")
 
 func _process(delta:float) -> void:
@@ -199,9 +219,10 @@ func receiveKey(event:InputEventKey):
 	if Editor.eventIs(event, &"editPausePlaytest") and Game.editor: Game.pauseTest()
 	elif Editor.eventIs(event, &"editStopPlaytest") and Game.editor: Game.stopTest()
 	elif Editor.eventIs(event, &"gameRestart"): Game.restart()
-	elif Editor.eventIs(event, &"gameUndo") and GameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav"), 1, 0.6)
+	elif Editor.eventIs(event, &"gameUndo") and !cameraMode and GameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav"), 1, 0.6)
 	elif Editor.eventIs(event, &"gameAction"): cycleMaster()
-	elif Editor.eventIs(event, &"gameComplexSwitch"): complexSwitch()
+	elif Editor.eventIs(event, &"gameComplexSwitch") and !cameraMode: complexSwitch()
+	elif Editor.eventIs(event, &"gameCamera") and Game.levelBounds.size != Vector2i(800,608): toggleCamera()
 	match event.keycode:
 		KEY_U: print(GameChanges.undoStack)
 
@@ -362,3 +383,7 @@ func _draw() -> void:
 	if complexSwitchAnim:
 		var switchScale:float = sin(complexSwitchAngle)
 		RenderingServer.canvas_item_add_texture_rect(drawComplexSwitch,Rect2(Vector2(-64*switchScale,-64*switchScale),Vector2(128*switchScale,128*switchScale)),CurseParticle.TEXTURE_GENERIC,false,Color(Color.WHITE,cos(complexSwitchAngle)))
+
+func toggleCamera() -> void:
+	cameraMode = !cameraMode
+	AudioManager.play(preload("res://resources/sounds/player/camera.wav"))

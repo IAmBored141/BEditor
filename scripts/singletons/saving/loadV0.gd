@@ -35,7 +35,7 @@ static var PROPERTIES:Dictionary[GDScript,Array] = {
 		&"id", &"position", &"size",
 	],
 	FloatingTile: [
-		&"id", &"position",
+		&"id", &"position", &"size",
 	],
 	RemoteLock: [
 		&"id", &"position", &"size",

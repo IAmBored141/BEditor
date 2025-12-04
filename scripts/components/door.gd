@@ -277,6 +277,8 @@ func propertyChangedDo(property:StringName) -> void:
 	super(property)
 	if editor and property == &"type" and editor.findProblems:
 		for lock in locks: editor.findProblems.findProblems(lock)
+	if property == &"type":
+		z_index = 7 if type == TYPE.GATE else 0
 	if property in [&"size", &"type"]:
 		%shape.shape.size = size
 		%shape.position = size/2

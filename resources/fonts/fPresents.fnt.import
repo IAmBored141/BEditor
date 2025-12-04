@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://dysqhd0h4peqk"
+path="res://.godot/imported/fPresents.fnt-53943cee40b9840ce8448e7bdbd2b85e.fontdata"
+
+[deps]
+
+source_file="res://resources/fonts/fPresents.fnt"
+dest_files=["res://.godot/imported/fPresents.fnt-53943cee40b9840ce8448e7bdbd2b85e.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

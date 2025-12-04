@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://br4e21jc0gv8o"]
+[gd_scene load_steps=13 format=3 uid="uid://br4e21jc0gv8o"]
 
 [ext_resource type="Script" uid="uid://bkauup2it2tfp" path="res://scripts/singletons/game/playGame.gd" id="1_abwwd"]
 [ext_resource type="PackedScene" uid="uid://2hd65vn44me7" path="res://scenes/world.tscn" id="2_abwwd"]
@@ -15,6 +15,9 @@ bg_color = Color(0, 0, 0, 1)
 shader = ExtResource("3_wfiui")
 shader_parameter/pauseAnimTimer = 0.0
 shader_parameter/darken = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y4ge2"]
+bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wfiui"]
 bg_color = Color(0.15727392, 0.15727398, 0.15727389, 1)
@@ -50,6 +53,14 @@ size = Vector2i(820, 623)
 size_2d_override = Vector2i(800, 608)
 size_2d_override_stretch = true
 render_target_update_mode = 4
+
+[node name="Panel" type="Panel" parent="aspectRatioContainer/gameViewportCont/gameViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_y4ge2")
 
 [node name="worldViewportCont" type="SubViewportContainer" parent="aspectRatioContainer/gameViewportCont/gameViewport"]
 unique_name_in_owner = true

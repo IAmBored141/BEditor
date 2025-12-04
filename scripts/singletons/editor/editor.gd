@@ -82,6 +82,7 @@ func _ready() -> void:
 		%fileMenu.menu.remove_item(5)
 		%fileMenu.menu.remove_item(3)
 	%screenshotViewport.world_2d = %gameViewport.world_2d
+	Game.camera = playtestCamera
 
 func _process(delta:float) -> void:
 	queue_redraw()
@@ -524,6 +525,19 @@ func _draw() -> void:
 			Color(Color("#e6c896") if Game.autoRun else Color("#64dc8c"),autoRunAlpha),
 			Color(Color.BLACK,autoRunAlpha),12,Vector2(4,20)
 		)
+	if Game.playState == Game.PLAY_STATE.PLAY and Game.player.cameraAnimVal > 0:
+		var topLeft:Vector2 = - Vector2(8,8) + Vector2(16,16)*Game.player.cameraAnimVal
+		var bottomRight:Vector2 = gameCont.size + Vector2(8,8) - Vector2(16,16)*Game.player.cameraAnimVal
+		RenderingServer.canvas_item_add_polyline(drawMain, [
+			topLeft, Vector2(bottomRight.x, topLeft.y), bottomRight, Vector2(topLeft.x, bottomRight.y), topLeft-Vector2(0,1)
+		], [Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK])
+		topLeft -= Vector2(4,4)
+		bottomRight += Vector2(4,4)
+		RenderingServer.canvas_item_add_polyline(drawMain, [
+			topLeft, Vector2(bottomRight.x, topLeft.y), bottomRight, Vector2(topLeft.x, bottomRight.y), topLeft-Vector2(0,1)
+		], [Color.BLACK,Color.BLACK,Color.BLACK,Color.BLACK])
+		TextDraw.outlined(Game.FPRESENTS, drawMain, "[%s] to zoom" % Explainer.hotkeyMap(&"gameAction"),Color(Color.WHITE,Game.player.cameraAnimVal),Color(Color.BLACK,Game.player.cameraAnimVal),14,Vector2(11,gameCont.size.y-16))
+		TextDraw.outlined(Game.FPRESENTS, drawMain, "[%s] to exit" % Explainer.hotkeyMap(&"gameCamera"),Color(Color.WHITE,Game.player.cameraAnimVal),Color(Color.BLACK,Game.player.cameraAnimVal),14,gameCont.size+Vector2(-108,-16),true)
 
 func autoRun() -> void:
 	Game.autoRun = !Game.autoRun
@@ -538,6 +552,6 @@ func takeScreenshot() -> void:
 
 func levelStartCameraCenter(screenSize:Vector2=Vector2(800,608)) -> Vector2:
 	if Game.levelStart:
-		var levelBoundsInner:Rect2 = Game.levelBounds.grow_individual(-400,-304,-400,-304)
+		@warning_ignore("narrowing_conversion") var levelBoundsInner:Rect2 = Game.levelBounds.grow_individual(-0.5*screenSize.x,-0.5*screenSize.y,-0.5*screenSize.x,-0.5*screenSize.y)
 		return Game.levelStart.position.clamp(levelBoundsInner.position, levelBoundsInner.end) - screenSize/2
 	return Vector2(Game.levelBounds.position) + (Vector2(Game.levelBounds.size) - screenSize)/2

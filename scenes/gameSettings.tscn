@@ -314,8 +314,12 @@ label = "Run Switch"
 action = &"gameAutoRun"
 metadata/_custom_type_script = "uid://4muxkbry8eqk"
 
-[node name="up" type="Control" parent="c/controls"]
+[node name="up" type="Button" parent="c/controls"]
 layout_mode = 2
+script = ExtResource("4_t6p7j")
+label = "Up"
+action = &"gameUp"
+metadata/_custom_type_script = "uid://4muxkbry8eqk"
 
 [node name="leave" type="Control" parent="c/controls"]
 layout_mode = 2
@@ -327,11 +331,19 @@ label = "Run"
 action = &"gameRun"
 metadata/_custom_type_script = "uid://4muxkbry8eqk"
 
-[node name="down" type="Control" parent="c/controls"]
+[node name="gameDown" type="Button" parent="c/controls"]
 layout_mode = 2
+script = ExtResource("4_t6p7j")
+label = "Down"
+action = &"gameDown"
+metadata/_custom_type_script = "uid://4muxkbry8eqk"
 
-[node name="camera" type="Control" parent="c/controls"]
+[node name="camera" type="Button" parent="c/controls"]
 layout_mode = 2
+script = ExtResource("4_t6p7j")
+label = "Camera"
+action = &"gameCamera"
+metadata/_custom_type_script = "uid://4muxkbry8eqk"
 
 [node name="walk" type="Button" parent="c/controls"]
 layout_mode = 2

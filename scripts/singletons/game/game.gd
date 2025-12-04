@@ -136,9 +136,6 @@ var levelBounds:Rect2i = Rect2i(0,0,800,608):
 		levelBounds = value
 		RenderingServer.global_shader_parameter_set(&"LEVEL_POS", levelBounds.position)
 		RenderingServer.global_shader_parameter_set(&"LEVEL_SIZE", levelBounds.size)
-		var camera:Camera2D
-		if editor: camera = editor.playtestCamera
-		if playGame: camera = playGame.playCamera
 		if camera:
 			camera.limit_left = levelBounds.position.x
 			camera.limit_top = levelBounds.position.y
@@ -166,6 +163,7 @@ const FLEVELID:Font = preload("res://resources/fonts/fLevelID.fnt")
 const FLEVELNAME:Font = preload("res://resources/fonts/fLevelName.fnt")
 const FROOMNUM:Font = preload("res://resources/fonts/fRoomNum.fnt")
 const FMINIID:Font = preload("res://resources/fonts/fMiniId.fnt")
+const FPRESENTS:Font = preload("res://resources/fonts/fPresents.fnt")
 
 var latestSpawn:PlayerSpawn
 var levelStart:PlayerSpawn
@@ -181,6 +179,8 @@ var playState:PLAY_STATE = PLAY_STATE.EDIT:
 		fastAnimSpeed = 0
 		fastAnimTimer = 0
 		complexViewHue = 0
+
+var camera:Camera2D
 
 var fastAnimSpeed:float = 0 # 0: slowest, 1: fastest
 var fastAnimTimer:float = 0 # speed resets when this counts down to 0
@@ -224,8 +224,6 @@ func _process(delta:float) -> void:
 		goldIndex = int(goldIndexFloat)
 		goldIndexChanged.emit()
 	RenderingServer.global_shader_parameter_set(&"NOISE_OFFSET", Vector2(randf_range(-1000, 1000), randf_range(-1000, 1000)))
-	if editor and player: editor.playtestCamera.position = player.position
-	if playGame and player: playGame.playCamera.position = player.position
 	# fast anims
 	if fastAnimTimer > 0:
 		fastAnimTimer -= delta
@@ -370,9 +368,10 @@ func win(goal:Goal) -> void:
 	if editor:
 		await timer(0.5)
 		stopTest()
-		editor.cameraZoom = 1
-		editor.editorCamera.zoom = Vector2.ONE
-		editor.home()
+		editor.cameraZoom = camera.zoom.x
+		editor.editorCamera.zoom = camera.zoom
+		editor.targetCameraZoom = camera.zoom.x
+		editor.editorCamera.position = camera.position - editor.gameCont.size/2
 	else:
 		playGame.win(goal)
 
