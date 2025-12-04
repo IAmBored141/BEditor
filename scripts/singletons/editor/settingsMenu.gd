@@ -44,6 +44,7 @@ func _tabSelected(tab:int) -> void:
 	%levelSettings.visible = tab == 0
 	%editorSettings.visible = tab == 1
 	%gameSettings.visible = tab == 2
+	mouse_filter = Control.MOUSE_FILTER_PASS if tab == 0 else Control.MOUSE_FILTER_STOP
 	queue_redraw()
 
 func _levelNumberSet(string:String) -> void:
