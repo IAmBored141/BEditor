@@ -295,11 +295,18 @@ func addLock() -> void:
 	elif type == Door.TYPE.SIMPLE: Changes.addChange(Changes.PropertyChange.new(self,&"type",TYPE.COMBO))
 	Changes.bufferSave()
 
-func getFirstFreePosition() -> Vector2:
-	var x:float = 0
-	while true:
-		for y in floor(size.y/32):
-			var rect:Rect2 = Rect2(Vector2(32*x+7,32*y+7), Vector2(32,32))
+func duplicateLock(lock:Lock) -> void:
+	var newLock:Lock = Changes.addChange(Changes.CreateComponentChange.new(Lock,{&"position":getFirstFreePosition(lock.getOffset(), lock.size),&"parentId":id})).result
+	Changes.addChange(Changes.PropertyChange.new(self,&"type",TYPE.COMBO))
+	for property in Lock.PROPERTIES:
+		if property not in Lock.CREATE_PARAMETERS and property != &"id":
+			Changes.addChange(Changes.PropertyChange.new(newLock,property,Changes.copy(lock.get(property))))
+	Changes.bufferSave()
+
+func getFirstFreePosition(lockOffset:Vector2=Vector2(7,7), lockSize:Vector2=Vector2(18,18)) -> Vector2:
+	for y in floor(size.y/32):
+		for x in floor(size.x/32):
+			var rect:Rect2 = Rect2(Vector2(32*x,32*y)-lockOffset, lockSize)
 			var overlaps:bool = false
 			for lock in locks:
 				if Rect2(lock.position-lock.getOffset(), lock.size).intersects(rect):
@@ -307,8 +314,7 @@ func getFirstFreePosition() -> Vector2:
 					break
 			if overlaps: continue
 			return Vector2(32*x,32*y)
-		x += 1
-	return Vector2.ZERO # unreachable
+	return Vector2.ZERO
 
 func removeLock(index:int) -> void:
 	Changes.addChange(Changes.DeleteComponentChange.new(locks[index]))

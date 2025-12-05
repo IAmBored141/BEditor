@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bknd0n765hjfq"]
+
+[ext_resource type="Shader" uid="uid://b7ek3evjsfuc5" path="res://resources/materials/multiselectOutline.gdshader" id="1_gahss"]
+
+[resource]
+shader = ExtResource("1_gahss")

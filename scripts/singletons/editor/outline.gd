@@ -21,10 +21,11 @@ func draw() -> void:
 	if Game.playState == Game.PLAY_STATE.PLAY: return
 	if editor.focusDialog.focused:
 		drawOutline(editor.focusDialog.focused)
-	if editor.objectHovered:
-		drawOutline(editor.objectHovered,Color("#ffffff88"))
-	if editor.componentHovered:
-		drawOutline(editor.componentHovered,Color("#00a2ff88"))
+	if editor.multiselect.state == Multiselect.STATE.HOLDING:
+		if editor.objectHovered:
+			drawOutline(editor.objectHovered,Color("#ffffff88"))
+		if editor.componentHovered:
+			drawOutline(editor.componentHovered,Color("#00a2ff88"))
 	if editor.focusDialog.componentFocused:
 		drawOutline(editor.focusDialog.componentFocused,Color("#00a2ff"))
 	if editor.settingsOpen and editor.settingsMenu.levelSettings.visible:
@@ -32,7 +33,7 @@ func draw() -> void:
 
 func drawOutline(component:GameComponent,color:Color=Color.WHITE) -> void:
 	var pos:Vector2 = component.getDrawPosition()
-	if component.get_script() in [Door, Lock, KeyCounter, RemoteLock, PlaceholderComponent, FloatingTile]:
+	if component.get_script() in Game.RECTANGLE_COMPONENTS:
 		RenderingServer.canvas_item_add_polyline(drawNormal,[ # cant just rectangle with the drawshader since uv doesnt work with rectangles, and there isnt a rectangle outline either from what i can tell
 			pos,
 			pos+Vector2(component.size.x+1/editor.cameraZoom,0),

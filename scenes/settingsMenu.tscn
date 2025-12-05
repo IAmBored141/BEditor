@@ -419,6 +419,11 @@ layout_mode = 2
 label = "Search Other Objects"
 action = &"editObjectSearch"
 
+[node name="editPipette" parent="c/editorSettings/c2/c/hotkeys" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Pipette"
+action = &"editPipette"
+
 [node name="editOpenSettings" parent="c/editorSettings/c2/c/hotkeys" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Open Settings"
@@ -667,6 +672,11 @@ layout_mode = 2
 
 [node name="c" type="VBoxContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties"]
 layout_mode = 2
+
+[node name="focusLockDuplicate" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Duplicate Lock"
+action = &"focusLockDuplicate"
 
 [node name="focusLockNormal" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2

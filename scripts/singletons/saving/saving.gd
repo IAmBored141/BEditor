@@ -105,8 +105,9 @@ func clear() -> void:
 		editor.quickSet.applyOrCancel()
 		editor.modes.setMode(Editor.MODE.SELECT)
 		editor.otherObjects.objectSelected(PlayerSpawn, true)
-		editor.multiselect.stopDrag()
+		editor.multiselect.deselect()
 		editor.multiselect.clipboard.clear()
+		editor.paste.disabled = true
 	if Game.playState != Game.PLAY_STATE.EDIT: await Game.stopTest()
 	Game.latestSpawn = null
 	Game.levelStart = null

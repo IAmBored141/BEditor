@@ -562,6 +562,9 @@ class LevelResizeChange extends Change:
 	func _init(_after:Rect2) -> void:
 		before = Game.levelBounds
 		after = _after
+		if before == after:
+			cancelled = true
+			return
 		do()
 	
 	func do() -> void:

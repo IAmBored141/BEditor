@@ -7,7 +7,7 @@ static var NON_OBJECT_COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement]
 static var PROPERTIES:Dictionary[GDScript,Array] = {
 	Lock: [
 		&"id", &"position", &"size",
-		&"parentId", &"color", &"type", &"configuration", &"sizeType", &"count", &"zeroI", &"isPartial", &"denominator", &"negated", &"armament",
+		&"parentId", &"color", &"type", &"sizeType", &"count", &"configuration", &"zeroI", &"isPartial", &"denominator", &"negated", &"armament",
 		&"index", &"displayIndex"
 	],
 	KeyCounterElement: [

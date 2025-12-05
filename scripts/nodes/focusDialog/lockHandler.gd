@@ -68,7 +68,7 @@ class LockHandlerButton extends HandlerButton:
 
 	func _draw() -> void:
 		RenderingServer.canvas_item_clear(drawMain)
-		if deleted: return
+		if deleted or !lock: return
 		var rect:Rect2 = Rect2(Vector2.ONE, size-Vector2(2,2))
 		if lock.color == Game.COLOR.GLITCH: RenderingServer.canvas_item_set_material(drawMain, Game.UNSCALED_GLITCH_MATERIAL)
 		else: RenderingServer.canvas_item_set_material(drawMain, Game.NO_MATERIAL)

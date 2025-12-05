@@ -41,17 +41,17 @@ func updateText() -> void:
 	if editor.focusDialog.focused:
 		if editor.focusDialog.componentFocused:
 				match editor.focusDialog.componentFocused.get_script():
-					Lock: string += "Lock / " + control
+					Lock: string += "Lock / [%s]Duplicate " % hotkeyMap(&"focusLockDuplicate") + control
 					KeyCounterElement: string += "Key Counter Element / " + control
 		else:
 			match editor.focusDialog.focused.get_script():
 				KeyBulk: string += "Key / " + control
-				Door: string += "Door / " + control
+				Door: string += "Door / [%s]Add Lock " % hotkeyMap(&"focusDoorAddLock") + control
 				PlayerSpawn: string += "Player Spawn / "+control
 				Goal: string += "Goal / "+control
-				KeyCounter: string += "Key Counter / "+control
+				KeyCounter: string += "Key Counter / [%s]Add Element " % hotkeyMap(&"focusKeyCounterAddElement") +control
 				FloatingTile: string += "Floating Tile / " + control
-				RemoteLock: string += "Remote Lock / "+control
+				RemoteLock: string += "Remote Lock / [%s]Add Connection " % hotkeyMap(&"focusRemoteLockAddConnection") + control
 		string += "[M]Move [Del]Delete"
 	elif editor.otherObjects.objectSearch.has_focus():
 		string += "Object Search / "+control+"[Enter][Tab]Select object [Esc]Cancel"
@@ -70,7 +70,7 @@ func updateText() -> void:
 			Editor.MODE.DOOR: string += LMB+"Place door"
 			Editor.MODE.OTHER: string += LMB+"Place object"
 			Editor.MODE.PASTE: string += LMB+"Paste"
-		string += " "+MMB+ARROWS+"Move/zoom camera [%s]Home camera" % hotkeyMap(&"editHome")
+		string += " "+MMB+ARROWS+"Move/zoom camera [%s]Home camera [%s]Pipette" % [hotkeyMap(&"editHome"), hotkeyMap(&"editPipette")]
 	editor.explainText.text = string
 
 func hotkeyMap(hotkey:StringName) -> String:

@@ -23,11 +23,11 @@ func _ready() -> void:
 	drawOutline = RenderingServer.canvas_item_create()
 	await get_tree().process_frame
 	RenderingServer.canvas_item_set_parent(drawTiles, Game.world.get_canvas_item())
-	RenderingServer.canvas_item_set_parent(drawOutline, drawTiles)
-	RenderingServer.canvas_item_set_modulate(drawOutline, Color("#ffffff66"))
-	RenderingServer.canvas_item_set_z_index(drawTiles, 3)
+	RenderingServer.canvas_item_set_parent(drawOutline, editor.multiselectParent.get_canvas_item())
+	RenderingServer.canvas_item_set_z_index(drawTiles, -1)
 
 func startSelect() -> void:
+	pivot = get_global_mouse_position()
 	state = STATE.SELECTING
 	visible = true
 	selected = []
@@ -63,11 +63,11 @@ func continueSelect() -> void:
 	# tiles
 	for x in range(floor(worldRect.position.x/32), ceil(worldRect.end.x/32)):
 		for y in range(floor(worldRect.position.y/32), ceil(worldRect.end.y/32)):
-			if Game.tiles.get_cell_source_id(Vector2i(x,y)) != -1: selected.append(TileSelect.new(editor,Vector2i(x,y)*32))
+			if Game.tiles.get_cell_source_id(Vector2i(x,y)) != -1: selected.append(TileSelect.new(Vector2i(x,y)*32))
 	# objects
 	for object in Game.objectsParent.get_children():
 		if Rect2(object.position,object.size).intersects(worldRect):
-			selected.append(ObjectSelect.new(editor,object))
+			selected.append(ObjectSelect.new(object))
 	draw()
 
 func continueDrag() -> void:
@@ -93,25 +93,35 @@ func receiveMouseInput(event:InputEventMouse) -> bool:
 		if state == STATE.DRAGGING: stopDrag(); return true
 	return false
 
-func draw() -> void:
+func draw() -> void: # cant be _draw since panel already has a _draw or something
 	RenderingServer.canvas_item_clear(drawTiles)
 	RenderingServer.canvas_item_clear(drawOutline)
 	for select in selected:
 		if select is TileSelect:
 			RenderingServer.canvas_item_add_texture_rect(drawTiles,Rect2(select.getDrawPosition(),select.size),TileSelect.TEXTURE)
-		RenderingServer.canvas_item_add_rect(drawOutline,Rect2(select.getDrawPosition(),select.size),Color.WHITE)
+		if select is ObjectSelect and select.object.get_script() not in Game.RECTANGLE_COMPONENTS:
+			RenderingServer.canvas_item_add_texture_rect(drawOutline,Rect2(select.getDrawPosition(),select.size),select.object.outlineTex())
+		else: RenderingServer.canvas_item_add_rect(drawOutline,Rect2(select.getDrawPosition(),select.size),Color.WHITE)
 
 func copySelection() -> void:
-	if len(selected) == 0: return
+	if len(selected) == 0:
+		if editor.focusDialog.focused:
+			selectRect.position = editor.focusDialog.focused.position
+			selected.assign([ObjectSelect.new(editor.focusDialog.focused)])
+		else: return
 	clipboard = []
 	for select in selected:
 		if select is TileSelect: clipboard.append(TileCopy.new(select))
-		elif select is ObjectSelect:
-			if select.object is Door: clipboard.append(DoorCopy.new(select))
-			elif select.object is KeyCounter: clipboard.append(KeyCounterCopy.new(select))
-			else: clipboard.append(ObjectCopy.new(select))
+		elif select is ObjectSelect: clipboard.append(createObjectCopy(select.object))
 	# itll only be disabled at the start
 	editor.paste.disabled = false
+
+func createObjectCopy(object:GameObject) -> ObjectCopy:
+	# KeyBulk, Door, Goal, KeyCounter, PlayerSpawn, FloatingTile, RemoteLock
+	match object.get_script():
+		Door: return DoorCopy.new(object)
+		KeyCounter: return KeyCounterCopy.new(object)
+		_: return ObjectCopy.new(object)
 
 func paste() -> void:
 	for copy in clipboard: copy.paste()
@@ -127,14 +137,17 @@ func deselect() -> void:
 	draw()
 	hold()
 
+func redrawClipboard() -> void:
+	for copy in clipboard: copy.draw()
+
 class Select extends RefCounted:
 	# a link to a single thing, selected
 	var editor:Editor
 	var position:Vector2
 	var size:Vector2
 
-	func _init(_editor:Editor, _position:Vector2) -> void:
-		editor = _editor
+	func _init(_position:Vector2) -> void:
+		editor = Game.editor
 		position = _position
 	
 	func startDrag() -> void: pass
@@ -148,44 +161,58 @@ class Select extends RefCounted:
 class TileSelect extends Select:
 	const TEXTURE:Texture2D = preload("res://assets/ui/multiselect/tile.png")
 	
-	func _init(_editor:Editor, _position:Vector2) -> void:
-		super(_editor,Vector2i(_position/32)*32)
+	func _init(_position:Vector2) -> void:
+		super(Vector2i(_position/32)*32)
 		size = Vector2(32,32)
 	
 	func startDrag() -> void:
 		Changes.addChange(Changes.TileChange.new(position/32,false))
 	func endDrag() -> void:
-		if Mods.active(&"OutOfBounds") or Game.levelBounds.has_point(position): Changes.addChange(Changes.TileChange.new(position/32,true))
+		Changes.addChange(Changes.TileChange.new(pos(),true))
 
-	func delete() -> void: Changes.addChange(Changes.TileChange.new(position/32,false))
+	func getDrawPosition() -> Vector2: return pos()*32
+
+	func delete() -> void: Changes.addChange(Changes.TileChange.new(pos(),false))
+
+	func pos() -> Vector2i:
+		if Mods.active(&"OutOfBounds"): return position/32
+		return position.clamp(Game.levelBounds.position, Game.levelBounds.end-Vector2i(32,32))/32
 
 class ObjectSelect extends Select:
 
 	var startingPosition:Vector2
 	var object:GameObject
 
-	func _init(_editor:Editor, _object:GameObject) -> void:
+	func _init(_object:GameObject) -> void:
 		object = _object
-		super(_editor, object.position)
+		super(object.position)
 		startingPosition = position
 		size = object.size
 	
 	func continueDrag() -> void:
-		object.position = position
+		object.position = pos()
 
 	func endDrag() -> void:
 		object.position = startingPosition
-		Changes.addChange(Changes.PropertyChange.new(object,&"position",position))
+		Changes.addChange(Changes.PropertyChange.new(object,&"position",pos()))
 	
 	func delete() -> void: Changes.addChange(Changes.DeleteComponentChange.new(object))
 
 	func getDrawPosition() -> Vector2:
-		if object is RemoteLock: return position-object.getOffset()
-		else: return position
+		if object is RemoteLock: return pos()-object.getOffset()
+		else: return pos()
 
-class Copy extends RefCounted:
+	func pos() -> Vector2:
+		if Mods.active(&"OutOfBounds"): return position
+		var rect:Rect2 = Rect2(position, size).grow(-1)
+		if object is RemoteLock: rect.position -= object.getOffset()
+		return position + Editor.snappedAway(Vector2.ZERO.max(Vector2(Game.levelBounds.position) - rect.end) - Vector2.ZERO.max(rect.position - Vector2(Game.levelBounds.end)), Vector2(editor.tileSize))
+
+@abstract class Copy extends RefCounted:
 	# a copy of a single thing
 	var editor:Editor
+
+	@abstract func draw() -> void
 
 class TileCopy extends Copy: # definitely rethink this at some point
 	var position:Vector2
@@ -193,20 +220,24 @@ class TileCopy extends Copy: # definitely rethink this at some point
 	func _init(select:TileSelect) -> void:
 		editor = select.editor
 		position = select.position - editor.multiselect.selectRect.position
+		draw()
 	
 	func paste() -> void:
 		if Game.levelBounds.has_point(Vector2i(position)+editor.mouseTilePosition): Changes.addChange(Changes.TileChange.new((Vector2i(position)+editor.mouseTilePosition)/32,true))
+
+	func draw() -> void:
+		pass
 
 class ObjectCopy extends Copy:
 	var properties:Dictionary[StringName, Variant]
 	var type:GDScript
 
-	func _init(select:ObjectSelect) -> void:
-		editor = select.editor
-		type = select.object.get_script()
+	func _init(object:GameObject) -> void:
+		editor = Game.editor
+		type = object.get_script()
 
-		for property in select.object.PROPERTIES:
-			properties[property] = select.object.get(property)
+		for property in object.PROPERTIES:
+			properties[property] = object.get(property)
 		
 		properties[&"position"] -= editor.multiselect.selectRect.position
 	
@@ -219,13 +250,16 @@ class ObjectCopy extends Copy:
 			return object
 		return null
 
+	func draw() -> void: pass
+
 class DoorCopy extends ObjectCopy:
 	var locks:Array[LockCopy]
 
-	func _init(select:ObjectSelect) -> void:
-		super(select)
-		for lock in select.object.locks:
-			locks.append(LockCopy.new(editor,lock))
+	func _init(object:Door) -> void:
+		super(object)
+		for lock in object.locks:
+			locks.append(LockCopy.new(lock))
+		draw()
 	
 	func paste() -> Door:
 		var object:GameObject = super()
@@ -233,14 +267,17 @@ class DoorCopy extends ObjectCopy:
 			for lock in locks:
 				lock.paste(object)
 		return object
-			 
+
+	func draw() -> void: pass
+
 class LockCopy extends Copy:
 	var properties:Dictionary[StringName, Variant]
 
-	func _init(_editor,lock:Lock) -> void:
-		editor = _editor
+	func _init(lock:Lock) -> void:
+		editor = Game.editor
 		for property in Lock.PROPERTIES:
 			properties[property] = lock.get(property)
+		draw()
 
 	func paste(door:Door) -> Lock:
 		var lock:Lock = Changes.addChange(Changes.CreateComponentChange.new(Lock,
@@ -251,13 +288,16 @@ class LockCopy extends Copy:
 				Changes.addChange(Changes.PropertyChange.new(lock,property,properties[property]))
 		return lock
 
+	func draw() -> void: pass
+
 class KeyCounterCopy extends ObjectCopy:
 	var elements:Array[KeyCounterElementCopy]
 
-	func _init(select:ObjectSelect) -> void:
-		super(select)
-		for element in select.object.elements:
-			elements.append(KeyCounterElementCopy.new(editor,element))
+	func _init(object:KeyCounter) -> void:
+		super(object)
+		for element in object.elements:
+			elements.append(KeyCounterElementCopy.new(element))
+		draw()
 	
 	func paste() -> Door:
 		var object:GameObject = super()
@@ -265,14 +305,17 @@ class KeyCounterCopy extends ObjectCopy:
 			for element in elements:
 				element.paste(object)
 		return object
-			 
+	
+	func draw() -> void: pass
+
 class KeyCounterElementCopy extends Copy:
 	var properties:Dictionary[StringName, Variant]
 
-	func _init(_editor,element:KeyCounterElement) -> void:
-		editor = _editor
+	func _init(element:KeyCounterElement) -> void:
+		editor = Game.editor
 		for property in KeyCounterElement.PROPERTIES:
 			properties[property] = element.get(property)
+		draw()
 
 	func paste(keyCounter:KeyCounter) -> KeyCounterElement:
 		var element:KeyCounterElement = Changes.addChange(Changes.CreateComponentChange.new(KeyCounterElement,
@@ -282,3 +325,5 @@ class KeyCounterElementCopy extends Copy:
 			if property != &"id" and property not in element.CREATE_PARAMETERS:
 				Changes.addChange(Changes.PropertyChange.new(element,property,properties[property]))
 		return element
+
+	func draw() -> void: pass

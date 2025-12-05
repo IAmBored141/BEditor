@@ -24,6 +24,8 @@ var findProblems:FindProblems
 
 @onready var gameViewport:SubViewport = %gameViewport
 @onready var explainText:RichTextLabel = %explainText
+@onready var multiselectParent:Node2D = %multiselectParent
+@onready var placePreviewParent:Node2D = %placePreviewParent
 
 enum MODE {SELECT, TILE, KEY, DOOR, OTHER, PASTE}
 var mode:MODE = MODE.SELECT
@@ -117,18 +119,19 @@ func _process(delta:float) -> void:
 	componentHovered = null
 	if !componentDragged:
 		objectHovered = null
-		for object in Game.objectsParent.get_children():
-			if mode == MODE.SELECT or (mode == MODE.KEY and object is KeyBulk) or (mode == MODE.DOOR and object is Door) or (mode == MODE.OTHER and object.get_script() == otherObjects.selected):
-				if Rect2(object.getDrawPosition(), object.size).has_point(mouseWorldPosition) and (Game.playState != Game.PLAY_STATE.PLAY or object.active):
-					objectHovered = object
-		if focusDialog.focused is Door:
-			for lock in focusDialog.focused.locks:
-				if Rect2(lock.getDrawPosition(), lock.size).has_point(mouseWorldPosition):
-					componentHovered = lock
-		elif focusDialog.focused is KeyCounter:
-			for element in focusDialog.focused.elements:
-				if Rect2(element.getDrawPosition(), element.getHoverSize()).has_point(mouseWorldPosition):
-					componentHovered = element
+		if !Input.is_action_pressed(&"heldKeepMode"):
+			for object in Game.objectsParent.get_children():
+				if mode == MODE.SELECT or (mode == MODE.KEY and object is KeyBulk) or (mode == MODE.DOOR and object is Door) or (mode == MODE.OTHER and object.get_script() == otherObjects.selected):
+					if Rect2(object.getDrawPosition(), object.size).has_point(mouseWorldPosition) and (Game.playState != Game.PLAY_STATE.PLAY or object.active):
+						objectHovered = object
+			if focusDialog.focused is Door:
+				for lock in focusDialog.focused.locks:
+					if Rect2(lock.getDrawPosition(), lock.size).has_point(mouseWorldPosition):
+						componentHovered = lock
+			elif focusDialog.focused is KeyCounter:
+				for element in focusDialog.focused.elements:
+					if Rect2(element.getDrawPosition(), element.getHoverSize()).has_point(mouseWorldPosition):
+						componentHovered = element
 	%mouseover.describe(objectHovered if Game.playState == Game.PLAY_STATE.PLAY else null, %gameViewportCont.get_local_mouse_position(), %gameViewportCont.size)
 	Game.tiles.z_index = 3 if mode == MODE.TILE and Game.playState != Game.PLAY_STATE.PLAY else 0
 	%screenshotCamera.position = levelStartCameraCenter()
@@ -137,6 +140,11 @@ func _process(delta:float) -> void:
 		autoRunTimer += delta
 		queue_redraw()
 		if autoRunTimer >= 2: autoRunTimer = 2
+
+	%multiselectCamera.position = editorCamera.position
+	%multiselectCamera.zoom = editorCamera.zoom
+	%placePreviewCamera.position = editorCamera.position
+	%placePreviewCamera.zoom = editorCamera.zoom
 
 func _gui_input(event:InputEvent) -> void:
 	if !objectHovered: objectHovered = null
@@ -157,21 +165,24 @@ func _gui_input(event:InputEvent) -> void:
 				if componentDragged: stopDrag()
 				Changes.bufferSave()
 			# set mouse cursor
-			if multiselect.state == Multiselect.STATE.DRAGGING: mouse_default_cursor_shape = CURSOR_DRAG
-			elif componentDragged:
-				match dragMode:
-					DRAG_MODE.POSITION: mouse_default_cursor_shape = CURSOR_DRAG
-					DRAG_MODE.SIZE_DIAG:
-						var diffSign:Vector2 = rectSign(dragPivotRect, dragHandlePosition)
-						match diffSign:
-							Vector2(-1,-1), Vector2(1,1): mouse_default_cursor_shape = CURSOR_FDIAGSIZE
-							Vector2(-1,1), Vector2(1,-1): mouse_default_cursor_shape = CURSOR_BDIAGSIZE
-							Vector2(-1,0), Vector2(1,0): mouse_default_cursor_shape = CURSOR_HSIZE
-							Vector2(0,-1), Vector2(0,1): mouse_default_cursor_shape = CURSOR_VSIZE
-							Vector2(0,0): mouse_default_cursor_shape = CURSOR_MOVE
-					DRAG_MODE.SIZE_VERT: mouse_default_cursor_shape = CURSOR_VSIZE
-					DRAG_MODE.SIZE_HORIZ: mouse_default_cursor_shape = CURSOR_HSIZE
-			else: mouse_default_cursor_shape = CURSOR_ARROW
+			match multiselect.state:
+				Multiselect.STATE.DRAGGING: mouse_default_cursor_shape = CURSOR_DRAG
+				Multiselect.STATE.SELECTING: mouse_default_cursor_shape = CURSOR_ARROW
+				Multiselect.STATE.HOLDING:
+					if componentDragged:
+						match dragMode:
+							DRAG_MODE.POSITION: mouse_default_cursor_shape = CURSOR_DRAG
+							DRAG_MODE.SIZE_DIAG:
+								var diffSign:Vector2 = rectSign(dragPivotRect, dragHandlePosition)
+								match diffSign:
+									Vector2(-1,-1), Vector2(1,1): mouse_default_cursor_shape = CURSOR_FDIAGSIZE
+									Vector2(-1,1), Vector2(1,-1): mouse_default_cursor_shape = CURSOR_BDIAGSIZE
+									Vector2(-1,0), Vector2(1,0): mouse_default_cursor_shape = CURSOR_HSIZE
+									Vector2(0,-1), Vector2(0,1): mouse_default_cursor_shape = CURSOR_VSIZE
+									Vector2(0,0): mouse_default_cursor_shape = CURSOR_MOVE
+							DRAG_MODE.SIZE_VERT: mouse_default_cursor_shape = CURSOR_VSIZE
+							DRAG_MODE.SIZE_HORIZ: mouse_default_cursor_shape = CURSOR_HSIZE
+					else: mouse_default_cursor_shape = CURSOR_ARROW
 			if settingsOpen:
 				settingsMenu.mouse_default_cursor_shape = mouse_default_cursor_shape
 				if componentDragged: return dragComponent()
@@ -186,7 +197,9 @@ func _gui_input(event:InputEvent) -> void:
 				return
 			# multiselect
 			if multiselect.receiveMouseInput(event): return
-			elif multiselect.state == Multiselect.STATE.HOLDING and (isLeftClick(event) or isRightClick(event)): multiselect.deselect()
+			elif multiselect.state == Multiselect.STATE.HOLDING:
+				if isLeftClick(event) or isRightClick(event): multiselect.deselect()
+			else: return
 			# size drag handles
 			if focusDialog.componentFocused is Lock and focusDialog.focused.type != Door.TYPE.SIMPLE:
 				if focusDialog.componentFocused.receiveMouseInput(event): return
@@ -207,7 +220,6 @@ func _gui_input(event:InputEvent) -> void:
 						elif objectHovered: startPositionDrag(objectHovered)
 						else:
 							focusDialog.defocus()
-							multiselect.pivot = get_global_mouse_position()
 					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and event is InputEventMouseMotion and multiselect.state == Multiselect.STATE.HOLDING: multiselect.startSelect()
 				MODE.TILE:
 					if inBounds:
@@ -422,6 +434,7 @@ func _input(event:InputEvent) -> void:
 			elif eventIs(event, &"editModeDoor"): modes.setMode(MODE.DOOR)
 			elif eventIs(event, &"editModeOther"): modes.setMode(MODE.OTHER)
 			elif eventIs(event, &"editObjectSearch"): otherObjects.objectSearch.grab_focus()
+			elif eventIs(event, &"editPipette"): pipette()
 			elif eventIs(event, &"editOpenSettings"): _toggleSettingsMenu(true)
 			elif eventIs(event, &"editNew"): Saving.confirmAction = Saving.ACTION.NONE; Saving.new()
 			elif eventIs(event, &"editOpen"): Saving.open()
@@ -459,6 +472,16 @@ func zoomCamera(factor:float) -> void:
 	if abs(targetCameraZoom - 1) < 0.001: targetCameraZoom = 1
 	if targetCameraZoom < 0.001: targetCameraZoom = 0.001
 	if targetCameraZoom > 1000: targetCameraZoom = 1000
+
+func pipette() -> void:
+	multiselect.deselect()
+	if objectHovered:
+		multiselect.selectRect.position = objectHovered.position
+		multiselect.clipboard.assign([multiselect.createObjectCopy(objectHovered)])
+		paste.disabled = false
+		modes.setMode(MODE.PASTE)
+	elif Game.tiles.get_cell_source_id(mouseTilePosition/32) != -1: modes.setMode(MODE.TILE)
+	else: modes.setMode(MODE.SELECT)
 
 func worldspaceToScreenspace(vector:Vector2) -> Vector2:
 	if Game.playState == Game.PLAY_STATE.PLAY: return (vector - playtestCamera.get_screen_center_position())*playtestCamera.zoom + gameCont.position + gameCont.size/2

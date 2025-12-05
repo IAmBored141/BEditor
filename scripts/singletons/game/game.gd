@@ -2,6 +2,8 @@ extends Node
 
 static var COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement, KeyBulk, Door, Goal, KeyCounter, PlayerSpawn, FloatingTile, RemoteLock]
 static var NON_OBJECT_COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement]
+# for outline draw; if not in this then provide an outlineTex() function
+static var RECTANGLE_COMPONENTS:Array[GDScript] = [Door, Lock, KeyCounter, RemoteLock, PlaceholderComponent, FloatingTile]
 
 const COLORS:int = 23
 enum COLOR {MASTER, WHITE, ORANGE, PURPLE, RED, GREEN, BLUE, PINK, CYAN, BLACK, BROWN, PURE, GLITCH, STONE, DYNAMITE, QUICKSILVER, MAROON, FOREST, NAVY, ICE, MUD, GRAFFITI, NONE}
