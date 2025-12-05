@@ -73,7 +73,6 @@ func receiveKey(key:InputEventKey):
 			if M.negative(value): bufferedNegative = true
 			setValue(M.ZERO,true)
 		deNew()
-		print(key)
 		if M.negative(value) != bufferedNegative: setValue(M.sub(M.times(value,M.N(10)), M.N(number)))
 		else: setValue(M.add(M.times(value,M.N(10)), M.N(number)))
 	return true

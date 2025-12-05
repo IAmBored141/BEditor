@@ -212,21 +212,15 @@ class ObjectSelect extends Select:
 	# a copy of a single thing
 	var editor:Editor
 
-	@abstract func draw() -> void
-
 class TileCopy extends Copy: # definitely rethink this at some point
 	var position:Vector2
 
 	func _init(select:TileSelect) -> void:
 		editor = select.editor
 		position = select.position - editor.multiselect.selectRect.position
-		draw()
-	
+
 	func paste() -> void:
 		if Game.levelBounds.has_point(Vector2i(position)+editor.mouseTilePosition): Changes.addChange(Changes.TileChange.new((Vector2i(position)+editor.mouseTilePosition)/32,true))
-
-	func draw() -> void:
-		pass
 
 class ObjectCopy extends Copy:
 	var properties:Dictionary[StringName, Variant]
@@ -249,8 +243,6 @@ class ObjectCopy extends Copy:
 					Changes.addChange(Changes.PropertyChange.new(object,property,properties[property]))
 			return object
 		return null
-
-	func draw() -> void: pass
 
 class DoorCopy extends ObjectCopy:
 	var locks:Array[LockCopy]
@@ -277,7 +269,6 @@ class LockCopy extends Copy:
 		editor = Game.editor
 		for property in Lock.PROPERTIES:
 			properties[property] = lock.get(property)
-		draw()
 
 	func paste(door:Door) -> Lock:
 		var lock:Lock = Changes.addChange(Changes.CreateComponentChange.new(Lock,
@@ -288,8 +279,6 @@ class LockCopy extends Copy:
 				Changes.addChange(Changes.PropertyChange.new(lock,property,properties[property]))
 		return lock
 
-	func draw() -> void: pass
-
 class KeyCounterCopy extends ObjectCopy:
 	var elements:Array[KeyCounterElementCopy]
 
@@ -297,16 +286,13 @@ class KeyCounterCopy extends ObjectCopy:
 		super(object)
 		for element in object.elements:
 			elements.append(KeyCounterElementCopy.new(element))
-		draw()
-	
+
 	func paste() -> Door:
 		var object:GameObject = super()
 		if object:
 			for element in elements:
 				element.paste(object)
 		return object
-	
-	func draw() -> void: pass
 
 class KeyCounterElementCopy extends Copy:
 	var properties:Dictionary[StringName, Variant]
@@ -315,7 +301,6 @@ class KeyCounterElementCopy extends Copy:
 		editor = Game.editor
 		for property in KeyCounterElement.PROPERTIES:
 			properties[property] = element.get(property)
-		draw()
 
 	func paste(keyCounter:KeyCounter) -> KeyCounterElement:
 		var element:KeyCounterElement = Changes.addChange(Changes.CreateComponentChange.new(KeyCounterElement,
@@ -325,5 +310,3 @@ class KeyCounterElementCopy extends Copy:
 			if property != &"id" and property not in element.CREATE_PARAMETERS:
 				Changes.addChange(Changes.PropertyChange.new(element,property,properties[property]))
 		return element
-
-	func draw() -> void: pass

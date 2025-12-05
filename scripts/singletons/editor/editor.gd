@@ -25,7 +25,9 @@ var findProblems:FindProblems
 @onready var gameViewport:SubViewport = %gameViewport
 @onready var explainText:RichTextLabel = %explainText
 @onready var multiselectParent:Node2D = %multiselectParent
-@onready var placePreviewParent:Node2D = %placePreviewParent
+@onready var placePreviewWorld:World = %placePreviewWorld
+
+var previewComponents:Array[GameComponent] = []
 
 enum MODE {SELECT, TILE, KEY, DOOR, OTHER, PASTE}
 var mode:MODE = MODE.SELECT
@@ -85,6 +87,7 @@ func _ready() -> void:
 		%fileMenu.menu.remove_item(3)
 	%screenshotViewport.world_2d = %gameViewport.world_2d
 	Game.camera = playtestCamera
+	get_window().files_dropped.connect(func(files): Saving.loadFile(files[0]))
 
 func _process(delta:float) -> void:
 	queue_redraw()
@@ -110,7 +113,7 @@ func _process(delta:float) -> void:
 	mouseWorldPosition = screenspaceToWorldspace(get_global_mouse_position())
 	mouseTilePosition = Vector2i(floor(mouseWorldPosition / Vector2(tileSize))) * tileSize
 	if Game.playState == Game.PLAY_STATE.PLAY or settingsOpen: %gameViewportCont.material.set_shader_parameter("mousePosition",Vector2(-1e7,-1e7)) # probably far away enough
-	else: %gameViewportCont.material.set_shader_parameter("mousePosition",mouseWorldPosition)
+	else: %gameViewportCont.material.set_shader_parameter("mousePosition",mouseWorldPosition - Vector2(Game.levelBounds.position))
 	%gameViewportCont.material.set_shader_parameter("screenPosition",screenspaceToWorldspace(Vector2.ZERO))
 	if Game.playState == Game.PLAY_STATE.PLAY: cameraZoom = playtestCamera.zoom.x
 	else: cameraZoom = editorCamera.zoom.x
@@ -143,6 +146,9 @@ func _process(delta:float) -> void:
 
 	%multiselectCamera.position = editorCamera.position
 	%multiselectCamera.zoom = editorCamera.zoom
+	placePreviewWorld.tiles.position = floor(mouseWorldPosition/32)*32
+	placePreviewWorld.tilesDropShadow.position = floor(mouseWorldPosition/32)*32 + Vector2(3,3)
+	placePreviewWorld.objectsParent.position = mouseTilePosition
 	%placePreviewCamera.position = editorCamera.position
 	%placePreviewCamera.zoom = editorCamera.zoom
 
@@ -224,10 +230,10 @@ func _gui_input(event:InputEvent) -> void:
 				MODE.TILE:
 					if inBounds:
 						if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-							Changes.addChange(Changes.TileChange.new(mouseTilePosition/32,true))
+							Changes.addChange(Changes.TileChange.new(floor(mouseWorldPosition/32),true))
 							focusDialog.defocus()
 						elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-							Changes.addChange(Changes.TileChange.new(mouseTilePosition/32,false))
+							Changes.addChange(Changes.TileChange.new(floor(mouseWorldPosition/32),false))
 							focusDialog.defocus()
 				MODE.KEY:
 					if isLeftClick(event): # if youre hovering a key and you leftclick, focus it
@@ -463,7 +469,7 @@ static func eventIs(event:InputEvent, action:StringName) -> bool: return event.i
 
 func home() -> void:
 	targetCameraZoom = 1
-	zoomPoint = levelStartCameraCenter(%gameCont.size) + %gameCont.size/2
+	zoomPoint = levelStartCameraCenter(%gameCont.size - Vector2(20,20)) - Vector2(10,10) + %gameCont.size/2
 	editorCamera.position = zoomPoint - gameCont.size / (cameraZoom*2)
 
 func zoomCamera(factor:float) -> void:
@@ -528,6 +534,7 @@ func _toggleSettingsMenu(toggled_on:bool) -> void:
 	%settingsMenu.visible = toggled_on
 	%settingsText.visible = toggled_on
 	%explainText.visible = !toggled_on
+	%placePreviewWorld.visible = !toggled_on
 	settingsOpen = toggled_on
 	get_tree().call_group(&"hotkeyButton", &"queue_redraw")
 	topBar._updateButtons()

@@ -102,7 +102,8 @@ func updateLabels() -> void:
 	queue_redraw()
 	for object in Game.objects.values(): if object.get_script() in [KeyBulk, Door, RemoteLock]: object.queue_redraw()
 	for component in Game.components.values(): if component.get_script() in [Lock, KeyCounterElement]: component.queue_redraw()
-	
+	if editor: for component in editor.previewComponents: if component.get_script() in [Lock, KeyCounterElement, KeyBulk, Door, RemoteLock]: component.queue_redraw()
+
 func _redSet(value:float) -> void:
 	selectedTone[%colorSelector.selected].r8 = round(value)
 	updateLabels()

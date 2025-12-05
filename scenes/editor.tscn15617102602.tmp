@@ -345,7 +345,6 @@ unique_name_in_owner = true
 
 [node name="editorCamera" type="Camera2D" parent="c/gameCont/gameViewportCont/gameViewport/world"]
 unique_name_in_owner = true
-position = Vector2(-10, -10)
 anchor_mode = 0
 limit_enabled = false
 
@@ -401,15 +400,19 @@ transparent_bg = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
 size = Vector2i(820, 628)
-render_target_update_mode = 4
 
-[node name="placePreviewWorld" parent="c/gameCont/placePreviewViewportCont/placePreviewViewport" instance=ExtResource("8_5tdu1")]
+[node name="placePreviewParent" type="Node2D" parent="c/gameCont/placePreviewViewportCont/placePreviewViewport"]
 unique_name_in_owner = true
 
-[node name="previewObjectsParent" type="Node2D" parent="c/gameCont/placePreviewViewportCont/placePreviewViewport/placePreviewWorld"]
+[node name="previewTile" type="Sprite2D" parent="c/gameCont/placePreviewViewportCont/placePreviewViewport/placePreviewParent"]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("5_74j0u")
+
+[node name="previewObjectsParent" type="Node2D" parent="c/gameCont/placePreviewViewportCont/placePreviewViewport/placePreviewParent"]
 unique_name_in_owner = true
 
-[node name="placePreviewCamera" type="Camera2D" parent="c/gameCont/placePreviewViewportCont/placePreviewViewport/placePreviewWorld"]
+[node name="placePreviewCamera" type="Camera2D" parent="c/gameCont/placePreviewViewportCont/placePreviewViewport"]
 unique_name_in_owner = true
 anchor_mode = 0
 

@@ -184,7 +184,6 @@ func propertyGameChangedDo(property:StringName) -> void:
 	if property == &"active":
 		%interact.process_mode = PROCESS_MODE_INHERIT if active else PROCESS_MODE_DISABLED
 
-
 func effectiveColor() -> Game.COLOR:
 	if color == Game.COLOR.GLITCH: return glitchMimic
 	return color

@@ -203,6 +203,8 @@ func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 	openWindow.position = get_window().position+(get_window().size-openWindow.size)/2
 	openWindow.path = path
 
+	if path.get_extension() != "cedit": errorPopup("Unrecognised file format"); return null
+
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.READ)
 
 	if file.get_pascal_string() != "IWLCEditorPuzzle": errorPopup("Unrecognised file format"); return null
