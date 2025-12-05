@@ -150,6 +150,13 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawConfiguration,get_canvas_item())
 	Game.connect(&"goldIndexChanged",func(): if color in Game.ANIMATED_COLORS or armament: queue_redraw())
 
+func _freed() -> void:
+	RenderingServer.free_rid(drawScaled)
+	RenderingServer.free_rid(drawAuraBreaker)
+	RenderingServer.free_rid(drawGlitch)
+	RenderingServer.free_rid(drawMain)
+	RenderingServer.free_rid(drawConfiguration)
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawScaled)
 	RenderingServer.canvas_item_clear(drawAuraBreaker)

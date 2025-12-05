@@ -24,3 +24,9 @@ func start() -> void: pass
 func stop() -> void: pass
 
 func deletedInit() -> void: pass
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_PREDELETE: _freed()
+
+func _freed() -> void: pass

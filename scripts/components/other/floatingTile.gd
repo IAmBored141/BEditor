@@ -28,6 +28,10 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawDropShadow,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 
+func _freed() -> void:
+	RenderingServer.free_rid(drawDropShadow)
+	RenderingServer.free_rid(drawMain)
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawDropShadow)
 	RenderingServer.canvas_item_clear(drawMain)

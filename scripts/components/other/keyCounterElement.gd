@@ -44,12 +44,10 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawMain,drawParent.get_canvas_item())
 	Game.connect(&"goldIndexChanged",queue_redraw)
 
-func _process(_delta:float) -> void:
-	queue_redraw()
-	drawCurse.color = color
-	drawCurse.scale = Vector2.ONE * (0.4 if color == Game.COLOR.BROWN else 0.5)
-	drawCurse.mode = 1 if Mods.active(&"C5") and Game.player and Game.player.curse[color] else 0
-	drawCurse.queue_redraw()
+func _freed() -> void:
+	RenderingServer.free_rid(drawStar)
+	RenderingServer.free_rid(drawGlitch)
+	RenderingServer.free_rid(drawMain)
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawStar)
@@ -62,6 +60,13 @@ func _draw() -> void:
 	KeyBulk.drawKey(drawGlitch,drawMain,Vector2.ZERO,color)
 	Game.FKEYNUM.draw_string(drawMain,Vector2(38,14),"x",HORIZONTAL_ALIGNMENT_LEFT,-1,22,TEXT_COLOR)
 	Game.FKEYNUM.draw_string(drawMain,Vector2(58,14),"0" if !Game.player else M.str(Game.player.key[color]),HORIZONTAL_ALIGNMENT_LEFT,-1,22,TEXT_COLOR)
+
+func _process(_delta:float) -> void:
+	queue_redraw()
+	drawCurse.color = color
+	drawCurse.scale = Vector2.ONE * (0.4 if color == Game.COLOR.BROWN else 0.5)
+	drawCurse.mode = 1 if Mods.active(&"C5") and Game.player and Game.player.curse[color] else 0
+	drawCurse.queue_redraw()
 
 func getDrawPosition() -> Vector2: return position + parent.position
 

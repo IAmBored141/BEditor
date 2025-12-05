@@ -66,6 +66,9 @@ class LockHandlerButton extends HandlerButton:
 		Game.connect(&"goldIndexChanged",queue_redraw)
 		queue_redraw()
 
+	func _freed() -> void:
+		RenderingServer.free_rid(drawMain)
+
 	func _draw() -> void:
 		RenderingServer.canvas_item_clear(drawMain)
 		if deleted or !lock: return

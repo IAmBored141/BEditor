@@ -88,3 +88,9 @@ class HandlerButton extends Button:
 		toggle_mode = true
 		z_index = 1
 		theme_type_variation = &"SelectorButton"
+		
+	func _notification(what: int) -> void:
+		match what:
+			NOTIFICATION_PREDELETE: _freed()
+
+	func _freed() -> void: pass

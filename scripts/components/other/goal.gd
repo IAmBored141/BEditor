@@ -82,6 +82,10 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawStar,get_canvas_item())
 
+func _freed() -> void:
+	RenderingServer.free_rid(drawMain)
+	RenderingServer.free_rid(drawStar)
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawMain)
 	RenderingServer.canvas_item_clear(drawStar)

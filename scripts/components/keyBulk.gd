@@ -60,6 +60,14 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawSymbol,get_canvas_item())
 	Game.connect(&"goldIndexChanged",func():if color in Game.ANIMATED_COLORS: queue_redraw())
 
+
+func _freed() -> void:
+	RenderingServer.free_rid(drawDropShadow)
+	RenderingServer.free_rid(drawGlitch)
+	RenderingServer.free_rid(drawMain)
+	RenderingServer.free_rid(drawSymbol)
+
+
 func outlineTex() -> Texture2D: return getOutlineTexture(color, type, un)
 
 static func getOutlineTexture(keyColor:Game.COLOR, keyType:TYPE=TYPE.NORMAL, keyUn:bool=false) -> Texture2D:

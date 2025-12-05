@@ -28,6 +28,9 @@ func _ready() -> void:
 	drawMain = RenderingServer.canvas_item_create()
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 
+func _freed() -> void:
+	RenderingServer.free_rid(drawMain)
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawMain)
 	if Game.playState == Game.PLAY_STATE.PLAY: return

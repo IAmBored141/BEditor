@@ -113,6 +113,18 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawNegative,get_canvas_item())
 	Game.connect(&"goldIndexChanged",queue_redraw)
 
+func _freed() -> void:
+	RenderingServer.free_rid(drawDropShadow)
+	RenderingServer.free_rid(drawScaled)
+	RenderingServer.free_rid(drawAuraBreaker)
+	RenderingServer.free_rid(drawGlitch)
+	RenderingServer.free_rid(drawMain)
+	RenderingServer.free_rid(drawCrumbled)
+	RenderingServer.free_rid(drawPainted)
+	RenderingServer.free_rid(drawFrozen)
+	RenderingServer.free_rid(drawCopies)
+	RenderingServer.free_rid(drawNegative)
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawDropShadow)
 	RenderingServer.canvas_item_clear(drawScaled)
