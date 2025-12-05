@@ -210,6 +210,8 @@ var won:bool = false
 enum CRASH_STATE {NONE, NONE_COLOR}
 var crashState = CRASH_STATE.NONE # focal point, none color
 
+var windowName:String
+
 func setWorld(_world:World) -> void:
 	world = _world
 	tiles = world.tiles
@@ -238,12 +240,16 @@ func _process(delta:float) -> void:
 	if playGame and !hideTimer: updateWindowName()
 
 func updateWindowName() -> void:
+	var newWindowName:String
 	if editor:
-		if anyChanges: get_window().title = level.name + "*" + " - IWLCEditor"
-		else: get_window().title = level.name + " - IWLCEditor"
+		if anyChanges: newWindowName = level.name + "*" + " - IWLCEditor"
+		else: newWindowName = level.name + " - IWLCEditor"
 	else:
-		if hideTimer: get_window().title = "IWLCEditor"
-		else: get_window().title = "IWLCEditor - Time: " + formatTime(playTime)
+		if hideTimer: newWindowName = "IWLCEditor"
+		else: newWindowName = "IWLCEditor - Time: " + formatTime(playTime)
+	if newWindowName != windowName:
+		windowName = newWindowName
+		get_window().title = newWindowName
 
 func fasterAnims() -> void:
 	if !fastAnimations: return

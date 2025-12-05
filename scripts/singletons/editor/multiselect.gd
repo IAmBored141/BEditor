@@ -27,7 +27,7 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_z_index(drawTiles, -1)
 
 func startSelect() -> void:
-	pivot = get_global_mouse_position()
+	pivot = editor.mouseWorldPosition
 	state = STATE.SELECTING
 	visible = true
 	selected = []
@@ -51,22 +51,22 @@ func drag() -> void:
 
 func stopDrag() -> void:
 	state = STATE.HOLDING
+	editor.mouse_default_cursor_shape = CURSOR_ARROW
 	for select in selected: select.endDrag()
 	Changes.bufferSave()
 
 func continueSelect() -> void:
-	var rect:Rect2 = Rect2(pivot,Vector2.ZERO).expand(get_global_mouse_position())
-	var worldRect:Rect2 = Rect2(editor.screenspaceToWorldspace(pivot),Vector2.ZERO).expand(editor.screenspaceToWorldspace(get_global_mouse_position()))
-	position = rect.position - editor.gameCont.position
-	size = rect.size
+	var rect:Rect2 = Rect2(pivot,Vector2.ZERO).expand(editor.mouseWorldPosition)
+	position = editor.worldspaceToScreenspace(rect.position) - editor.gameCont.position
+	size = editor.worldspaceToScreenspace(rect.end) - position - editor.gameCont.position
 	selected = []
 	# tiles
-	for x in range(floor(worldRect.position.x/32), ceil(worldRect.end.x/32)):
-		for y in range(floor(worldRect.position.y/32), ceil(worldRect.end.y/32)):
+	for x in range(floor(rect.position.x/32), ceil(rect.end.x/32)):
+		for y in range(floor(rect.position.y/32), ceil(rect.end.y/32)):
 			if Game.tiles.get_cell_source_id(Vector2i(x,y)) != -1: selected.append(TileSelect.new(Vector2i(x,y)*32))
 	# objects
 	for object in Game.objectsParent.get_children():
-		if Rect2(object.position,object.size).intersects(worldRect):
+		if Rect2(object.position,object.size).intersects(rect):
 			selected.append(ObjectSelect.new(object))
 	draw()
 
@@ -79,10 +79,14 @@ func continueDrag() -> void:
 		select.continueDrag()
 	draw()
 
+func update() -> void:
+	if state == STATE.SELECTING: continueSelect()
+	elif state == STATE.DRAGGING: continueDrag()
+
 func receiveMouseInput(event:InputEventMouse) -> bool:
 	if event is InputEventMouseMotion:
-		if state == STATE.SELECTING: continueSelect(); return false
-		if state == STATE.DRAGGING: continueDrag(); return false
+		update()
+		return false
 	elif Editor.isLeftClick(event) and state == STATE.HOLDING:
 		for select in selected:
 			if Rect2i(select.position,select.size).has_point(editor.mouseWorldPosition):

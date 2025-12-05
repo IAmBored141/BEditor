@@ -123,8 +123,8 @@ func receiveKey(event:InputEvent) -> bool:
 			elif Editor.eventIs(event, &"focusDoorPainted"): _paintedSet(!main.focused.painted)
 			else: return false
 		else:
-			if Editor.eventIs(event, &"focusLockDuplicate"): main.focused.duplicateLock(main.componentFocused)
-			elif Editor.eventIs(event, &"focusDoorAddLock"): main.focused.addLock()
+			if Editor.eventIs(event, &"focusLockDuplicate", true): main.focused.duplicateLock(main.componentFocused)
+			elif Editor.eventIs(event, &"focusDoorAddLock", true): main.focused.addLock()
 			elif Editor.eventIs(event, &"focusDoorColorLink"): %colorLink.button_pressed = !%colorLink.button_pressed
 			elif Editor.eventIs(event, &"quicksetLockSize"): editor.quickSet.startQuick(&"quicksetLockSize", main.componentFocused)
 			elif Editor.eventIs(event, &"editDelete"):
@@ -136,7 +136,7 @@ func receiveKey(event:InputEvent) -> bool:
 		if Editor.eventIs(event, &"focusDoorFrozen"): _frozenSet(!main.focused.frozen)
 		elif Editor.eventIs(event, &"focusDoorCrumbled"): _crumbledSet(!main.focused.crumbled)
 		elif Editor.eventIs(event, &"focusDoorPainted"): _paintedSet(!main.focused.painted)
-		elif Editor.eventIs(event, &"focusDoorAddLock"): main.focused.addLock()
+		elif Editor.eventIs(event, &"focusDoorAddLock", true): main.focused.addLock()
 		elif Editor.eventIs(event, &"focusDoorColorLink"): %colorLink.button_pressed = !%colorLink.button_pressed
 		else: return false
 	return true

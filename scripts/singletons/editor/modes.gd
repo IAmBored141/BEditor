@@ -9,6 +9,7 @@ func _setMode(mode:int) -> void:
 func setMode(mode:Editor.MODE) -> void:
 	if mode == Editor.MODE.OTHER: %other.button_pressed = true
 	else: get_child(mode+2).button_pressed = true
+	editor.multiselect.deselect()
 	editor.mode = mode
 	editor.placePreviewWorld.tiles.clear()
 	editor.placePreviewWorld.tilesDropShadow.clear()

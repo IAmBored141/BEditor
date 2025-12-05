@@ -98,6 +98,7 @@ func _process(delta:float) -> void:
 	else:
 		editorCamera.zoom *= scaleFactor
 		editorCamera.position += (1-1/scaleFactor) * (worldspaceToScreenspace(zoomPoint)-gameCont.position) / editorCamera.zoom
+		multiselect.update()
 	
 	if settingsOpen: tileSize = Vector2i(32,32)
 	else:
@@ -454,18 +455,20 @@ func _input(event:InputEvent) -> void:
 			elif eventIs(event, &"editCopy"): multiselect.copySelection()
 			elif eventIs(event, &"editCut"): multiselect.copySelection(); multiselect.delete()
 			elif eventIs(event, &"editPaste") and multiselect.clipboard != []: modes.setMode(MODE.PASTE)
-			elif eventIs(event, &"editUndo"): Changes.undo()
-			elif eventIs(event, &"editRedo"): Changes.redo()
+			elif eventIs(event, &"editUndo"): Changes.undo(); multiselect.update()
+			elif eventIs(event, &"editRedo"): Changes.redo(); multiselect.update()
 			elif eventIs(event, &"editDrag"):
 				if focusDialog.componentFocused and !(focusDialog.componentFocused.parent is Door and focusDialog.componentFocused.parent.type == Door.TYPE.SIMPLE): startPositionDrag(focusDialog.componentFocused)
 				elif focusDialog.focused: startPositionDrag(focusDialog.focused)
+				elif multiselect.selected:
+					multiselect.drag()
 				focusDialog.defocus()
 			elif eventIs(event, &"editDelete"): multiselect.delete()
 			match event.keycode:
 				KEY_TAB: grab_focus()
 				KEY_F2: takeScreenshot()
 
-static func eventIs(event:InputEvent, action:StringName) -> bool: return event.is_action_pressed(action, false, true)
+static func eventIs(event:InputEvent, action:StringName, allowEcho:bool=false) -> bool: return event.is_action_pressed(action, allowEcho, true)
 
 func home() -> void:
 	targetCameraZoom = 1
