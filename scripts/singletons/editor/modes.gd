@@ -28,6 +28,7 @@ func setMode(mode:Editor.MODE) -> void:
 			var object:GameObject = editor.otherObjects.selected.SCENE.instantiate()
 			editor.placePreviewWorld.objectsParent.add_child(object)
 			if object is KeyCounter: addElement(object)
+			elif object is PlayerSpawn and !Game.levelStart: object.forceDrawStart = true
 		Editor.MODE.PASTE:
 			for copy in editor.multiselect.clipboard:
 				if copy is Multiselect.TileCopy:
@@ -38,7 +39,8 @@ func setMode(mode:Editor.MODE) -> void:
 					for property in object.PROPERTIES:
 						object.set(property, copy.properties[property])
 					editor.placePreviewWorld.objectsParent.add_child(object)
-					if copy is Multiselect.DoorCopy:
+					if object is PlayerSpawn and !Game.levelStart: object.forceDrawStart = true
+					elif copy is Multiselect.DoorCopy:
 						for lockCopy in copy.locks:
 							var lock = addLock(object)
 							for property in lock.PROPERTIES:

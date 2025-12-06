@@ -37,6 +37,9 @@ func hold() -> void:
 	state = STATE.HOLDING
 	visible = false
 	if len(selected) > 0:
+		if len(selected) == 1 and selected[0] is ObjectSelect:
+			editor.focusDialog.focus(selected[0].object)
+			return deselect()
 		selectRect = Rect2(selected[0].position,selected[0].size)
 		for select in selected:
 			selectRect = selectRect.expand(select.position).expand(select.position+select.size)
@@ -82,6 +85,7 @@ func continueDrag() -> void:
 func update() -> void:
 	if state == STATE.SELECTING: continueSelect()
 	elif state == STATE.DRAGGING: continueDrag()
+	else: draw()
 
 func receiveMouseInput(event:InputEventMouse) -> bool:
 	if event is InputEventMouseMotion:

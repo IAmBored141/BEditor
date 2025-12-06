@@ -455,8 +455,8 @@ func _input(event:InputEvent) -> void:
 			elif eventIs(event, &"editCopy"): multiselect.copySelection()
 			elif eventIs(event, &"editCut"): multiselect.copySelection(); multiselect.delete()
 			elif eventIs(event, &"editPaste") and multiselect.clipboard != []: modes.setMode(MODE.PASTE)
-			elif eventIs(event, &"editUndo"): Changes.undo(); multiselect.update()
-			elif eventIs(event, &"editRedo"): Changes.redo(); multiselect.update()
+			elif eventIs(event, &"editUndo"): multiselect.deselect(); Changes.undo()
+			elif eventIs(event, &"editRedo"): multiselect.deselect(); Changes.redo()
 			elif eventIs(event, &"editDrag"):
 				if focusDialog.componentFocused and !(focusDialog.componentFocused.parent is Door and focusDialog.componentFocused.parent.type == Door.TYPE.SIMPLE): startPositionDrag(focusDialog.componentFocused)
 				elif focusDialog.focused: startPositionDrag(focusDialog.focused)
@@ -484,6 +484,7 @@ func zoomCamera(factor:float) -> void:
 
 func pipette() -> void:
 	multiselect.deselect()
+	focusDialog.defocus()
 	if objectHovered:
 		multiselect.selectRect.position = objectHovered.position
 		multiselect.clipboard.assign([multiselect.createObjectCopy(objectHovered)])

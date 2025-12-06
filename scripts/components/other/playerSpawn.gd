@@ -24,6 +24,8 @@ static var ARRAYS:Dictionary[StringName,GDScript] = {}
 var drawMain:RID
 func _init() -> void : size = Vector2(32,32)
 
+var forceDrawStart:bool = false
+
 func _ready() -> void:
 	drawMain = RenderingServer.canvas_item_create()
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
@@ -35,5 +37,5 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawMain)
 	if Game.playState == Game.PLAY_STATE.PLAY: return
 	var rect:Rect2 = Rect2(Vector2.ZERO, size)
-	if Game.levelStart == self: RenderingServer.canvas_item_add_texture_rect(drawMain,rect,SEARCH_ICON)
+	if forceDrawStart or Game.levelStart == self: RenderingServer.canvas_item_add_texture_rect(drawMain,rect,SEARCH_ICON)
 	else: RenderingServer.canvas_item_add_texture_rect(drawMain,rect,SAVESTATE_ICON)
