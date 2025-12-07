@@ -3,7 +3,7 @@ extends Node
 static var COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement, KeyBulk, Door, Goal, KeyCounter, PlayerSpawn, FloatingTile, RemoteLock]
 static var NON_OBJECT_COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement]
 # for outline draw; if not in this then provide an outlineTex() function
-static var RECTANGLE_COMPONENTS:Array[GDScript] = [Door, Lock, KeyCounter, RemoteLock, PlaceholderComponent, FloatingTile]
+static var RECTANGLE_COMPONENTS:Array[GDScript] = [Door, Lock, KeyCounter, RemoteLock, PlaceholderObject, FloatingTile]
 
 const COLORS:int = 23
 enum COLOR {MASTER, WHITE, ORANGE, PURPLE, RED, GREEN, BLUE, PINK, CYAN, BLACK, BROWN, PURE, GLITCH, STONE, DYNAMITE, QUICKSILVER, MAROON, FOREST, NAVY, ICE, MUD, GRAFFITI, NONE}
@@ -144,8 +144,8 @@ var levelBounds:Rect2i = Rect2i(0,0,800,608):
 			camera.limit_right = levelBounds.end.x
 			camera.limit_bottom = levelBounds.end.y
 		if editor:
-			editor.levelBoundsComponent.position = levelBounds.position
-			editor.levelBoundsComponent.size = levelBounds.size
+			editor.levelBoundsObject.position = levelBounds.position
+			editor.levelBoundsObject.size = levelBounds.size
 			if editor.settingsOpen: editor.settingsMenu.updateLevelSettingsPosition()
 
 const NO_MATERIAL:CanvasItemMaterial = preload("res://resources/materials/noMaterial.tres")
@@ -289,6 +289,10 @@ func pauseTest() -> void:
 	playState = PLAY_STATE.PAUSED
 	for object in objects.values(): object.queue_redraw()
 	for component in components.values(): component.queue_redraw()
+	if !objects.get(-1):
+		objects[-1] = editor.playerObject
+		objectsParent.add_child(editor.playerObject)
+	editor.playerObject.position = player.position - Vector2(6, 12)
 
 func stopTest() -> void:
 	playState = PLAY_STATE.EDIT
@@ -304,6 +308,9 @@ func stopTest() -> void:
 	for component in components.values():
 		component.stop()
 		component.queue_redraw()
+	if objects.get(-1):
+		objects.erase(-1)
+		objectsParent.remove_child(editor.playerObject)
 
 func restart() -> void:
 	if editor:

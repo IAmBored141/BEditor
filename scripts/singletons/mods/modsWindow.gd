@@ -41,6 +41,7 @@ func _back():
 	stage = STAGE.SELECT_MODS
 
 func _saveChanges():
+	if Game.playState != Game.PLAY_STATE.EDIT: Game.stopTest()
 	Changes.addChange(Changes.GlobalPropertyChange.new(Mods,&"activeModpack",tempActiveModpack))
 	Changes.addChange(Changes.GlobalPropertyChange.new(Mods,&"activeVersion",tempActiveVersion))
 	for mod in Mods.mods.values():

@@ -52,6 +52,7 @@ func updateText() -> void:
 				KeyCounter: string += "Key Counter / [%s]Add Element " % hotkeyMap(&"focusKeyCounterAddElement") +control
 				FloatingTile: string += "Floating Tile / " + control
 				RemoteLock: string += "Remote Lock / [%s]Add Connection " % hotkeyMap(&"focusRemoteLockAddConnection") + control
+				PlayerPlaceholderObject: string += "Player / " + control
 		string += "[M]Move [Del]Delete"
 	elif editor.otherObjects.objectSearch.has_focus():
 		string += "Object Search / "+control+"[Enter][Tab]Select object [Esc]Cancel"

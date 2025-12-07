@@ -156,6 +156,14 @@ func colors() -> Array[Game.COLOR]:
 	if active(&"NoneColor"): array.append(Game.COLOR.NONE)
 	return array
 
+func nextColor(color:Game.COLOR) -> Game.COLOR:
+	var colorsArray:Array[Game.COLOR] = colors()
+	return colorsArray[posmod(colorsArray.find(color) + 1, len(colorsArray))]
+
+func previousColor(color:Game.COLOR) -> Game.COLOR:
+	var colorsArray:Array[Game.COLOR] = colors()
+	return colorsArray[posmod(colorsArray.find(color) - 1, len(colorsArray))]
+
 func keyTypes() -> Array[KeyBulk.TYPE]:
 	var array:Array[KeyBulk.TYPE] = [
 		KeyBulk.TYPE.NORMAL,

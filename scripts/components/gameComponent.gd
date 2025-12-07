@@ -12,6 +12,7 @@ var isReady:bool = false
 var editor:Editor
 
 func getDrawPosition() -> Vector2: return position
+func getDrawSize() -> Vector2: return size
 
 func receiveMouseInput(_event:InputEventMouse) -> bool: return false
 

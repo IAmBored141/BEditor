@@ -29,10 +29,11 @@ func draw() -> void:
 	if editor.focusDialog.componentFocused:
 		drawOutline(editor.focusDialog.componentFocused,Color("#00a2ff"))
 	if editor.settingsOpen and editor.settingsMenu.levelSettings.visible:
-		drawOutline(editor.levelBoundsComponent,Color("#ffffffff"))
+		drawOutline(editor.levelBoundsObject,Color("#ffffffff"))
 
 func drawOutline(component:GameComponent,color:Color=Color.WHITE) -> void:
 	var pos:Vector2 = component.getDrawPosition()
+	if component is PlayerPlaceholderObject: pos -= component.getOffset()
 	if component.get_script() in Game.RECTANGLE_COMPONENTS:
 		RenderingServer.canvas_item_add_polyline(drawNormal,[ # cant just rectangle with the drawshader since uv doesnt work with rectangles, and there isnt a rectangle outline either from what i can tell
 			pos,
@@ -42,7 +43,7 @@ func drawOutline(component:GameComponent,color:Color=Color.WHITE) -> void:
 			pos # bitch
 		],[color,color,color,color],2/editor.cameraZoom)
 	else:
-		RenderingServer.canvas_item_add_texture_rect(drawShader,Rect2(pos,component.size),component.outlineTex(),false,color)
+		RenderingServer.canvas_item_add_texture_rect(drawShader,Rect2(pos,component.getDrawSize()),component.outlineTex(),false,color)
 
 func _process(_delta) -> void:
 	draw()

@@ -16,7 +16,7 @@ func _ready() -> void:
 func setValue(_value:PackedInt64Array,manual:bool=false) -> void:
 	value = _value
 	realEdit.setValue(M.r(value), true)
-	imaginaryEdit.setValue(M.i(value), true)
+	imaginaryEdit.setValue(M.ir(value), true)
 
 	if !manual: valueSet.emit(value)
 

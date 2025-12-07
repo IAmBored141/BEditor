@@ -244,7 +244,7 @@ func receiveKey(event:InputEventKey):
 		KEY_U: print(GameChanges.undoStack)
 
 func _newlyInteracted(area:Area2D) -> void:
-	if pauseFrame: return
+	if pauseFrame or paused(): return
 	var object:GameObject = area.get_parent()
 	if object is KeyBulk: object.collect(self)
 	elif object is RemoteLock: object.check(self)
@@ -252,7 +252,7 @@ func _newlyInteracted(area:Area2D) -> void:
 	elif object is Goal: Game.win(object)
 
 func _newlyUninteracted(area: Area2D):
-	if pauseFrame: return
+	if pauseFrame or paused(): return
 	var object:GameObject = area.get_parent()
 	if object is Door and object.type == Door.TYPE.GATE: checkKeys()
 
@@ -380,7 +380,7 @@ func _draw() -> void:
 		RenderingServer.canvas_item_add_texture_rect(drawWarp,Rect2(Vector2(-16-offset,-23),Vector2(32,32)),WARP_2,false,Color.from_hsv(crashAnimHue,crashAnimSat,crashAnimVal))
 		return
 	# drop shadow
-	RenderingServer.canvas_item_add_texture_rect(drawDropShadow,Rect2(Vector2(-13,-20),Vector2(-32 if %sprite.flip_h else 32,32)),%sprite.sprite_frames.get_frame_texture(%sprite.animation,%sprite.frame),false,Game.DROP_SHADOW_COLOR)
+	RenderingServer.canvas_item_add_texture_rect(drawDropShadow,Rect2(Vector2(-13,-20),Vector2(-32 if %sprite.flip_h else 32,32)),getCurrentSprite(),false,Game.DROP_SHADOW_COLOR)
 	# auras
 	if auraRed: RenderingServer.canvas_item_add_texture_rect(drawAura,AURA_RECT,AURA_RED,false,AURA_DRAW_OPACITY)
 	if auraMaroon: RenderingServer.canvas_item_add_texture_rect(drawAura,AURA_RECT,AURA_MAROON,false,AURA_DRAW_OPACITY)
@@ -400,6 +400,9 @@ func _draw() -> void:
 	if complexSwitchAnim:
 		var switchScale:float = sin(complexSwitchAngle)
 		RenderingServer.canvas_item_add_texture_rect(drawComplexSwitch,Rect2(Vector2(-64*switchScale,-64*switchScale),Vector2(128*switchScale,128*switchScale)),CurseParticle.TEXTURE_GENERIC,false,Color(Color.WHITE,cos(complexSwitchAngle)))
+
+func getCurrentSprite() -> Texture2D:
+	return %sprite.sprite_frames.get_frame_texture(%sprite.animation,%sprite.frame)
 
 func toggleCamera() -> void:
 	cameraMode = !cameraMode

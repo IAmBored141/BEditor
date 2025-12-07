@@ -6,9 +6,10 @@ class_name FocusDialog
 
 @onready var keyDialog:KeyDialog = %keyDialog
 @onready var doorDialog:DoorDialog = %doorDialog
-@onready var playerDialog:PlayerDialog = %playerDialog
+@onready var playerSpawnDialog:PlayerSpawnDialog = %playerSpawnDialog
 @onready var keyCounterDialog:KeyCounterDialog = %keyCounterDialog
 @onready var goalDialog:GoalDialog = %goalDialog
+@onready var playerDialog:PlayerDialog = %playerDialog
 
 var focused:GameObject # the object that is currently focused
 var componentFocused:GameComponent # you can focus both a door and a lock at the same time so
@@ -27,16 +28,18 @@ func focus(object:GameObject, dontRedirect:bool=false) -> void:
 	if new: deinteract()
 	if focused is KeyBulk: keyDialog.focus(focused, new)
 	elif focused is Door or focused is RemoteLock: doorDialog.focus(focused, new, dontRedirect)
-	elif focused is PlayerSpawn: playerDialog.focus(focused, new)
+	elif focused is PlayerSpawn: playerSpawnDialog.focus(focused, new)
 	elif focused is KeyCounter: keyCounterDialog.focus(focused, new, dontRedirect)
 	elif focused is Goal: goalDialog.focus(focused, new)
+	elif focused is PlayerPlaceholderObject: playerDialog.focus(focused, new)
 
 func showCorrectDialog() -> void:
 	%keyDialog.visible = focused is KeyBulk
 	%doorDialog.visible = focused is Door or focused is RemoteLock
-	%playerDialog.visible = focused is PlayerSpawn
+	%playerSpawnDialog.visible = focused is PlayerSpawn
 	%keyCounterDialog.visible = focused is KeyCounter
 	%goalDialog.visible = focused is Goal
+	%playerDialog.visible = focused is PlayerPlaceholderObject
 	above = focused is KeyCounter # maybe add more later
 	%speechBubbler.visible = focused is not FloatingTile
 	%speechBubbler.rotation_degrees = 0 if above else 180
@@ -118,6 +121,10 @@ func tabbed(numberEdit:PanelContainer) -> void:
 					elif numberEdit == %partialBlastNumeratorEdit.realEdit:
 						if componentFocused.index == 0: interactDoorLastEdit()
 						else: interactLockLastEdit(componentFocused.index-1)
+				elif focused is PlayerPlaceholderObject:
+					if numberEdit == %playerKeyCountEdit.realEdit:
+						playerDialog.setSelectedColor(Mods.previousColor(playerDialog.color))
+						interact(%playerKeyCountEdit.imaginaryEdit)
 			NumberEdit.PURPOSE.AXIAL:
 				assert(componentFocused)
 				if componentFocused.index == 0: interactDoorLastEdit()
@@ -138,6 +145,10 @@ func tabbed(numberEdit:PanelContainer) -> void:
 					elif numberEdit in [%partialBlastNumeratorEdit.imaginaryEdit, %partialBlastDenominatorEdit.imaginaryEdit]:
 						if componentFocused.index == len(focused.locks) - 1: interactDoorFirstEdit()
 						else: interactLockFirstEdit(componentFocused.index+1)
+				elif focused is PlayerPlaceholderObject:
+					if numberEdit == %playerKeyCountEdit.imaginaryEdit:
+						playerDialog.setSelectedColor(Mods.nextColor(playerDialog.color))
+						interact(%playerKeyCountEdit.realEdit)
 			NumberEdit.PURPOSE.AXIAL:
 				assert(componentFocused)
 				if componentFocused.index == len(focused.locks) - 1: interactDoorFirstEdit()
@@ -174,7 +185,7 @@ func getWidth() -> float:
 	match focused.get_script():
 		KeyBulk: return keyDialog.get_child(0).size.x
 		Door: return doorDialog.get_child(0).size.x
-		Player: return playerDialog.get_child(0).size.x
+		Player: return playerSpawnDialog.get_child(0).size.x
 		KeyCounter: return keyCounterDialog.get_child(0).size.x
 		Goal: return goalDialog.get_child(0).size.x
 		_: return 0

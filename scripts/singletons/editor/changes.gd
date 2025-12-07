@@ -196,6 +196,13 @@ class DeleteComponentChange extends Change:
 	var arrays:Dictionary[StringName, Array] = {} # dictionary[property, array[type, array]]
 
 	func _init(component:GameComponent) -> void:
+		if component is PlayerPlaceholderObject:
+			if component == Game.editor.focusDialog.focused: Game.editor.focusDialog.defocus()
+			component.deletedInit()
+			Game.objects.erase(-1)
+			cancelled = true
+			return
+
 		type = component.get_script()
 		for property in component.PROPERTIES:
 			prop[property] = Changes.copy(component.get(property))
@@ -302,6 +309,11 @@ class PropertyChange extends Change:
 	var type:GDScript
 	
 	func _init(component:GameComponent,_property:StringName,_after:Variant) -> void:
+		if component is PlayerPlaceholderObject:
+			component.set(_property, _after)
+			component.propertyChangedDo(_property)
+			cancelled = true
+			return
 		id = component.id
 		property = _property
 		before = Changes.copy(component.get(property))

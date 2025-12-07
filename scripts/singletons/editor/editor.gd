@@ -35,6 +35,7 @@ var mode:MODE = MODE.SELECT
 var mouseWorldPosition:Vector2
 var mouseTilePosition:Vector2i
 
+var cameraZoom:float = 1
 var targetCameraZoom:float = 1
 var zoomPoint:Vector2 # the point where the latest zoom was targetted
 
@@ -50,14 +51,12 @@ var dragPivotRect:Rect2 # the pivot for size dragging
 var dragHandlePosition:Vector2
 var previousDragPosition:Vector2i
 var dragHandle:Vector2 # direction of the handle (initially), so that size_vert and size_horiz behave as they do
-var levelBoundsComponent:GameComponent = PlaceholderComponent.new() # spoof
+var levelBoundsObject:GameObject = PlaceholderObject.new() # spoof
 
 var lockBufferConvert:bool = false
 var connectionSource:GameObject # for pulling connections between remote locks and doors
 
 var tileSize:Vector2i = Vector2i(32,32)
-
-var cameraZoom:float = 1
 
 var settingsOpen:bool = false
 
@@ -66,6 +65,8 @@ var drawAutoRunGradient:RID
 var autoRunTimer:float = 2
 
 var screenshot:Image
+
+var playerObject:GameObject = PlayerPlaceholderObject.new()
 
 func _ready() -> void:
 	Changes.editor = self
@@ -88,6 +89,8 @@ func _ready() -> void:
 	%screenshotViewport.world_2d = %gameViewport.world_2d
 	Game.camera = playtestCamera
 	get_window().files_dropped.connect(func(files): Saving.loadFile(files[0]))
+	playerObject.size = Vector2(12,21)
+	playerObject.id = -1
 
 func _process(delta:float) -> void:
 	queue_redraw()
@@ -296,7 +299,7 @@ func _gui_input(event:InputEvent) -> void:
 							modes.setMode(MODE.SELECT)
 
 func stopDrag() -> void:
-	if componentDragged == levelBoundsComponent:
+	if componentDragged == levelBoundsObject:
 		componentDragged = null
 		return
 	if sizeDragging():
@@ -333,7 +336,7 @@ func startSizeDrag(component:GameComponent, handle:Vector2=Vector2(1,1)) -> void
 	elif component is Lock or component is RemoteLock: minSize = Vector2(18,18)
 	elif component is KeyCounter: minSize = Vector2(107,63)
 	elif component is FloatingTile: minSize = Vector2(16,16)
-	elif component == levelBoundsComponent: minSize = Vector2(800, 608)
+	elif component == levelBoundsObject: minSize = Vector2(800, 608)
 	if handle.x and handle.y: dragMode = DRAG_MODE.SIZE_DIAG
 	elif handle.x: dragMode = DRAG_MODE.SIZE_HORIZ; minSize.y = componentDragged.size.y
 	elif handle.y: dragMode = DRAG_MODE.SIZE_VERT; minSize.x = componentDragged.size.x
@@ -405,7 +408,7 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 					lockGoingTo.position += snappedAway(Vector2.ZERO.max(doorInnerBounds.position - lockGoingTo.end) - Vector2.ZERO.max(lockGoingTo.position - doorInnerBounds.end), Vector2(tileSize)) # keep in bounds
 					Changes.addChange(Changes.PropertyChange.new(lock,&"position",lockGoingTo.position))
 			previousDragPosition += Vector2i(dragOffset)
-			if componentDragged == levelBoundsComponent:
+			if componentDragged == levelBoundsObject:
 				Changes.addChange(Changes.LevelResizeChange.new(toRect))
 			else:
 				Changes.addChange(Changes.PropertyChange.new(componentDragged,&"position",toRect.position))

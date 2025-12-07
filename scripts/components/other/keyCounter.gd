@@ -90,8 +90,7 @@ func removeElement(index:int) -> void:
 func nextColor() -> Game.COLOR:
 	# make sure to change this when implementing Mods
 	if len(elements) < 2: return Game.COLOR.WHITE
-	if elements[-2].color == Game.COLORS - 1: return Game.COLOR.MASTER
-	return elements[-2].color + 1 as Game.COLOR
+	return Mods.nextColor(elements[-2].color)
 
 func reindexElements() -> void:
 	var index:int = 0

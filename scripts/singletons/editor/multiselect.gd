@@ -106,10 +106,10 @@ func draw() -> void: # cant be _draw since panel already has a _draw or somethin
 	RenderingServer.canvas_item_clear(drawOutline)
 	for select in selected:
 		if select is TileSelect:
-			RenderingServer.canvas_item_add_texture_rect(drawTiles,Rect2(select.getDrawPosition(),select.size),TileSelect.TEXTURE)
+			RenderingServer.canvas_item_add_texture_rect(drawTiles,Rect2(select.getDrawPosition(),select.getDrawSize()),TileSelect.TEXTURE)
 		if select is ObjectSelect and select.object.get_script() not in Game.RECTANGLE_COMPONENTS:
-			RenderingServer.canvas_item_add_texture_rect(drawOutline,Rect2(select.getDrawPosition(),select.size),select.object.outlineTex())
-		else: RenderingServer.canvas_item_add_rect(drawOutline,Rect2(select.getDrawPosition(),select.size),Color.WHITE)
+			RenderingServer.canvas_item_add_texture_rect(drawOutline,Rect2(select.getDrawPosition(),select.getDrawSize()),select.object.outlineTex())
+		else: RenderingServer.canvas_item_add_rect(drawOutline,Rect2(select.getDrawPosition(),select.getDrawSize()),Color.WHITE)
 
 func copySelection() -> void:
 	if len(selected) == 0:
@@ -120,9 +120,9 @@ func copySelection() -> void:
 	clipboard = []
 	for select in selected:
 		if select is TileSelect: clipboard.append(TileCopy.new(select))
-		elif select is ObjectSelect: clipboard.append(createObjectCopy(select.object))
+		elif select is ObjectSelect and select.object is not PlayerPlaceholderObject: clipboard.append(createObjectCopy(select.object))
 	# itll only be disabled at the start
-	editor.paste.disabled = false
+	if clipboard: editor.paste.disabled = false
 
 func createObjectCopy(object:GameObject) -> ObjectCopy:
 	# KeyBulk, Door, Goal, KeyCounter, PlayerSpawn, FloatingTile, RemoteLock
@@ -163,6 +163,7 @@ class Select extends RefCounted:
 	func endDrag() -> void: pass
 
 	func getDrawPosition() -> Vector2: return position
+	func getDrawSize() -> Vector2: return size
 
 	func delete() -> void: pass # delete the thing selected
 
@@ -199,6 +200,7 @@ class ObjectSelect extends Select:
 	
 	func continueDrag() -> void:
 		object.position = pos()
+		if object is PlayerPlaceholderObject: object.propertyChangedDo(&"position")
 
 	func endDrag() -> void:
 		object.position = startingPosition
@@ -207,13 +209,15 @@ class ObjectSelect extends Select:
 	func delete() -> void: Changes.addChange(Changes.DeleteComponentChange.new(object))
 
 	func getDrawPosition() -> Vector2:
-		if object is RemoteLock: return pos()-object.getOffset()
+		if object is RemoteLock or object is PlayerPlaceholderObject: return pos()-object.getOffset()
 		else: return pos()
+
+	func getDrawSize() -> Vector2: return object.getDrawSize()
 
 	func pos() -> Vector2:
 		if Mods.active(&"OutOfBounds"): return position
 		var rect:Rect2 = Rect2(position, size).grow(-1)
-		if object is RemoteLock: rect.position -= object.getOffset()
+		if object is RemoteLock or object is PlayerPlaceholderObject: rect.position -= object.getOffset()
 		return position + Editor.snappedAway(Vector2.ZERO.max(Vector2(Game.levelBounds.position) - rect.end) - Vector2.ZERO.max(rect.position - Vector2(Game.levelBounds.end)), Vector2(editor.tileSize))
 
 @abstract class Copy extends RefCounted:

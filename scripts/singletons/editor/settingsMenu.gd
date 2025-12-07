@@ -38,7 +38,7 @@ func receiveMouseInput(event:InputEvent) -> void:
 	elif (diffSign.x > 0) == (diffSign.y > 0): mouse_default_cursor_shape = Control.CURSOR_FDIAGSIZE
 	else: mouse_default_cursor_shape = Control.CURSOR_BDIAGSIZE
 	if Editor.isLeftClick(event):
-		editor.startSizeDrag(editor.levelBoundsComponent, diffSign)
+		editor.startSizeDrag(editor.levelBoundsObject, diffSign)
 
 func _tabSelected(tab:int) -> void:
 	%levelSettings.visible = tab == 0

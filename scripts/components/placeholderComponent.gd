@@ -1,2 +1,2 @@
-extends GameComponent
-class_name PlaceholderComponent
+extends GameObject
+class_name PlaceholderObject
