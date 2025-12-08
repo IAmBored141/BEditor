@@ -336,12 +336,6 @@ label = "Eighth Tile Snap"
 action = &"heldTileSize4"
 held = true
 
-[node name="heldTileSize1" parent="c/editorSettings/c2/c/hotkeys" instance=ExtResource("6_dkncv")]
-layout_mode = 2
-label = "No Snap"
-action = &"heldTileSize1"
-held = true
-
 [node name="heldKeepMode" parent="c/editorSettings/c2/c/hotkeys" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Keep Mode"
@@ -779,6 +773,29 @@ layout_mode = 2
 layout_mode = 2
 label = "Add Connection"
 action = &"focusRemoteLockAddConnection"
+
+[node name="l5" type="Label" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c"]
+layout_mode = 2
+text = "Player/Savestate focused"
+label_settings = SubResource("LabelSettings_tyaol")
+vertical_alignment = 2
+
+[node name="playerFocused" type="MarginContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c"]
+layout_mode = 2
+
+[node name="c" type="VBoxContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/playerFocused"]
+layout_mode = 2
+
+[node name="focusPlayerStar" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/playerFocused/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Toggle Star"
+action = &"focusPlayerStar"
+
+[node name="focusPlayerCurse" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/playerFocused/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Toggle Curse"
+action = &"focusPlayerCurse"
+prerequisite = &"C5"
 
 [node name="gameSettings" parent="c" instance=ExtResource("6_tyaol")]
 unique_name_in_owner = true

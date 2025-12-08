@@ -14,9 +14,8 @@ var editor:Editor
 
 func _ready() -> void:
 	for control:Control in get_tree().get_nodes_in_group("explained"):
-		if control is Button:
-			control.mouse_entered.connect(_explain.bind(control))
-			control.mouse_exited.connect(_deexplain.bind(control))
+		control.mouse_entered.connect(_explain.bind(control))
+		control.mouse_exited.connect(_deexplain.bind(control))
 
 func _process(_delta:float) -> void: updateText()
 
@@ -49,7 +48,7 @@ func updateText() -> void:
 				Door: string += "Door / [%s]Add Lock " % hotkeyMap(&"focusDoorAddLock") + control
 				PlayerSpawn: string += "Player Spawn / "+control
 				Goal: string += "Goal / "+control
-				KeyCounter: string += "Key Counter / [%s]Add Element " % hotkeyMap(&"focusKeyCounterAddElement") +control
+				KeyCounter: string += "Key Counter / [%s]Add Element " % hotkeyMap(&"focusKeyCounterAddElement") + control
 				FloatingTile: string += "Floating Tile / " + control
 				RemoteLock: string += "Remote Lock / [%s]Add Connection " % hotkeyMap(&"focusRemoteLockAddConnection") + control
 				PlayerPlaceholderObject: string += "Player / " + control

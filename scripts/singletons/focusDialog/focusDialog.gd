@@ -155,6 +155,7 @@ func tabbed(numberEdit:PanelContainer) -> void:
 func receiveKey(event:InputEvent) -> bool:
 	if focused is KeyBulk and keyDialog.receiveKey(event): return true
 	elif (focused is Door or focused is RemoteLock) and doorDialog.receiveKey(event): return true
+	elif (focused is PlayerSpawn or focused is PlayerPlaceholderObject) and playerDialog.receiveKey(event): return true
 	elif focused is KeyCounter and keyCounterDialog.receiveKey(event): return true
 	else:
 		if Editor.eventIs(event, &"editDelete"):

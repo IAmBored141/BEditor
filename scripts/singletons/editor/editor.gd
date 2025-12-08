@@ -105,7 +105,7 @@ func _process(delta:float) -> void:
 	
 	if settingsOpen: tileSize = Vector2i(32,32)
 	else:
-		if Input.is_action_pressed(&"heldTileSize1"): tileSize = Vector2i(1,1)
+		if Input.is_action_pressed(&"heldTileSize4") and Input.is_action_pressed(&"heldTileSize16"): tileSize = Vector2i(1,1)
 		elif Input.is_action_pressed(&"heldTileSize4"): tileSize = Vector2i(4,4)
 		elif Input.is_action_pressed(&"heldTileSize16"): tileSize = Vector2i(16,16)
 		else: tileSize = Vector2i(32,32)

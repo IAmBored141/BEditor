@@ -37,6 +37,7 @@ func applyOrCancel() -> void:
 				match component.get_script():
 					KeyBulk: editor.focusDialog.keyDialog._keyColorSelected(found)
 					Door, Lock, RemoteLock: editor.focusDialog.doorDialog._doorColorSelected(found)
+					PlayerSpawn, PlayerPlaceholderObject: editor.focusDialog.playerDialog.setSelectedColor(found)
 					KeyCounterElement: editor.focusDialog.keyCounterDialog._keyCounterColorSelected(found)
 		&"quicksetLockSize":
 			var found:int = findInputIn(LockSizeQuicksetSetting.matches)

@@ -20,8 +20,8 @@ func focusComponent(component:KeyCounterElement, _new:bool) -> void:
 	%keyCounterColorSelector.setSelect(component.color)
 
 func receiveKey(event:InputEvent) -> bool:
-	if Editor.eventIs(event, &"quicksetColor"): editor.quickSet.startQuick(&"quicksetColor", main.componentFocused)
-	elif Editor.eventIs(event, &"focusKeyCounterAddElement"): main.focused.addElement()
+	if Editor.eventIs(event, &"focusKeyCounterAddElement"): main.focused.addElement()
+	elif Editor.eventIs(event, &"quicksetColor"): editor.quickSet.startQuick(&"quicksetColor", main.componentFocused)
 	elif Editor.eventIs(event, &"editDelete"):
 		if main.componentFocused and len(main.focused.elements) > 1:
 			main.focused.removeElement(main.componentFocused.index)

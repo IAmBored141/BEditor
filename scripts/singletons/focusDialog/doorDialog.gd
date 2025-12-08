@@ -102,9 +102,6 @@ func receiveKey(event:InputEvent) -> bool:
 		if blastSettings: _blastLockSignSet(!%blastLockSign.button_pressed)
 	elif Editor.eventIs(event, &"numberTimesI"):
 		if blastSettings: _blastLockAxisSet(!%blastLockAxis.button_pressed)
-	elif Editor.eventIs(event, &"quicksetColor"):
-		if main.componentFocused: editor.quickSet.startQuick(&"quicksetColor", main.componentFocused)
-		else: editor.quickSet.startQuick(&"quicksetColor", main.focused)
 	elif main.focused is RemoteLock or main.componentFocused is Lock:
 		if Editor.eventIs(event, &"focusLockNormal"): _lockTypeSelected(Lock.TYPE.NORMAL)
 		elif Editor.eventIs(event, &"focusLockBlank"): _lockTypeSelected(Lock.TYPE.BLANK)
@@ -121,6 +118,7 @@ func receiveKey(event:InputEvent) -> bool:
 			elif Editor.eventIs(event, &"focusDoorFrozen"): _frozenSet(!main.focused.frozen)
 			elif Editor.eventIs(event, &"focusDoorCrumbled"): _crumbledSet(!main.focused.crumbled)
 			elif Editor.eventIs(event, &"focusDoorPainted"): _paintedSet(!main.focused.painted)
+			elif Editor.eventIs(event, &"quicksetColor"): editor.quickSet.startQuick(&"quicksetColor", main.focused)
 			else: return false
 		else:
 			if Editor.eventIs(event, &"focusLockDuplicate", true): main.focused.duplicateLock(main.componentFocused)
@@ -131,6 +129,7 @@ func receiveKey(event:InputEvent) -> bool:
 				main.focused.removeLock(main.componentFocused.index)
 				if len(main.focused.locks) != 0: main.focusComponent(main.focused.locks[-1])
 				else: main.focus(main.focused)
+			elif Editor.eventIs(event, &"quicksetColor"): editor.quickSet.startQuick(&"quicksetColor", main.componentFocused)
 			else: return false
 	else:
 		if Editor.eventIs(event, &"focusDoorFrozen"): _frozenSet(!main.focused.frozen)
@@ -138,6 +137,7 @@ func receiveKey(event:InputEvent) -> bool:
 		elif Editor.eventIs(event, &"focusDoorPainted"): _paintedSet(!main.focused.painted)
 		elif Editor.eventIs(event, &"focusDoorAddLock", true): main.focused.addLock()
 		elif Editor.eventIs(event, &"focusDoorColorLink"): %colorLink.button_pressed = !%colorLink.button_pressed
+		elif Editor.eventIs(event, &"quicksetColor"): editor.quickSet.startQuick(&"quicksetColor", main.focused)
 		else: return false
 	return true
 

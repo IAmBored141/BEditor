@@ -84,7 +84,7 @@ class HotkeySettingButton extends Button:
 			if Input.is_key_pressed(KEY_CTRL): text += "Ctrl+"
 			if Input.is_key_pressed(KEY_SHIFT): text += "Shift+"
 			if Input.is_key_pressed(KEY_ALT): text += "Alt+"
-			if !text: text = "(Unhover to confirm)" if hotkey.held else "(Unhover to cancel)"
+			if !text: text = "(Unhover to cancel)"
 			elif hotkey.held: text = text.left(-1)
 		else:
 			assert(event is InputEventKey)
@@ -123,10 +123,7 @@ class HotkeySettingButton extends Button:
  
 	func _input(_event:InputEvent) -> void:
 		if !setting or _event is InputEventMouse or !_event.pressed: return
-		var modifier:bool = false
-		if _event is InputEventKey and _event.keycode in [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META]:
-			modifier = true
-			if !hotkey.held: return
+		if _event is InputEventKey and _event.keycode in [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META] and !hotkey.held: return
 		_event.keycode = 0
 		_event.unicode = 0
 		_event.pressed = false
@@ -135,7 +132,7 @@ class HotkeySettingButton extends Button:
 		event = _event
 		changed = true
 		get_viewport().set_input_as_handled()
-		if !modifier: _cancelSet()
+		_cancelSet()
 
 	func remove() -> void:
 		mouse_exited.disconnect(_cancelSet) # sneaky

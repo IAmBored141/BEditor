@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://djnt51xv7wn52"]
+[gd_scene load_steps=43 format=3 uid="uid://djnt51xv7wn52"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_j8y2p"]
 [ext_resource type="Script" uid="uid://2wjcj6frwpjo" path="res://scripts/singletons/editor/editor.gd" id="2_o435n"]
@@ -64,6 +64,12 @@ corner_detail = 5
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_wm3ai"]
 resource_name = "modes"
+
+[sub_resource type="Resource" id="Resource_lo5f0"]
+script = ExtResource("17_bn54a")
+explanation = "[%s]Search objects"
+hotkeys = Array[StringName]([&"editObjectSearch"])
+metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
 
 [sub_resource type="Resource" id="Resource_1abrv"]
 script = ExtResource("17_bn54a")
@@ -235,13 +241,14 @@ defaultHotkey = &"editModeOther"
 pressedHotkey = &"heldKeepMode"
 metadata/_custom_type_script = "uid://buv3n70m06kje"
 
-[node name="objectSearch" type="LineEdit" parent="c/c/topBar/c/modes/otherObjects/c/c"]
+[node name="objectSearch" type="LineEdit" parent="c/c/topBar/c/modes/otherObjects/c/c" groups=["explained"]]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
-placeholder_text = "[S]earch objects"
+placeholder_text = "Search objects"
 right_icon = ExtResource("10_8g6du")
 caret_blink = true
+metadata/explanation = SubResource("Resource_lo5f0")
 
 [node name="c2" type="Control" parent="c/c/topBar/c/modes/otherObjects/c"]
 layout_mode = 2

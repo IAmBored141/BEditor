@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://8bth374yqwpe"]
+[gd_scene load_steps=58 format=3 uid="uid://8bth374yqwpe"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_eqegh"]
 [ext_resource type="Script" uid="uid://dm8t82nhqkdlc" path="res://scripts/singletons/focusDialog/focusDialog.gd" id="2_k8bto"]
@@ -111,6 +111,18 @@ metadata/_custom_type_script = "uid://lwocqakgt4qr"
 allow_unpress = true
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_h1xy2"]
+
+[sub_resource type="Resource" id="Resource_vapyv"]
+script = ExtResource("22_s5h3h")
+explanation = "[%s]Toggle star"
+hotkeys = Array[StringName]([&"focusPlayerStar"])
+metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
+
+[sub_resource type="Resource" id="Resource_lm5cw"]
+script = ExtResource("22_s5h3h")
+explanation = "[%s]Toggle curse"
+hotkeys = Array[StringName]([&"focusPlayerCurse"])
+metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_7tfe2"]
 allow_unpress = true
@@ -534,7 +546,7 @@ layout_mode = 2
 theme_type_variation = &"RadioButtonText"
 toggle_mode = true
 button_group = SubResource("ButtonGroup_h1xy2")
-text = "Test State"
+text = "Savestate"
 
 [node name="playerSettings" type="VBoxContainer" parent="playerDialog/c/c/c"]
 unique_name_in_owner = true
@@ -556,19 +568,21 @@ layout_mode = 2
 layout_mode = 2
 alignment = 1
 
-[node name="playerStar" type="Button" parent="playerDialog/c/c/c/playerSettings/colorSettings"]
+[node name="playerStar" type="Button" parent="playerDialog/c/c/c/playerSettings/colorSettings" groups=["explained"]]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 toggle_mode = true
 icon = ExtResource("8_mscoq")
+metadata/explanation = SubResource("Resource_vapyv")
 
-[node name="playerCurse" type="Button" parent="playerDialog/c/c/c/playerSettings/colorSettings"]
+[node name="playerCurse" type="Button" parent="playerDialog/c/c/c/playerSettings/colorSettings" groups=["explained"]]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 toggle_mode = true
 icon = ExtResource("41_ft2jg")
+metadata/explanation = SubResource("Resource_lm5cw")
 
 [node name="keyCounterDialog" type="Control" parent="."]
 unique_name_in_owner = true

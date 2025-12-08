@@ -32,6 +32,13 @@ func _playerColorSelected(_color:Game.COLOR) -> void:
 		%playerStar.button_pressed = main.focused.star[color]
 		%playerCurse.button_pressed = main.focused.curse[color]
 
+func receiveKey(event:InputEvent) -> bool:
+	if Editor.eventIs(event, &"focusPlayerStar") and %playerSettings.visible: _playerStarSet(!%playerStar.button_pressed)
+	elif Editor.eventIs(event, &"focusPlayerCurse") and %playerSettings.visible and %playerCurse.visible: _playerCurseSet(!%playerCurse.button_pressed)
+	elif Editor.eventIs(event, &"quicksetColor") and %playerSettings.visible: editor.quickSet.startQuick(&"quicksetColor", main.focused)
+	else: return false
+	return true
+
 func changedMods() -> void:
 	%playerCurse.visible = Mods.active(&"C5")
 
