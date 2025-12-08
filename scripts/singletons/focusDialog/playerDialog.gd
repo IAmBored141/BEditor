@@ -6,7 +6,7 @@ class_name PlayerDialog
 
 var color:Game.COLOR
 
-func focus(focused:GameObject, new:bool) -> void:
+func focus(focused:GameObject, new:bool, _dontRedirect:bool) -> void:
 	%playerSpawnSettings.visible = focused is PlayerSpawn
 	%playerSettings.visible = focused is PlayerPlaceholderObject or Game.levelStart != focused
 	if new: setSelectedColor(Game.COLOR.WHITE)
@@ -71,11 +71,11 @@ func _setLevelStart():
 	Changes.addChange(Changes.GlobalObjectChange.new(Game,&"levelStart",main.focused))
 	main.focused.resetColors()
 	main.focused.queue_redraw()
-	focus(main.focused, false)
+	focus(main.focused, false, false)
 
 func _setSavestate():
 	if main.focused is not PlayerSpawn: return
 	if Game.levelStart == main.focused:
 		Changes.addChange(Changes.GlobalObjectChange.new(Game,&"levelStart",null))
 		main.focused.queue_redraw()
-	focus(main.focused, false)
+	focus(main.focused, false, false)

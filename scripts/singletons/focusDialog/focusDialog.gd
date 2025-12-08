@@ -14,6 +14,7 @@ class_name FocusDialog
 var focused:GameObject # the object that is currently focused
 var componentFocused:GameComponent # you can focus both a door and a lock at the same time so
 var interacted:PanelContainer # the number edit that is currently interacted
+var activeDialog:Control
 
 var above:bool = false # display above the object instead
 
@@ -26,21 +27,22 @@ func focus(object:GameObject, dontRedirect:bool=false) -> void:
 	Game.objectsParent.move_child(focused, -1)
 	showCorrectDialog()
 	if new: deinteract()
-	if focused is KeyBulk: keyDialog.focus(focused, new)
-	elif focused is Door or focused is RemoteLock: doorDialog.focus(focused, new, dontRedirect)
-	elif focused is PlayerSpawn or focused is PlayerPlaceholderObject: playerDialog.focus(focused, new)
-	elif focused is KeyCounter: keyCounterDialog.focus(focused, new, dontRedirect)
-	elif focused is Goal: goalDialog.focus(focused, new)
+	activeDialog.focus(focused, new, dontRedirect)
 
 func showCorrectDialog() -> void:
-	%keyDialog.visible = focused is KeyBulk
-	%doorDialog.visible = focused is Door or focused is RemoteLock
-	%playerDialog.visible = focused is PlayerSpawn or focused is PlayerPlaceholderObject
-	%keyCounterDialog.visible = focused is KeyCounter
-	%goalDialog.visible = focused is Goal
-	above = focused is KeyCounter # maybe add more later
-	%speechBubbler.visible = focused is not FloatingTile
-	%speechBubbler.rotation_degrees = 0 if above else 180
+	above = false
+	for dialog in get_children():
+		if dialog is not Control: continue
+		dialog.visible = false
+	%speechBubbler.visible = true
+	match focused.get_script():
+		KeyBulk: activeDialog = keyDialog
+		Door, RemoteLock: activeDialog = doorDialog
+		PlayerSpawn, PlayerPlaceholderObject: activeDialog = playerDialog
+		KeyCounter: activeDialog = keyCounterDialog; above = true
+		Goal: activeDialog = goalDialog
+		_: %speechBubbler.visible = false
+	activeDialog.visible = true
 
 func defocus() -> void:
 	if !focused: return
@@ -153,10 +155,7 @@ func tabbed(numberEdit:PanelContainer) -> void:
 				else: interactLockFirstEdit(componentFocused.index+1)
 
 func receiveKey(event:InputEvent) -> bool:
-	if focused is KeyBulk and keyDialog.receiveKey(event): return true
-	elif (focused is Door or focused is RemoteLock) and doorDialog.receiveKey(event): return true
-	elif (focused is PlayerSpawn or focused is PlayerPlaceholderObject) and playerDialog.receiveKey(event): return true
-	elif focused is KeyCounter and keyCounterDialog.receiveKey(event): return true
+	if activeDialog.receiveKey(event): return true
 	else:
 		if Editor.eventIs(event, &"editDelete"):
 			Changes.addChange(Changes.DeleteComponentChange.new(focused))
@@ -164,30 +163,41 @@ func receiveKey(event:InputEvent) -> bool:
 		else: return false
 	return true
 
+const EDGE_MARGIN:float = 4
+const OBJECT_MARGIN:float = 8 # between the dialog and the object; where the speech bubbler goes
+const SPEECH_BUBBLER_MARGIN:float = 10 # between speech bubbler and edge of dialog
+
 func _process(_delta:float) -> void:
 	if focused:
 		visible = true
-		if above: position = editor.worldspaceToScreenspace(focused.getDrawPosition() + Vector2(focused.size.x/2,0)) + Vector2(0,-8)
-		else: position = editor.worldspaceToScreenspace(focused.getDrawPosition() + Vector2(focused.size.x/2,focused.size.y)) + Vector2(0,8)
-		var halfWidth:float = getWidth()/2
+		var flip:bool = false
+		activeDialog.get_child(0).size.y = 0
+		var height:float = activeDialog.get_child(0).size.y
+		position = editor.worldspaceToScreenspace(focused.getDrawPosition() + Vector2(focused.size.x/2,focused.size.y)) + Vector2(0,OBJECT_MARGIN)
+		
+		if above and position.y - height - 2*OBJECT_MARGIN - focused.size.y*editor.cameraZoom < editor.gameCont.position.y + EDGE_MARGIN: flip = true
+		elif !above and position.y + height > editor.gameCont.position.y + editor.gameCont.size.y - EDGE_MARGIN: flip = true
+
+		if above != flip: position = editor.worldspaceToScreenspace(focused.getDrawPosition() + Vector2(focused.size.x/2,0)) + Vector2(0,-OBJECT_MARGIN)
+		%speechBubbler.rotation_degrees = 0 if above != flip else 180
+		if flip != above: activeDialog.get_child(0).position.y = -height
+		else: activeDialog.get_child(0).position.y = 0
+
+		var halfWidth:float = activeDialog.get_child(0).size.x/2
+		var speechBubblerRange:float = halfWidth
+		if activeDialog == doorDialog and flip: speechBubblerRange = activeDialog.get_child(0).get_child(1).size.x/2
 		%speechBubbler.position.x = 0
-		if position.x < halfWidth:
-			%speechBubbler.position.x = max(position.x-halfWidth,10-halfWidth)
-			position.x = halfWidth
-		if position.x + halfWidth > editor.gameCont.size.x:
-			%speechBubbler.position.x = min(position.x+halfWidth-editor.gameCont.size.x,halfWidth-10)
-			position.x = editor.gameCont.size.x - halfWidth
+		if position.x < halfWidth + EDGE_MARGIN:
+			%speechBubbler.position.x = max(position.x-halfWidth-EDGE_MARGIN,SPEECH_BUBBLER_MARGIN-speechBubblerRange)
+			position.x = halfWidth + EDGE_MARGIN
+		if position.x + halfWidth + EDGE_MARGIN > editor.gameCont.size.x:
+			%speechBubbler.position.x = min(position.x+halfWidth-editor.gameCont.size.x+EDGE_MARGIN,speechBubblerRange-SPEECH_BUBBLER_MARGIN)
+			position.x = editor.gameCont.size.x - halfWidth - EDGE_MARGIN
+		
+		if above != flip: position.y = min(position.y, editor.gameCont.position.y + editor.gameCont.size.y - SPEECH_BUBBLER_MARGIN)
+		else: position.y = max(position.y, editor.gameCont.position.y + SPEECH_BUBBLER_MARGIN)
 	else:
 		visible = false
-
-func getWidth() -> float:
-	match focused.get_script():
-		KeyBulk: return keyDialog.get_child(0).size.x
-		Door: return doorDialog.get_child(0).size.x
-		PlayerSpawn, PlayerPlaceholderObject: return playerDialog.get_child(0).size.x
-		KeyCounter: return keyCounterDialog.get_child(0).size.x
-		Goal: return goalDialog.get_child(0).size.x
-		_: return 0
 
 func focusHandlerAdded(type:GDScript, index:int) -> void:
 	match type:
