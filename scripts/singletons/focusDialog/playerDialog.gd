@@ -8,13 +8,14 @@ var color:Game.COLOR
 
 func focus(focused:GameObject, new:bool, _dontRedirect:bool) -> void:
 	%playerSpawnSettings.visible = focused is PlayerSpawn
-	%playerSettings.visible = focused is PlayerPlaceholderObject or Game.levelStart != focused
+	%playerStateSettings.visible = focused is PlayerPlaceholderObject or Game.levelStart != focused
+	%playerSettings.visible = focused is PlayerPlaceholderObject
 	if new: setSelectedColor(Game.COLOR.WHITE)
 	else: _playerColorSelected(color)
 	if %playerSpawnSettings.visible:
 		if Game.levelStart == focused: %levelStart.button_pressed = true
 		else: %savestate.button_pressed = true
-	if %playerSettings.visible:
+	if %playerStateSettings.visible:
 		if !main.interacted: main.interact(%playerKeyCountEdit.realEdit)
 
 func setSelectedColor(toColor:Game.COLOR) -> void:
@@ -33,9 +34,9 @@ func _playerColorSelected(_color:Game.COLOR) -> void:
 		%playerCurse.button_pressed = main.focused.curse[color]
 
 func receiveKey(event:InputEvent) -> bool:
-	if Editor.eventIs(event, &"focusPlayerStar") and %playerSettings.visible: _playerStarSet(!%playerStar.button_pressed)
-	elif Editor.eventIs(event, &"focusPlayerCurse") and %playerSettings.visible and %playerCurse.visible: _playerCurseSet(!%playerCurse.button_pressed)
-	elif Editor.eventIs(event, &"quicksetColor") and %playerSettings.visible: editor.quickSet.startQuick(&"quicksetColor", main.focused)
+	if Editor.eventIs(event, &"focusPlayerStar") and %playerStateSettings.visible: _playerStarSet(!%playerStar.button_pressed)
+	elif Editor.eventIs(event, &"focusPlayerCurse") and %playerStateSettings.visible and %playerCurse.visible: _playerCurseSet(!%playerCurse.button_pressed)
+	elif Editor.eventIs(event, &"quicksetColor") and %playerStateSettings.visible: editor.quickSet.startQuick(&"quicksetColor", main.focused)
 	else: return false
 	return true
 
@@ -79,3 +80,9 @@ func _setSavestate():
 		Changes.addChange(Changes.GlobalObjectChange.new(Game,&"levelStart",null))
 		main.focused.queue_redraw()
 	focus(main.focused, false, false)
+
+func _leaveSavestate():
+	var state:PlayerSpawn = Changes.addChange(Changes.CreateComponentChange.new(PlayerSpawn, {&"position":Game.player.position-Vector2(17, 23),&"forceState":true})).result
+	Changes.addChange(Changes.PropertyChange.new(state,&"key",Game.player.key.map(func(count): return count.duplicate())))
+	Changes.addChange(Changes.PropertyChange.new(state,&"star",Game.player.star))
+	Changes.addChange(Changes.PropertyChange.new(state,&"curse",Game.player.curse))

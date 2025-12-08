@@ -55,11 +55,11 @@ func copy(value:Variant) -> Variant:
 	if value is Array or value is PackedInt64Array: return value.duplicate()
 	else: return value
 
-class Change extends RefCounted:
+@abstract class Change extends RefCounted:
 	var cancelled:bool = false
 	# is a singular recorded change
-	func do() -> void: pass
-	func undo() -> void: pass
+	@abstract func do() -> void
+	@abstract func undo() -> void
 
 class UndoSeparator extends RefCounted:
 	# indicates the start/end of an undo in the stack
@@ -119,7 +119,7 @@ class CreateComponentChange extends Change:
 		else: dictionary = Game.objects
 
 		do()
-		if type == PlayerSpawn and !Game.levelStart:
+		if type == PlayerSpawn and !Game.levelStart and !parameters.get(&"forceState"):
 			Changes.addChange(GlobalObjectChange.new(Game,&"levelStart",result))
 		elif type == KeyCounterElement:
 			Game.objects[prop[&"parentId"]]._elementsChanged()
@@ -332,7 +332,8 @@ class PropertyChange extends Change:
 		var component:GameComponent
 		if type in Game.NON_OBJECT_COMPONENTS: component = Game.components[id]
 		else: component = Game.objects[id]
-		component.set(property, value)
+		if value is Array: component.get(property).assign(value)
+		else: component.set(property, value)
 		component.propertyChangedDo(property)
 		component.queue_redraw()
 		if Game.editor.focusDialog.focused == component: Game.editor.focusDialog.focus(component)
@@ -461,6 +462,7 @@ class ArrayElementChange extends Change:
 
 	func _to_string() -> String:
 		return "<ArrayElementChange:"+str(id)+"."+str(array)+"."+str(index)+"->"+str(after)+">"
+
 class ArrayPopAtChange extends Change:
 	# pops at array index
 	var id:int
@@ -519,6 +521,7 @@ class ComponentArrayAppendChange extends Change:
 
 	func _to_string() -> String:
 		return "<ComponentArrayAppendChange:"+str(id)+"."+str(array)+"+="+str(afterId)+">"
+
 class ComponentArrayElementChange extends Change:
 	# Changes element of array of components
 	var id:int

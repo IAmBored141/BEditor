@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://8bth374yqwpe"]
+[gd_scene load_steps=59 format=3 uid="uid://8bth374yqwpe"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_eqegh"]
 [ext_resource type="Script" uid="uid://dm8t82nhqkdlc" path="res://scripts/singletons/focusDialog/focusDialog.gd" id="2_k8bto"]
@@ -122,6 +122,12 @@ metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
 script = ExtResource("22_s5h3h")
 explanation = "[%s]Toggle curse"
 hotkeys = Array[StringName]([&"focusPlayerCurse"])
+metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
+
+[sub_resource type="Resource" id="Resource_2wjug"]
+script = ExtResource("22_s5h3h")
+explanation = "[%s]Leave savestate"
+hotkeys = Array[StringName]([&"focusPlayerSavestate"])
 metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_7tfe2"]
@@ -548,27 +554,27 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_h1xy2")
 text = "Savestate"
 
-[node name="playerSettings" type="VBoxContainer" parent="playerDialog/c/c/c"]
+[node name="playerStateSettings" type="VBoxContainer" parent="playerDialog/c/c/c"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
-[node name="playerColorSelector" type="GridContainer" parent="playerDialog/c/c/c/playerSettings" groups=["modUI"]]
+[node name="playerColorSelector" type="GridContainer" parent="playerDialog/c/c/c/playerStateSettings" groups=["modUI"]]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 script = ExtResource("3_wmate")
 metadata/_custom_type_script = "uid://c70juj2p5s6yd"
 
-[node name="playerKeyCountEdit" parent="playerDialog/c/c/c/playerSettings" instance=ExtResource("5_qjvko")]
+[node name="playerKeyCountEdit" parent="playerDialog/c/c/c/playerStateSettings" instance=ExtResource("5_qjvko")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="colorSettings" type="HBoxContainer" parent="playerDialog/c/c/c/playerSettings"]
+[node name="colorSettings" type="HBoxContainer" parent="playerDialog/c/c/c/playerStateSettings"]
 layout_mode = 2
 alignment = 1
 
-[node name="playerStar" type="Button" parent="playerDialog/c/c/c/playerSettings/colorSettings" groups=["explained"]]
+[node name="playerStar" type="Button" parent="playerDialog/c/c/c/playerStateSettings/colorSettings" groups=["explained"]]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
@@ -576,13 +582,26 @@ toggle_mode = true
 icon = ExtResource("8_mscoq")
 metadata/explanation = SubResource("Resource_vapyv")
 
-[node name="playerCurse" type="Button" parent="playerDialog/c/c/c/playerSettings/colorSettings" groups=["explained"]]
+[node name="playerCurse" type="Button" parent="playerDialog/c/c/c/playerStateSettings/colorSettings" groups=["explained"]]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 toggle_mode = true
 icon = ExtResource("41_ft2jg")
 metadata/explanation = SubResource("Resource_lm5cw")
+
+[node name="playerSettings" type="VBoxContainer" parent="playerDialog/c/c/c"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="leaveSavestate" type="Button" parent="playerDialog/c/c/c/playerSettings" groups=["explained"]]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"RadioButtonText"
+text = "Leave savestate"
+metadata/explanation = SubResource("Resource_2wjug")
 
 [node name="keyCounterDialog" type="Control" parent="."]
 unique_name_in_owner = true
@@ -708,10 +727,11 @@ default_color = Color(0.8352941, 0.8352941, 0.8352941, 1)
 [connection signal="pressed" from="playerDialog/c/c/c/playerSpawnSettings/c/playTest" to="playerDialog" method="_playTest"]
 [connection signal="pressed" from="playerDialog/c/c/c/playerSpawnSettings/c/levelStart" to="playerDialog" method="_setLevelStart"]
 [connection signal="pressed" from="playerDialog/c/c/c/playerSpawnSettings/c/savestate" to="playerDialog" method="_setSavestate"]
-[connection signal="select" from="playerDialog/c/c/c/playerSettings/playerColorSelector" to="playerDialog" method="_playerColorSelected"]
-[connection signal="valueSet" from="playerDialog/c/c/c/playerSettings/playerKeyCountEdit" to="playerDialog" method="_playerKeyCountSet"]
-[connection signal="toggled" from="playerDialog/c/c/c/playerSettings/colorSettings/playerStar" to="playerDialog" method="_playerStarSet"]
-[connection signal="toggled" from="playerDialog/c/c/c/playerSettings/colorSettings/playerCurse" to="playerDialog" method="_playerCurseSet"]
+[connection signal="select" from="playerDialog/c/c/c/playerStateSettings/playerColorSelector" to="playerDialog" method="_playerColorSelected"]
+[connection signal="valueSet" from="playerDialog/c/c/c/playerStateSettings/playerKeyCountEdit" to="playerDialog" method="_playerKeyCountSet"]
+[connection signal="toggled" from="playerDialog/c/c/c/playerStateSettings/colorSettings/playerStar" to="playerDialog" method="_playerStarSet"]
+[connection signal="toggled" from="playerDialog/c/c/c/playerStateSettings/colorSettings/playerCurse" to="playerDialog" method="_playerCurseSet"]
+[connection signal="pressed" from="playerDialog/c/c/c/playerSettings/leaveSavestate" to="playerDialog" method="_leaveSavestate"]
 [connection signal="select" from="keyCounterDialog/c/c/c/keyCounterWidthSelector" to="keyCounterDialog" method="_keyCounterWidthSelected"]
 [connection signal="select" from="keyCounterDialog/c/c/c/keyCounterColorSelector" to="keyCounterDialog" method="_keyCounterColorSelected"]
 [connection signal="select" from="goalDialog/c/c/c/goalTypeSelector" to="goalDialog" method="_goalTypeSelected"]

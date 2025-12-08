@@ -45,11 +45,11 @@ func copy(value:Variant) -> Variant:
 	if value is PackedInt64Array: return value.duplicate()
 	else: return value
 
-class Change extends RefCounted:
+@abstract class Change extends RefCounted:
 	var cancelled:bool = false
 	# is a singular recorded change
-	# do() subsumed to _init()
-	func undo() -> void: pass
+	@abstract func do() -> void
+	@abstract func undo() -> void
 
 class UndoSeparator extends RefCounted:
 	# indicates the start/end of an undo in the stack; also saves the player's position at that point
@@ -67,17 +67,20 @@ class ColorChange extends Change:
 	static func array() -> StringName: return &""
 
 	var color:Game.COLOR
+	var after:Variant
 	var before:Variant
 
-	func _init(_color:Game.COLOR, after:Variant) -> void:
+	func _init(_color:Game.COLOR, _after:Variant) -> void:
 		color = _color
+		after = GameChanges.copy(_after)
 		before = GameChanges.copy(Game.player.get(array())[color])
 		if before == after or color == Game.COLOR.NONE:
 			cancelled = true
 			return
-		Game.player.get(array())[color] = GameChanges.copy(after)
+		do()
 		Game.player.checkKeys()
 	
+	func do() -> void: Game.player.get(array())[color] = GameChanges.copy(after)
 	func undo() -> void: Game.player.get(array())[color] = GameChanges.copy(before)
 
 	func _to_string() -> String:
@@ -87,11 +90,11 @@ class KeyChange extends ColorChange:
 	# C major -> A minor, for example
 	static func array() -> StringName: return &"key"
 
-	func _init(_color:Game.COLOR, after:Variant) -> void:
+	func _init(_color:Game.COLOR, _after:Variant) -> void:
 		if Game.player.star[_color] or color == Game.COLOR.NONE:
 			cancelled = true
 			return
-		super(_color,after)
+		super(_color,_after)
 		for object in Game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateCheck(Game.player)
 
 class StarChange extends ColorChange:
@@ -99,27 +102,29 @@ class StarChange extends ColorChange:
 	static func array() -> StringName: return &"star"
 
 class CurseChange extends ColorChange:
-	# a change to the starred state
+	# a change to the cursed state
 	static func array() -> StringName: return &"curse"
 
 class PropertyChange extends Change:
 	var id:int
 	var property:StringName
+	var after:Variant
 	var before:Variant
 	var type:GDScript
 	
-	func _init(component:GameComponent,_property:StringName,after:Variant) -> void:
+	func _init(component:GameComponent,_property:StringName,_after:Variant) -> void:
 		id = component.id
 		property = _property
+		after = Changes.copy(_after)
 		before = Changes.copy(component.get(property))
 		if before == after:
 			cancelled = true
 			return
 		type = component.get_script()
-		assert(before != after)
-		changeValue(Changes.copy(after))
+		do()
 
-	func undo() -> void: changeValue(Changes.copy(before))
+	func do() -> void: changeValue(after)
+	func undo() -> void: changeValue(before)
 	
 	func changeValue(value:Variant) -> void:
 		var component:GameComponent
@@ -127,7 +132,7 @@ class PropertyChange extends Change:
 			Lock: component = Game.components.get(id)
 			_: component = Game.objects.get(id)
 		if !component: return
-		component.set(property, value)
+		component.set(property, Changes.copy(value))
 		component.propertyGameChangedDo(property)
 		component.queue_redraw()
 		if component is Door:
