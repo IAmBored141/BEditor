@@ -86,9 +86,4 @@ func _setSavestate():
 		main.focused.queue_redraw()
 	focus(main.focused, false, false)
 
-func _leaveSavestate():
-	var state:PlayerSpawn = Changes.addChange(Changes.CreateComponentChange.new(PlayerSpawn, {&"position":Game.player.position-Vector2(17, 23),&"forceState":true})).result
-	Changes.addChange(Changes.PropertyChange.new(state,&"key",Game.player.key.map(func(count): return count.duplicate())))
-	Changes.addChange(Changes.PropertyChange.new(state,&"star",Game.player.star))
-	Changes.addChange(Changes.PropertyChange.new(state,&"curse",Game.player.curse))
-	Changes.addChange(Changes.PropertyChange.new(state,&"undoStack",GameChanges.undoStack.duplicate()))
+func _leaveSavestate(): Game.savestate()

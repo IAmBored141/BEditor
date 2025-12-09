@@ -158,6 +158,7 @@ const SUBTRACTIVE_MATERIAL:CanvasItemMaterial = preload("res://resources/materia
 const NEGATIVE_MATERIAL:ShaderMaterial = preload("res://resources/materials/negativeMaterial.tres")
 const TEXT_GRADIENT_MATERIAL:ShaderMaterial = preload("res://resources/materials/textGradientMaterial.tres")
 
+const ROBOTO_MONO:Font = preload("res://resources/fonts/RobotoMono-SemiBold.ttf")
 const FKEYX:Font = preload("res://resources/fonts/fKeyX.fnt")
 const FKEYNUM:Font = preload("res://resources/fonts/fKeyNum.fnt")
 const FTALK:Font = preload("res://resources/fonts/fTalk.fnt")
@@ -323,6 +324,13 @@ func stopTest() -> void:
 		component.queue_redraw()
 	if objects.get(-1):
 		editor.playerObject.deleted(true)
+
+func savestate() -> void:
+	var state:PlayerSpawn = Changes.addChange(Changes.CreateComponentChange.new(PlayerSpawn, {&"position":Game.player.position-Vector2(17, 23),&"forceState":true})).result
+	Changes.addChange(Changes.PropertyChange.new(state,&"key",Game.player.key.map(func(count): return count.duplicate())))
+	Changes.addChange(Changes.PropertyChange.new(state,&"star",Game.player.star))
+	Changes.addChange(Changes.PropertyChange.new(state,&"curse",Game.player.curse))
+	Changes.addChange(Changes.PropertyChange.new(state,&"undoStack",GameChanges.undoStack.duplicate()))
 
 func restart() -> void:
 	if editor:

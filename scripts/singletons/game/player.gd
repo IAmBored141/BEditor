@@ -228,6 +228,7 @@ func receiveKey(event:InputEventKey):
 	if paused(): return
 	if Editor.eventIs(event, &"editPausePlaytest") and Game.editor: Game.pauseTest()
 	elif Editor.eventIs(event, &"editStopPlaytest") and Game.editor: Game.stopTest()
+	elif Editor.eventIs(event, &"editSavestate") and Game.editor: Game.savestate()
 	elif Editor.eventIs(event, &"gameRestart"): Game.restart()
 	elif Editor.eventIs(event, &"gameUndo") and !cameraMode and GameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav"), 1, 0.6)
 	elif Editor.eventIs(event, &"gameAction"):

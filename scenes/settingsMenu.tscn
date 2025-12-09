@@ -383,6 +383,11 @@ layout_mode = 2
 label = "Stop Playtest"
 action = &"editStopPlaytest"
 
+[node name="editSavestate" parent="c/editorSettings/c2/c/hotkeys/playtesting/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Leave Savestate"
+action = &"editSavestate"
+
 [node name="editModeSelect" parent="c/editorSettings/c2/c/hotkeys" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Select Mode"

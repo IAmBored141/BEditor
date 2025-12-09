@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://djnt51xv7wn52"]
+[gd_scene load_steps=45 format=3 uid="uid://djnt51xv7wn52"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_j8y2p"]
 [ext_resource type="Script" uid="uid://2wjcj6frwpjo" path="res://scripts/singletons/editor/editor.gd" id="2_o435n"]
@@ -26,6 +26,7 @@
 [ext_resource type="Texture2D" uid="uid://lbuoq1o35ds2" path="res://assets/ui/playControls/pause.png" id="15_fce0a"]
 [ext_resource type="Texture2D" uid="uid://dnjchcne7ikhq" path="res://assets/ui/playControls/stop.png" id="16_m12ww"]
 [ext_resource type="Script" uid="uid://cgjhnhjwymb8g" path="res://scripts/resources/controlExplanation.gd" id="17_bn54a"]
+[ext_resource type="Texture2D" uid="uid://bdtmt4y2pnoo0" path="res://assets/ui/playControls/savestate.png" id="17_lo5f0"]
 [ext_resource type="Material" uid="uid://bc5stfiew5ji4" path="res://resources/materials/outlineDrawMaterial.tres" id="22_jke8t"]
 [ext_resource type="Script" uid="uid://c7ptucaohcnil" path="res://scripts/singletons/editor/outline.gd" id="23_lo5f0"]
 [ext_resource type="PackedScene" uid="uid://uojm0pynavni" path="res://scenes/settingsMenu.tscn" id="25_6lm8n"]
@@ -70,6 +71,12 @@ script = ExtResource("17_bn54a")
 explanation = "[%s]Search objects"
 hotkeys = Array[StringName]([&"editObjectSearch"])
 metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
+
+[sub_resource type="Resource" id="Resource_mxdmd"]
+script = ExtResource("17_bn54a")
+explanation = "[%s]Leave savestate"
+hotkeys = Array[StringName]([&"editSavestate"])
+metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="Resource" id="Resource_1abrv"]
 script = ExtResource("17_bn54a")
@@ -291,6 +298,16 @@ tab_2/title = "Game"
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
+
+[node name="savestate" type="Button" parent="c/c/topBar/c/playControls" groups=["explained"]]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+icon = ExtResource("17_lo5f0")
+script = ExtResource("5_3vi5u")
+defaultHotkey = &"editSavestate"
+metadata/_custom_type_script = "uid://buv3n70m06kje"
+metadata/explanation = SubResource("Resource_mxdmd")
 
 [node name="play" type="Button" parent="c/c/topBar/c/playControls" groups=["explained"]]
 unique_name_in_owner = true
@@ -565,6 +582,7 @@ theme = ExtResource("1_j8y2p")
 [connection signal="text_submitted" from="c/c/topBar/c/modes/otherObjects/c/c/objectSearch" to="c/c/topBar/c/modes/otherObjects" method="_searchSubmitted" unbinds=1]
 [connection signal="pressed" from="c/c/topBar/c/modes/paste" to="c/c/topBar/c/modes" method="_setMode" binds= [5]]
 [connection signal="tab_changed" from="c/c/topBar/c/settingTabs" to="c/gameCont/c/settingsMenu" method="_tabSelected"]
+[connection signal="pressed" from="c/c/topBar/c/playControls/savestate" to="c/c/topBar" method="_savestate"]
 [connection signal="pressed" from="c/c/topBar/c/playControls/play" to="c/c/topBar" method="_play"]
 [connection signal="pressed" from="c/c/topBar/c/playControls/pause" to="c/c/topBar" method="_pause"]
 [connection signal="pressed" from="c/c/topBar/c/playControls/stop" to="c/c/topBar" method="_stop"]

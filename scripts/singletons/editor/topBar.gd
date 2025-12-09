@@ -7,6 +7,7 @@ class_name TopBar
 func _updateButtons() -> void:
 	%modes.visible = Game.playState != Game.PLAY_STATE.PLAY and !editor.settingsOpen
 
+	%savestate.visible = Game.playState != Game.PLAY_STATE.EDIT and !editor.settingsOpen
 	play.visible = Game.playState != Game.PLAY_STATE.PLAY and !editor.settingsOpen
 	%pause.visible = Game.playState == Game.PLAY_STATE.PLAY and !editor.settingsOpen
 	%stop.visible = Game.playState != Game.PLAY_STATE.EDIT and !editor.settingsOpen
@@ -17,3 +18,4 @@ func _updateButtons() -> void:
 func _play() -> void: Game.playTest(Game.levelStart)
 func _pause() -> void: Game.pauseTest()
 func _stop() -> void: Game.stopTest()
+func _savestate() -> void: Game.savestate()

@@ -1,12 +1,13 @@
 extends Button
 class_name HotkeyButton
 
-const fTalk:FontVariation = preload("res://resources/fonts/fControls.tres")
-
 @onready var editor:Editor = get_node("/root/editor")
 
 @export var defaultHotkey:StringName
 @export var pressedHotkey:StringName
+
+func _pressed() -> void:
+	editor.grab_focus()
 
 func _ready() -> void:
 	connect("toggled", queue_redraw.unbind(1))
@@ -14,8 +15,8 @@ func _ready() -> void:
 
 func _draw() -> void:
 	if disabled or editor.settingsOpen: return
-	var strWidth:int = int(fTalk.get_string_size(getCurrentHotkey(),HORIZONTAL_ALIGNMENT_LEFT,-1,12).x)
-	draw_string(fTalk,Vector2((size.x-strWidth)/2,size.y+12),getCurrentHotkey(),HORIZONTAL_ALIGNMENT_LEFT,-1,12)
+	var strWidth:int = int(Game.ROBOTO_MONO.get_string_size(getCurrentHotkey(),HORIZONTAL_ALIGNMENT_LEFT,-1,12).x)
+	draw_string(Game.ROBOTO_MONO,Vector2((size.x-strWidth)/2,size.y+9),getCurrentHotkey(),HORIZONTAL_ALIGNMENT_LEFT,-1,12)
 
 func getCurrentHotkey() -> String:
 	if button_pressed:

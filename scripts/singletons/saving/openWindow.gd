@@ -51,5 +51,7 @@ func resolve() -> void:
 	loader.loadFile(file)
 	if levelStart != -1:
 		Game.levelStart = Game.objects[levelStart]
-		if Game.editor: Game.editor.topBar._updateButtons()
+		if Game.editor:
+			Game.editor.home()
+			Game.editor.topBar._updateButtons()
 	_close()
