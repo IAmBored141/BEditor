@@ -1,4 +1,4 @@
-[gd_scene load_steps=59 format=3 uid="uid://8bth374yqwpe"]
+[gd_scene load_steps=61 format=3 uid="uid://8bth374yqwpe"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_eqegh"]
 [ext_resource type="Script" uid="uid://dm8t82nhqkdlc" path="res://scripts/singletons/focusDialog/focusDialog.gd" id="2_k8bto"]
@@ -53,8 +53,8 @@ metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
 
 [sub_resource type="Resource" id="Resource_jx0iq"]
 script = ExtResource("22_s5h3h")
-explanation = "[%s] Toggle Colorlink"
-hotkeys = Array[StringName]([&"focusDoorColorlink"])
+explanation = "[%s]Toggle color link"
+hotkeys = Array[StringName]([&"focusDoorColorLink"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
 
 [sub_resource type="Resource" id="Resource_q8u4b"]
@@ -110,7 +110,17 @@ metadata/_custom_type_script = "uid://lwocqakgt4qr"
 [sub_resource type="ButtonGroup" id="ButtonGroup_xwnfa"]
 allow_unpress = true
 
+[sub_resource type="Resource" id="Resource_rrq8c"]
+script = ExtResource("22_s5h3h")
+explanation = "[%s]Start from this spawn"
+hotkeys = Array[StringName]([&"focusPlayerStart"])
+metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
+
 [sub_resource type="ButtonGroup" id="ButtonGroup_h1xy2"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_p7jkh"]
+font_size = 10
+font_color = Color(0.70519364, 0.70519364, 0.7051936, 1)
 
 [sub_resource type="Resource" id="Resource_vapyv"]
 script = ExtResource("22_s5h3h")
@@ -533,10 +543,11 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="playTest" type="Button" parent="playerDialog/c/c/c/playerSpawnSettings/c"]
+[node name="playTest" type="Button" parent="playerDialog/c/c/c/playerSpawnSettings/c" groups=["explained"]]
 layout_mode = 2
 size_flags_vertical = 4
 icon = ExtResource("24_7tfe2")
+metadata/explanation = SubResource("Resource_rrq8c")
 
 [node name="levelStart" type="Button" parent="playerDialog/c/c/c/playerSpawnSettings/c"]
 unique_name_in_owner = true
@@ -558,6 +569,13 @@ text = "Savestate"
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+
+[node name="playerUndostack" type="Label" parent="playerDialog/c/c/c/playerStateSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "2 positions in undo stack"
+label_settings = SubResource("LabelSettings_p7jkh")
+horizontal_alignment = 1
 
 [node name="playerColorSelector" type="GridContainer" parent="playerDialog/c/c/c/playerStateSettings" groups=["modUI"]]
 unique_name_in_owner = true

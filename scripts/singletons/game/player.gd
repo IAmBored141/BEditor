@@ -83,6 +83,8 @@ var cameraMode:bool = false
 var cameraAnimVal:float = 0
 var cameraZoomTarget:float = 1
 
+var bufferedCheckKeys:bool = false
+
 func _init() -> void:
 	for color in Game.COLORS:
 		# if color == Game.COLOR.STONE:
@@ -130,6 +132,10 @@ func _physics_process(_delta:float) -> void:
 		else: %sprite.pause()
 		return
 	
+	if bufferedCheckKeys:
+		bufferedCheckKeys = false
+		checkKeys()
+
 	if cameraMode:
 		cameraAnimVal += (1-cameraAnimVal) * 0.1
 		if cameraAnimVal > 0.99: cameraAnimVal = 1
@@ -249,13 +255,13 @@ func _newlyInteracted(area:Area2D) -> void:
 	var object:GameObject = area.get_parent()
 	if object is KeyBulk: object.collect(self)
 	elif object is RemoteLock: object.check(self)
-	elif object is Door and object.type == Door.TYPE.GATE: checkKeys()
+	elif object is Door and object.type == Door.TYPE.GATE: bufferCheckKeys()
 	elif object is Goal: Game.win(object)
 
 func _newlyUninteracted(area: Area2D):
 	if pauseFrame or paused(): return
 	var object:GameObject = area.get_parent()
-	if object is Door and object.type == Door.TYPE.GATE: checkKeys()
+	if object is Door and object.type == Door.TYPE.GATE: bufferCheckKeys()
 
 func interacted(area:Area2D) -> void:
 	var object:GameObject = area.get_parent()
@@ -313,6 +319,8 @@ func getArmamentImmunities() -> Array[Game.COLOR]:
 			for color in object.armamentColors():
 				if color not in colors: colors.append(color)
 	return colors
+
+func bufferCheckKeys() -> void: bufferedCheckKeys = true
 
 func checkKeys() -> void:
 	var armamentImmunities:Array[Game.COLOR] = getArmamentImmunities()

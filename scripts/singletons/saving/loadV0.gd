@@ -32,7 +32,7 @@ static var PROPERTIES:Dictionary[GDScript,Array] = {
 		&"id", &"position", &"size",
 	],
 	PlayerSpawn: [
-		&"id", &"position", &"size",
+		&"id", &"position", &"size", &"undoStack"
 	],
 	FloatingTile: [
 		&"id", &"position", &"size",
@@ -102,6 +102,7 @@ static func loadFile(file:FileAccess) -> void:
 	# objects
 	Game.objectIdIter = file.get_64()
 	var objectBufferedArrays:Dictionary[int,Dictionary] = {} # dictionary[object id, dictionary[property name, array]]
+	var otherBuffers:Array[Array] # array[component, property name, value]
 	for _i in file.get_64():
 		var type:GDScript = COMPONENTS[file.get_16()]
 		var object = type.SCENE.instantiate()
@@ -111,7 +112,8 @@ static func loadFile(file:FileAccess) -> void:
 			if property == &"id":
 				Game.objects[value] = object
 				Game.objectsParent.add_child(object)
-			object.set(property, value)
+			if type == PlayerSpawn and property == &"undoStack" and value: otherBuffers.append([object, property, value])
+			else: object.set(property, value)
 			object.propertyChangedDo(property)
 		objectBufferedArrays[object.id] = {}
 		for array in ARRAYS[type].keys():
@@ -132,17 +134,20 @@ static func loadFile(file:FileAccess) -> void:
 		var component:GameComponent = Game.components[componentId]
 		for array in ARRAYS[component.get_script()]:
 			var value:Array = componentBufferedArrays[componentId][array]
-			var arrayType:Variant = ARRAYS[component.get_script()][array]
-			if arrayType in Game.COMPONENTS: value = Saving.IDArraytoComponents(arrayType,value)
+			var arrayType = ARRAYS[component.get_script()][array]
+			if Saving.arrayTypeIsComponent(arrayType): value = Saving.IDArraytoComponents(arrayType,value)
 			component.get(array).assign(value)
 
 	for objectId in objectBufferedArrays.keys():
 		var object:GameObject = Game.objects[objectId]
 		for array in ARRAYS[object.get_script()]:
 			var value:Array = objectBufferedArrays[objectId][array]
-			var arrayType:Variant = ARRAYS[object.get_script()][array]
-			if arrayType in Game.COMPONENTS: value = Saving.IDArraytoComponents(arrayType,value)
+			var arrayType = ARRAYS[object.get_script()][array]
+			if Saving.arrayTypeIsComponent(arrayType): value = Saving.IDArraytoComponents(arrayType,value)
 			object.get(array).assign(value)
+
+	for buffer in otherBuffers:
+		if buffer[0] is PlayerSpawn and buffer[1] == &"undoStack": buffer[0].undoStack.assign(buffer[2].build())
 
 	#if levelStart != -1:
 	#	Game.levelStart = Game.objects[levelStart]

@@ -17,7 +17,7 @@ const CREATE_PARAMETERS:Array[StringName] = [
 	&"position"
 ]
 const PROPERTIES:Array[StringName] = [
-	&"id", &"position", &"size",
+	&"id", &"position", &"size", &"undoStack" # undostack is a "property" and not an "array" because we wont ever interact with the elements; its basically just a selfcontained piece of Data
 ]
 static var ARRAYS:Dictionary[StringName,Variant] = {
 	&"key":TYPE_PACKED_INT64_ARRAY,
@@ -28,6 +28,7 @@ static var ARRAYS:Dictionary[StringName,Variant] = {
 var key:Array[PackedInt64Array] = []
 var star:Array[bool]
 var curse:Array[bool]
+var undoStack:Array[RefCounted] = []
 
 var drawMain:RID
 

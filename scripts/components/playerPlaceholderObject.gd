@@ -1,6 +1,9 @@
 extends PlaceholderObject
 class_name PlayerPlaceholderObject
 
+var undoStack:Array[RefCounted]:
+	get(): return GameChanges.undoStack
+
 func outlineTex() -> Texture2D:
 	return Game.player.getCurrentSprite()
 
@@ -15,5 +18,8 @@ func propertyChangedDo(property:StringName) -> void:
 		&"position":
 			Game.player.position = position + Vector2(6, 12)
 
-func deletedInit() -> void:
-	Game.stopTest()
+func deleted(alreadyStopped:bool=false) -> void:
+	Game.objects.erase(-1)
+	Game.objectsParent.remove_child(self)
+	if !alreadyStopped: Game.stopTest()
+	if self == Game.editor.focusDialog.focused: Game.editor.focusDialog.defocus()

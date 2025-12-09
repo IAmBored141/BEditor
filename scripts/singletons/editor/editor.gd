@@ -128,7 +128,7 @@ func _process(delta:float) -> void:
 		objectHovered = null
 		if !Input.is_action_pressed(&"heldKeepMode"):
 			for object in Game.objectsParent.get_children():
-				if mode == MODE.SELECT or (mode == MODE.KEY and object is KeyBulk) or (mode == MODE.DOOR and object is Door) or (mode == MODE.OTHER and object.get_script() == otherObjects.selected):
+				if mode == MODE.SELECT or Game.playState == Game.PLAY_STATE.PLAY or (mode == MODE.KEY and object is KeyBulk) or (mode == MODE.DOOR and object is Door) or (mode == MODE.OTHER and object.get_script() == otherObjects.selected):
 					if Rect2(object.getDrawPosition(), object.size).has_point(mouseWorldPosition) and (Game.playState != Game.PLAY_STATE.PLAY or object.active):
 						objectHovered = object
 			if focusDialog.focused is Door:
@@ -150,6 +150,7 @@ func _process(delta:float) -> void:
 
 	%multiselectCamera.position = editorCamera.position
 	%multiselectCamera.zoom = editorCamera.zoom
+	%placePreviewWorld.visible = Game.playState != Game.PLAY_STATE.PLAY
 	placePreviewWorld.tiles.position = floor(mouseWorldPosition/32)*32
 	placePreviewWorld.tilesDropShadow.position = floor(mouseWorldPosition/32)*32 + Vector2(3,3)
 	placePreviewWorld.objectsParent.position = mouseTilePosition

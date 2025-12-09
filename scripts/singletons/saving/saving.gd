@@ -173,7 +173,7 @@ func save(path:String="") -> void:
 		for property in component.PROPERTIES:
 			file.store_var(component.get(property), true)
 		for array in component.ARRAYS.keys():
-			if component.ARRAYS[array] in Game.COMPONENTS: file.store_var(componentArrayToIDs(component.get(array)))
+			if arrayTypeIsComponent(component.ARRAYS[array]): file.store_var(componentArrayToIDs(component.get(array)))
 			else: file.store_var(component.get(array))
 	# objects
 	file.store_64(Game.objectIdIter)
@@ -182,9 +182,11 @@ func save(path:String="") -> void:
 		if object is PlaceholderObject: continue
 		file.store_16(Game.COMPONENTS.find(object.get_script()))
 		for property in object.PROPERTIES:
-			file.store_var(object.get(property), true)
+			if object is PlayerSpawn and property == &"undoStack":
+				file.store_var(SerialisedUndoStack.new(object.undoStack) if object.undoStack else null, true)
+			else: file.store_var(object.get(property), true)
 		for array in object.ARRAYS.keys():
-			if object.ARRAYS[array] in Game.COMPONENTS: file.store_var(componentArrayToIDs(object.get(array)))
+			if arrayTypeIsComponent(object.ARRAYS[array]): file.store_var(componentArrayToIDs(object.get(array)))
 			else: file.store_var(object.get(array))
 		if object is Door: file.store_var(componentArrayToIDs(object.locks))
 		elif object is KeyCounter: file.store_var(componentArrayToIDs(object.elements))
@@ -193,6 +195,8 @@ func save(path:String="") -> void:
 		JavaScriptBridge.download_buffer(FileAccess.get_file_as_bytes(path),Game.level.name+".cedit")
 	
 	if confirmAction == ACTION.SAVE_FOR_PLAY: Game.playSaved()
+
+func arrayTypeIsComponent(arrayType) -> bool: return arrayType is GDScript and arrayType in Game.COMPONENTS
 
 func componentArrayToIDs(array:Array) -> Array: return array.map(func(component):return component.id)
 func IDArraytoComponents(type:GDScript,array:Array) -> Array:

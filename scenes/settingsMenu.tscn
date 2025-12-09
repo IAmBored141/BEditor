@@ -786,6 +786,11 @@ layout_mode = 2
 [node name="c" type="VBoxContainer" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/playerFocused"]
 layout_mode = 2
 
+[node name="focusPlayerStart" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/playerFocused/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Start Playtest From Focused Spawn"
+action = &"focusPlayerStart"
+
 [node name="focusPlayerStar" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/playerFocused/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2
 label = "Toggle Star"
@@ -796,6 +801,11 @@ layout_mode = 2
 label = "Toggle Curse"
 action = &"focusPlayerCurse"
 prerequisite = &"C5"
+
+[node name="focusPlayerSavestate" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/playerFocused/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Leave Savestate"
+action = &"focusPlayerSavestate"
 
 [node name="gameSettings" parent="c" instance=ExtResource("6_tyaol")]
 unique_name_in_owner = true

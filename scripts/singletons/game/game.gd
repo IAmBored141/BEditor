@@ -186,7 +186,7 @@ var camera:Camera2D
 
 var fastAnimSpeed:float = 0 # 0: slowest, 1: fastest
 var fastAnimTimer:float = 0 # speed resets when this counts down to 0
-
+var bufferedGateCheck:bool = false
 var complexViewHue:float = 0
 
 var editorWindowSize:Vector2
@@ -238,6 +238,13 @@ func _process(delta:float) -> void:
 	complexViewHue += delta*0.1764705882 # 0.75/255 per frame, 60fps
 	if complexViewHue >= 1: complexViewHue -= 1
 	if playGame and !hideTimer: updateWindowName()
+	if bufferedGateCheck:
+		bufferedGateCheck = false
+		if player:
+			for object in objects.values():
+				if object is Door and object.type == Door.TYPE.GATE: object.gateCheck(player)
+
+func bufferGateCheck() -> void: bufferedGateCheck = true
 
 func updateWindowName() -> void:
 	var newWindowName:String
@@ -258,6 +265,13 @@ func fasterAnims() -> void:
 
 func playTest(spawn:PlayerSpawn) -> void:
 	var starting:bool = false
+	
+	editor.multiselect.deselect()
+	editor.focusDialog.defocusComponent()
+	editor.focusDialog.defocus()
+	editor.componentDragged = null
+	Changes.bufferSave()
+	
 	if playState == PLAY_STATE.EDIT:
 		camera.zoom = Vector2.ONE
 		starting = true
@@ -265,21 +279,16 @@ func playTest(spawn:PlayerSpawn) -> void:
 		world.add_child(player)
 		player.position = spawn.position + Vector2(17, 23)
 		if spawn != levelStart:
+			GameChanges.assignAndFollowStack(spawn.undoStack)
 			player.key.assign(spawn.key.map(func(number): return number.duplicate()))
 			player.star.assign(spawn.star)
 			player.curse.assign(spawn.curse)
+		else: GameChanges.start()
 	playState = PLAY_STATE.PLAY
 	latestSpawn = spawn
 
 	goldIndexFloat = 0
 
-	editor.multiselect.deselect()
-	editor.focusDialog.defocusComponent()
-	editor.focusDialog.defocus()
-	editor.componentDragged = null
-	Changes.bufferSave()
-
-	if starting: GameChanges.start()
 	for object in objects.values():
 		if starting: object.start()
 		object.queue_redraw()
@@ -313,8 +322,7 @@ func stopTest() -> void:
 		component.stop()
 		component.queue_redraw()
 	if objects.get(-1):
-		objects.erase(-1)
-		objectsParent.remove_child(editor.playerObject)
+		editor.playerObject.deleted(true)
 
 func restart() -> void:
 	if editor:

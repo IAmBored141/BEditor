@@ -1,3 +1,4 @@
+class_name GameChangesClass
 extends Node
 
 var undoStack:Array[RefCounted] = []
@@ -5,6 +6,12 @@ var saveBuffered:bool = false
 
 # handles the undo system for the Game
 # a lot is copied over from Changes
+
+func assignAndFollowStack(stack:Array[RefCounted]) -> void:
+	undoStack.assign(stack)
+	for change in stack:
+		if change is UndoSeparator: continue
+		change.do()
 
 func start() -> void:
 	undoStack = []
@@ -35,7 +42,6 @@ func undo() -> bool:
 			Game.player.position = undoStack[-1].position
 			Game.player.dropMaster()
 			for object in Game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateBufferCheck = null
-			Game.player.checkKeys()
 			return true
 		var change = undoStack.pop_back()
 		change.undo()
@@ -51,6 +57,9 @@ func copy(value:Variant) -> Variant:
 	@abstract func do() -> void
 	@abstract func undo() -> void
 
+	@abstract func serialise() -> Array
+	# and also a static deserialise one. first element of the array should be the type
+
 class UndoSeparator extends RefCounted:
 	# indicates the start/end of an undo in the stack; also saves the player's position at that point
 	var position:Vector2
@@ -61,7 +70,10 @@ class UndoSeparator extends RefCounted:
 	func _to_string() -> String:
 		return "<UndoSeparator:"+str(position)+">"
 
-class ColorChange extends Change:
+	func serialise() -> Array: return [SerialisedUndoStack.CHANGE_TYPES.find(UndoSeparator), position]
+	static func deserialise(properties:Array) -> UndoSeparator: return UndoSeparator.new(properties[1])
+
+@abstract class ColorChange extends Change:
 	# a change to something in an array of player indexed by colors
 	# like key and star
 	static func array() -> StringName: return &""
@@ -70,33 +82,43 @@ class ColorChange extends Change:
 	var after:Variant
 	var before:Variant
 
-	func _init(_color:Game.COLOR, _after:Variant) -> void:
+	func _init(_color:Game.COLOR, _after:Variant, activate:bool=true) -> void:
 		color = _color
 		after = GameChanges.copy(_after)
-		before = GameChanges.copy(Game.player.get(array())[color])
-		if before == after or color == Game.COLOR.NONE:
-			cancelled = true
-			return
-		do()
-		Game.player.checkKeys()
+		if activate:
+			before = GameChanges.copy(Game.player.get(array())[color])
+			if cancelCondition():
+				cancelled = true
+				return
+			do()
 	
-	func do() -> void: Game.player.get(array())[color] = GameChanges.copy(after)
-	func undo() -> void: Game.player.get(array())[color] = GameChanges.copy(before)
+	func do() -> void: Game.player.get(array())[color] = GameChanges.copy(after); update()
+	func undo() -> void: Game.player.get(array())[color] = GameChanges.copy(before); update()
+
+	func cancelCondition() -> bool:
+		return before == after or color == Game.COLOR.NONE
+
+	func update() -> void:
+		Game.player.bufferCheckKeys()
 
 	func _to_string() -> String:
 		return "<ColorChange:"+str(color)+">"
+	
+	func serialise() -> Array: return [SerialisedUndoStack.CHANGE_TYPES.find(get_script()), color, before, after]
+	static func deserialise(properties:Array) -> ColorChange:
+		var change:ColorChange = SerialisedUndoStack.CHANGE_TYPES[properties[0]].new(properties[1], properties[3], false)
+		change.before = GameChanges.copy(properties[2])
+		return change
 
 class KeyChange extends ColorChange:
 	# C major -> A minor, for example
 	static func array() -> StringName: return &"key"
 
-	func _init(_color:Game.COLOR, _after:Variant) -> void:
-		if Game.player.star[_color] or color == Game.COLOR.NONE:
-			cancelled = true
-			return
-		super(_color,_after)
-		for object in Game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateCheck(Game.player)
+	func cancelCondition() -> bool: return super() or Game.player.star[color]
 
+	func update() -> void:
+		super()
+		Game.bufferGateCheck()
 class StarChange extends ColorChange:
 	# a change to the starred state
 	static func array() -> StringName: return &"star"
@@ -112,25 +134,25 @@ class PropertyChange extends Change:
 	var before:Variant
 	var type:GDScript
 	
-	func _init(component:GameComponent,_property:StringName,_after:Variant) -> void:
+	func _init(component:GameComponent,_property:StringName,_after:Variant, activate:bool=true) -> void:
 		id = component.id
 		property = _property
 		after = Changes.copy(_after)
-		before = Changes.copy(component.get(property))
-		if before == after:
-			cancelled = true
-			return
 		type = component.get_script()
-		do()
+		if activate:
+			before = Changes.copy(component.get(property))
+			if before == after:
+				cancelled = true
+				return
+			do()
 
 	func do() -> void: changeValue(after)
 	func undo() -> void: changeValue(before)
 	
 	func changeValue(value:Variant) -> void:
 		var component:GameComponent
-		match type:
-			Lock: component = Game.components.get(id)
-			_: component = Game.objects.get(id)
+		if type in Game.NON_OBJECT_COMPONENTS: component = Game.components.get(id)
+		else: component = Game.objects.get(id)
 		if !component: return
 		component.set(property, Changes.copy(value))
 		component.propertyGameChangedDo(property)
@@ -140,3 +162,13 @@ class PropertyChange extends Change:
 	
 	func _to_string() -> String:
 		return "<PropertyChange:"+str(id)+"."+str(property)+">"
+
+	func serialise() -> Array: return [SerialisedUndoStack.CHANGE_TYPES.find(PropertyChange), type in Game.NON_OBJECT_COMPONENTS, id, property, before, after]
+	static func deserialise(properties:Array) -> PropertyChange:
+		var component:GameComponent
+		if properties[1]: component = Game.components.get(properties[2])
+		else: component = Game.objects.get(properties[2])
+		if !component: return null
+		var change:PropertyChange = PropertyChange.new(component, properties[3], properties[5], false)
+		change.before = GameChanges.copy(properties[4])
+		return change

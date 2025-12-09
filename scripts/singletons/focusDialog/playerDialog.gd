@@ -12,6 +12,9 @@ func focus(focused:GameObject, new:bool, _dontRedirect:bool) -> void:
 	%playerSettings.visible = focused is PlayerPlaceholderObject
 	if new: setSelectedColor(Game.COLOR.WHITE)
 	else: _playerColorSelected(color)
+	var undoPositions:int = focused.undoStack.reduce(func(accum, change): return accum + 1 if change is GameChanges.UndoSeparator else accum, -1)
+	%playerUndostack.text = "%s positions in undo history" % undoPositions
+	%playerUndostack.visible = undoPositions > 0
 	if %playerSpawnSettings.visible:
 		if Game.levelStart == focused: %levelStart.button_pressed = true
 		else: %savestate.button_pressed = true
@@ -34,8 +37,10 @@ func _playerColorSelected(_color:Game.COLOR) -> void:
 		%playerCurse.button_pressed = main.focused.curse[color]
 
 func receiveKey(event:InputEvent) -> bool:
-	if Editor.eventIs(event, &"focusPlayerStar") and %playerStateSettings.visible: _playerStarSet(!%playerStar.button_pressed)
+	if Editor.eventIs(event, &"focusPlayerStart") and %playerSpawnSettings.visible: _playTest()
+	elif Editor.eventIs(event, &"focusPlayerStar") and %playerStateSettings.visible: _playerStarSet(!%playerStar.button_pressed)
 	elif Editor.eventIs(event, &"focusPlayerCurse") and %playerStateSettings.visible and %playerCurse.visible: _playerCurseSet(!%playerCurse.button_pressed)
+	elif Editor.eventIs(event, &"focusPlayerSavestate") and %playerSettings.visible: _leaveSavestate()
 	elif Editor.eventIs(event, &"quicksetColor") and %playerStateSettings.visible: editor.quickSet.startQuick(&"quicksetColor", main.focused)
 	else: return false
 	return true
@@ -86,3 +91,4 @@ func _leaveSavestate():
 	Changes.addChange(Changes.PropertyChange.new(state,&"key",Game.player.key.map(func(count): return count.duplicate())))
 	Changes.addChange(Changes.PropertyChange.new(state,&"star",Game.player.star))
 	Changes.addChange(Changes.PropertyChange.new(state,&"curse",Game.player.curse))
+	Changes.addChange(Changes.PropertyChange.new(state,&"undoStack",GameChanges.undoStack.duplicate()))

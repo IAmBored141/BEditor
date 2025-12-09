@@ -170,8 +170,11 @@ const SPEECH_BUBBLER_MARGIN:float = 10 # between speech bubbler and edge of dial
 func _process(_delta:float) -> void:
 	if focused:
 		visible = true
+		# position the dialog every frame (could be optimised but i dont care)
 		var flip:bool = false
-		activeDialog.get_child(0).size.y = 0
+		activeDialog.get_child(0).size = Vector2.ZERO
+		var halfWidth:float = activeDialog.get_child(0).size.x/2
+		activeDialog.get_child(0).position = Vector2(-halfWidth,0)
 		var height:float = activeDialog.get_child(0).size.y
 		position = editor.worldspaceToScreenspace(focused.getDrawPosition() + Vector2(focused.size.x/2,focused.size.y)) + Vector2(0,OBJECT_MARGIN)
 		
@@ -183,7 +186,6 @@ func _process(_delta:float) -> void:
 		if flip != above: activeDialog.get_child(0).position.y = -height
 		else: activeDialog.get_child(0).position.y = 0
 
-		var halfWidth:float = activeDialog.get_child(0).size.x/2
 		var speechBubblerRange:float = halfWidth
 		if activeDialog == doorDialog and flip: speechBubblerRange = activeDialog.get_child(0).get_child(1).size.x/2
 		%speechBubbler.position.x = 0

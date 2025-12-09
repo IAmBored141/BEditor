@@ -197,9 +197,7 @@ class DeleteComponentChange extends Change:
 
 	func _init(component:GameComponent) -> void:
 		if component is PlayerPlaceholderObject:
-			if component == Game.editor.focusDialog.focused: Game.editor.focusDialog.defocus()
-			component.deletedInit()
-			Game.objects.erase(-1)
+			component.delete()
 			cancelled = true
 			return
 

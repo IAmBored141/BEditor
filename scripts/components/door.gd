@@ -754,7 +754,7 @@ func setGlitch(setColor:Game.COLOR) -> void:
 	queue_redraw()
 	if type == TYPE.GATE:
 		gateCheck(Game.player)
-		Game.player.checkKeys()
+		Game.player.bufferCheckKeys() # if armaments
 
 func armamentColors() -> Array[Game.COLOR]:
 	var colors:Array[Game.COLOR]
