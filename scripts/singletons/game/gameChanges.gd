@@ -41,7 +41,6 @@ func undo() -> bool:
 		if undoStack[-1] is UndoSeparator:
 			Game.player.position = undoStack[-1].position
 			Game.player.dropMaster()
-			for object in Game.objects.values(): if object is Door and object.type == Door.TYPE.GATE: object.gateBufferCheck = null
 			return true
 		var change = undoStack.pop_back()
 		change.undo()
@@ -116,12 +115,15 @@ class KeyChange extends ColorChange:
 
 	func cancelCondition() -> bool: return super() or Game.player.star[color]
 
-	func update() -> void:
+	func do() -> void:
 		super()
 		Game.bufferGateCheck()
+
 class StarChange extends ColorChange:
 	# a change to the starred state
 	static func array() -> StringName: return &"star"
+
+	func update() -> void: pass
 
 class CurseChange extends ColorChange:
 	# a change to the cursed state

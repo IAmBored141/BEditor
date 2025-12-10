@@ -57,6 +57,8 @@ func focusComponent(component:GameComponent, _new:bool) -> void: # Lock or Remot
 		%lockConfigurationSelector.setup(component)
 	%lockSettings.visible = true
 	
+	%remoteLockConvert.visible = Mods.active(&"C1") and component is not RemoteLock
+
 	%doorAxialNumberEdit.visible = component.type == Lock.TYPE.NORMAL or component.type == Lock.TYPE.EXACT
 	%doorAxialNumberEdit.zeroIValid = component.type == Lock.TYPE.EXACT
 	%doorAxialNumberEdit.setValue(component.count, true)
@@ -107,12 +109,9 @@ func receiveKey(event:InputEvent) -> bool:
 		elif Editor.eventIs(event, &"focusLockBlank"): _lockTypeSelected(Lock.TYPE.BLANK)
 		elif Editor.eventIs(event, &"focusLockBlast"): _lockTypeSelected(Lock.TYPE.BLAST)
 		elif Editor.eventIs(event, &"focusLockAll"): _lockTypeSelected(Lock.TYPE.ALL)
-		elif Editor.eventIs(event, &"focusLockExact"):
-			if Mods.active(&"C3"): _lockTypeSelected(Lock.TYPE.EXACT)
-		elif Editor.eventIs(event, &"focusLockNegated"):
-			if Mods.active(&"C1"): _lockNegatedSet(!%lockNegated.button_pressed)
-		elif Editor.eventIs(event, &"focusLockArmament"):
-			if Mods.active(&"C5"): _lockArmamentSet(!%lockArmament.button_pressed)
+		elif Editor.eventIs(event, &"focusLockExact") and Mods.active(&"C3"): _lockTypeSelected(Lock.TYPE.EXACT)
+		elif Editor.eventIs(event, &"focusLockNegated") and Mods.active(&"C1"): _lockNegatedSet(!%lockNegated.button_pressed)
+		elif Editor.eventIs(event, &"focusLockArmament") and Mods.active(&"C5"): _lockArmamentSet(!%lockArmament.button_pressed)
 		elif main.focused is RemoteLock:
 			if Editor.eventIs(event, &"focusRemoteLockAddConnection"): %doorsHandler.addComponent()
 			elif Editor.eventIs(event, &"focusDoorFrozen"): _frozenSet(!main.focused.frozen)
@@ -122,6 +121,7 @@ func receiveKey(event:InputEvent) -> bool:
 			else: return false
 		else:
 			if Editor.eventIs(event, &"focusLockDuplicate", true): main.focused.duplicateLock(main.componentFocused)
+			elif Editor.eventIs(event, &"focusLockConvertRemote") and Mods.active(&"C1"): _remoteLockConvert()
 			elif Editor.eventIs(event, &"focusDoorAddLock", true): main.focused.addLock()
 			elif Editor.eventIs(event, &"focusDoorColorLink"): %colorLink.button_pressed = !%colorLink.button_pressed
 			elif Editor.eventIs(event, &"quicksetLockSize"): editor.quickSet.startQuick(&"quicksetLockSize", main.componentFocused)
@@ -142,7 +142,7 @@ func receiveKey(event:InputEvent) -> bool:
 	return true
 
 func changedMods() -> void:
-	%lockSettingsSep.visible = Mods.active(&"C1")
+	%lockSettingsSep.visible = Mods.active(&"C1") or Mods.active(&"C5")
 	%lockNegated.visible = Mods.active(&"C1")
 	%lockArmament.visible = Mods.active(&"C5")
 	%realInfiniteCopy.visible = Mods.active(&"InfCopies")
@@ -283,3 +283,6 @@ func _lockArmamentSet(value:bool) -> void:
 	var lock:GameComponent = main.componentFocused if main.componentFocused is Lock else main.focused
 	Changes.addChange(Changes.PropertyChange.new(lock,&"armament",value))
 	Changes.bufferSave()
+
+func _remoteLockConvert() -> void:
+	main.focus(editor.convertLock(main.componentFocused))

@@ -23,7 +23,9 @@ func _ready() -> void:
 	if modpack: %modpack.texture = modpack.iconSmall
 	else: %modpack.visible = false
 	if mods: %mods.text = ", ".join(mods.filter(func(mod): return Mods.mods[mod].disclosatory).map(func(mod): return Mods.mods[mod].name))
-	if modpack: %mods.text += ", " + modpack.name + " (" + version.name + ": " + ", ".join(version.mods.map(func(mod): return Mods.mods[mod].name)) + ")"
+	if modpack:
+		var modpackMods:String = ", ".join(version.mods.map(func(mod): return Mods.mods[mod].name)) + ")"
+		%mods.text += ", " + modpack.name + " (" + version.name + (": " + modpackMods if modpackMods != ")" else ")")
 	if levelStart == -1:
 		%play.disabled = true
 		%play.text = "Play (disabled; no level start)"

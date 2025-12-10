@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://8bth374yqwpe"]
+[gd_scene load_steps=63 format=3 uid="uid://8bth374yqwpe"]
 
 [ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_eqegh"]
 [ext_resource type="Script" uid="uid://dm8t82nhqkdlc" path="res://scripts/singletons/focusDialog/focusDialog.gd" id="2_k8bto"]
@@ -28,6 +28,7 @@
 [ext_resource type="Texture2D" uid="uid://brhnpnqvdifb8" path="res://assets/ui/focusDialog/lockBooleans/armament.png" id="22_4u2vc"]
 [ext_resource type="Texture2D" uid="uid://dyhbxvexn1w26" path="res://assets/ui/focusDialog/blastLockSettings/negative.png" id="22_hh12n"]
 [ext_resource type="Script" uid="uid://cgjhnhjwymb8g" path="res://scripts/resources/controlExplanation.gd" id="22_s5h3h"]
+[ext_resource type="Texture2D" uid="uid://f5p4r1jp4dsm" path="res://assets/ui/focusDialog/lockBooleans/remoteLock.png" id="23_ft2jg"]
 [ext_resource type="Texture2D" uid="uid://b38kvgugo2qsu" path="res://assets/ui/focusDialog/blastLockSettings/i.png" id="23_h1xy2"]
 [ext_resource type="Texture2D" uid="uid://ddautei1wlnil" path="res://assets/ui/focusDialog/otherObjects/playtest.png" id="24_7tfe2"]
 [ext_resource type="Script" uid="uid://lbaubg2qq1s1" path="res://scripts/nodes/focusDialog/keyCounterHandler.gd" id="25_1rcup"]
@@ -68,6 +69,12 @@ script = ExtResource("22_s5h3h")
 explanation = "[%s]Toggle armament"
 hotkeys = Array[StringName]([&"focusLockArmament"])
 metadata/_custom_type_script = "uid://lwocqakgt4qr"
+
+[sub_resource type="Resource" id="Resource_ljt45"]
+script = ExtResource("22_s5h3h")
+explanation = "[%s]Convert to Remote Lock"
+hotkeys = Array[StringName]([&"focusLockConvertRemote"])
+metadata/_custom_type_script = "uid://cgjhnhjwymb8g"
 
 [sub_resource type="Resource" id="Resource_p7jkh"]
 script = ExtResource("22_s5h3h")
@@ -370,6 +377,12 @@ toggle_mode = true
 icon = ExtResource("22_4u2vc")
 metadata/explanation = SubResource("Resource_mscoq")
 
+[node name="remoteLockConvert" type="Button" parent="doorDialog/c/lock/c/c/lockSettings" groups=["explained"]]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("23_ft2jg")
+metadata/explanation = SubResource("Resource_ljt45")
+
 [node name="doorAuraSettings" type="HBoxContainer" parent="doorDialog/c/lock/c/c"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -511,6 +524,7 @@ metadata/_custom_type_script = "uid://2iqmgcrc5wpq"
 
 [node name="playerDialog" type="Control" parent="." groups=["modUI"]]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 0
 script = ExtResource("40_p7jkh")
 
@@ -746,6 +760,7 @@ default_color = Color(0.8352941, 0.8352941, 0.8352941, 1)
 [connection signal="select" from="doorDialog/c/lock/c/c/lockSettings/lockTypeSelector" to="doorDialog" method="_lockTypeSelected"]
 [connection signal="toggled" from="doorDialog/c/lock/c/c/lockSettings/lockNegated" to="doorDialog" method="_lockNegatedSet"]
 [connection signal="toggled" from="doorDialog/c/lock/c/c/lockSettings/lockArmament" to="doorDialog" method="_lockArmamentSet"]
+[connection signal="pressed" from="doorDialog/c/lock/c/c/lockSettings/remoteLockConvert" to="doorDialog" method="_remoteLockConvert"]
 [connection signal="toggled" from="doorDialog/c/lock/c/c/doorAuraSettings/frozen" to="doorDialog" method="_frozenSet"]
 [connection signal="toggled" from="doorDialog/c/lock/c/c/doorAuraSettings/crumbled" to="doorDialog" method="_crumbledSet"]
 [connection signal="toggled" from="doorDialog/c/lock/c/c/doorAuraSettings/painted" to="doorDialog" method="_paintedSet"]

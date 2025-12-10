@@ -376,7 +376,7 @@ var addCopySound:AudioStreamPlayer
 var animPart:int = 0
 var gateAlpha:float = 1
 var gateOpen:bool = false
-var gateBufferCheck:Player = null
+var gateBufferCheck:bool = false
 var curseTimer:float = 0
 var drawComplex:bool = false
 
@@ -417,8 +417,8 @@ func _process(delta:float) -> void:
 				animState = ANIM_STATE.IDLE
 			queue_redraw()
 	if type == TYPE.GATE:
-		if gateBufferCheck and !gateBufferCheck.overlapping(%interact):
-			gateBufferCheck = null
+		if gateBufferCheck and !overlappingPlayer() and !Game.player.overlapping(%interact):
+			GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateBufferCheck",false))
 			GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateOpen",false))
 			GameChanges.bufferSave()
 		if !gateOpen and gateAlpha < 1:
@@ -438,17 +438,24 @@ func start() -> void:
 	animTimer = 0
 	animAlpha = 0
 	animPart = 0
-	propertyGameChangedDo(&"gateOpen")
 	complexCheck()
-	if type == TYPE.GATE: gateCheck(Game.player, true)
+	if type == TYPE.GATE:
+		if overlappingPlayer():
+			gateOpen = true
+			gateBufferCheck = true
+		else: gateCheck(Game.player, true)
+	propertyGameChangedDo(&"gateOpen")
 	super()
+
+# avoids 1 frame delay
+func overlappingPlayer() -> bool: return Rect2(Game.player.position - Vector2(6,12), Vector2(12,21)).intersects(Rect2(position, size))
 
 func stop() -> void:
 	cursed = false
 	curseTimer = 0
 	gateAlpha = 1
 	gateOpen = false
-	gateBufferCheck = null
+	gateBufferCheck = false
 	drawComplex = false
 	glitchMimic = Game.COLOR.GLITCH
 	curseGlitchMimic = Game.COLOR.GLITCH
@@ -646,11 +653,11 @@ func gateCheck(player:Player, starting:bool=false) -> void:
 		if !lock.satisfied: shouldOpen = false
 	if shouldOpen and willCrash: Game.crash(); return
 	if gateOpen and !shouldOpen:
-		if player.overlapping(%interact): gateBufferCheck = player
+		if player.overlapping(%interact): GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateBufferCheck",true))
 		else: GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateOpen",false))
 	elif !gateOpen and shouldOpen:
-		gateBufferCheck = null
-		if starting: gateOpen = true; propertyGameChangedDo(&"gateOpen")
+		GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateBufferCheck",false))
+		if starting: gateOpen = true
 		else: GameChanges.addChange(GameChanges.PropertyChange.new(self,&"gateOpen",true))
 
 func auraCheck(player:Player) -> void:

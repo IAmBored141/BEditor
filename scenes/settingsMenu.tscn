@@ -109,7 +109,7 @@ layout_mode = 1
 anchors_preset = 0
 offset_right = 800.0
 offset_bottom = 608.0
-mouse_filter = 1
+mouse_filter = 2
 script = ExtResource("3_psrcj")
 offset = Vector2(10, 10)
 
@@ -714,6 +714,12 @@ layout_mode = 2
 label = "Toggle Armament"
 action = &"focusLockArmament"
 prerequisite = &"C5"
+
+[node name="focusLockConvertRemote" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Convert To Remote Lock"
+action = &"focusLockConvertRemote"
+prerequisite = &"C1"
 
 [node name="quicksetLockSize" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" instance=ExtResource("6_dkncv")]
 layout_mode = 2

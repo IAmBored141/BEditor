@@ -311,16 +311,21 @@ func stopDrag() -> void:
 	elif dragMode == DRAG_MODE.POSITION:
 		if lockBufferConvert:
 			lockBufferConvert = false
-			var remoteLock = Changes.addChange(Changes.CreateComponentChange.new(RemoteLock,{&"position":componentDragged.position+componentDragged.parent.position})).result
-			for property in Lock.PROPERTIES:
-				if property not in [&"id", &"position", &"parentId", &"index"]:
-					Changes.addChange(Changes.PropertyChange.new(remoteLock,property,componentDragged.get(property)))
-			remoteLock._connectTo(componentDragged.parent)
-			Changes.addChange(Changes.DeleteComponentChange.new(componentDragged))
+			convertLock(componentDragged)
 		if componentDragged:
 			if componentDragged.get_script() in Game.NON_OBJECT_COMPONENTS: focusDialog.focusComponent(componentDragged)
 			else: focusDialog.focus(componentDragged)
 	componentDragged = null
+
+func convertLock(lock:Lock) -> RemoteLock:
+	var remoteLock = Changes.addChange(Changes.CreateComponentChange.new(RemoteLock,{&"position":lock.position+lock.parent.position})).result
+	for property in Lock.PROPERTIES:
+		if property not in [&"id", &"position", &"parentId", &"index"]:
+			Changes.addChange(Changes.PropertyChange.new(remoteLock,property,lock.get(property)))
+	remoteLock._connectTo(lock.parent)
+	if lock.parent.type == Door.TYPE.SIMPLE: Changes.addChange(Changes.PropertyChange.new(lock.parent,&"type",Door.TYPE.COMBO))
+	Changes.addChange(Changes.DeleteComponentChange.new(lock))
+	return remoteLock
 
 func startPositionDrag(component:GameComponent) -> void:
 	if component is GameObject: focusDialog.focus(component)
