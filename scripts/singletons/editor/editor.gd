@@ -317,7 +317,7 @@ func stopDrag() -> void:
 			else: focusDialog.focus(componentDragged)
 	componentDragged = null
 
-func convertLock(lock:Lock) -> RemoteLock:
+static func convertLock(lock:Lock) -> RemoteLock:
 	var remoteLock = Changes.addChange(Changes.CreateComponentChange.new(RemoteLock,{&"position":lock.position+lock.parent.position})).result
 	for property in Lock.PROPERTIES:
 		if property not in [&"id", &"position", &"parentId", &"index"]:

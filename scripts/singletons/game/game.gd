@@ -281,6 +281,7 @@ func playTest(spawn:PlayerSpawn) -> void:
 		player.position = spawn.position + Vector2(17, 23)
 		if spawn != levelStart:
 			GameChanges.assignAndFollowStack(spawn.undoStack)
+			GameChanges.saveBuffered = spawn.saveBuffered
 			player.key.assign(spawn.key.map(func(number): return number.duplicate()))
 			player.star.assign(spawn.star)
 			player.curse.assign(spawn.curse)
@@ -326,11 +327,12 @@ func stopTest() -> void:
 		editor.playerObject.deleted(true)
 
 func savestate() -> void:
-	var state:PlayerSpawn = Changes.addChange(Changes.CreateComponentChange.new(PlayerSpawn, {&"position":Game.player.position.round()-Vector2(17, 23),&"forceState":true})).result
-	Changes.addChange(Changes.PropertyChange.new(state,&"key",Game.player.key.map(func(count): return count.duplicate())))
-	Changes.addChange(Changes.PropertyChange.new(state,&"star",Game.player.star))
-	Changes.addChange(Changes.PropertyChange.new(state,&"curse",Game.player.curse))
+	var state:PlayerSpawn = Changes.addChange(Changes.CreateComponentChange.new(PlayerSpawn, {&"position":player.position.round()-Vector2(17, 23),&"forceState":true})).result
+	Changes.addChange(Changes.PropertyChange.new(state,&"key",player.key.map(func(count): return count.duplicate())))
+	Changes.addChange(Changes.PropertyChange.new(state,&"star",player.star))
+	Changes.addChange(Changes.PropertyChange.new(state,&"curse",player.curse))
 	Changes.addChange(Changes.PropertyChange.new(state,&"undoStack",GameChanges.undoStack.duplicate()))
+	Changes.addChange(Changes.PropertyChange.new(state,&"saveBuffered",GameChanges.saveBuffered))
 
 func restart() -> void:
 	if editor:

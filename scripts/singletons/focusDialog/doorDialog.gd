@@ -285,4 +285,4 @@ func _lockArmamentSet(value:bool) -> void:
 	Changes.bufferSave()
 
 func _remoteLockConvert() -> void:
-	main.focus(editor.convertLock(main.componentFocused))
+	main.focus(Editor.convertLock(main.componentFocused))
