@@ -9,13 +9,14 @@ var confirmAction:ACTION
 
 var jsCallback:JavaScriptObject
 
-const FILE_FORMAT_VERSION:int = 0
+const FILE_FORMAT_VERSION:int = 1
 
 # Okay.
 # Here's how we'll do it
 # HEADER:
 # - file format header
 # - file format version number
+# - last opened editor version
 # LEVEL METADATA:
 # - level object
 # - screenshot
@@ -151,8 +152,9 @@ func save(path:String="") -> void:
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.WRITE)
 
 	# HEADER
-	file.store_pascal_string("IWLCEditorPuzzle")
+	file.store_pascal_string("IWLCEditorLevel")
 	file.store_32(FILE_FORMAT_VERSION)
+	file.store_pascal_string(ProjectSettings.get_setting("application/config/version"))
 	# LEVEL METADATA
 	file.store_var(Game.level,true)
 	editor.takeScreenshot()
@@ -212,12 +214,15 @@ func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.READ)
 
-	if file.get_pascal_string() != "IWLCEditorPuzzle": errorPopup("Unrecognised file format"); return null
-	match file.get_32():
-		0: openWindow.loader = LoadV0
-		_:
-			openWindow.queue_free()
-			errorPopup("Unrecognised file version"); return null
+	if file.get_pascal_string() != "IWLCEditorLevel": errorPopup("Unrecognised file format"); return null
+	var formatVersion:int = file.get_32()
+	var editorVersion:String = file.get_pascal_string()
+	if formatVersion == 1: openWindow.loader = LoadV1
+	else:
+		openWindow.queue_free()
+		if formatVersion == 0: errorPopup("File version 0 is unrecognised")
+		else: errorPopup("File version %s is unrecognised. File last opened in IWLCEditor v%s" % [formatVersion, editorVersion])
+		return null
 
 	openWindow.level = file.get_var(true)
 	openWindow.screenshot = file.get_var(true)
