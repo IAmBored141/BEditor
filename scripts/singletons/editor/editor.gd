@@ -482,6 +482,7 @@ func _input(event:InputEvent) -> void:
 			match event.keycode:
 				KEY_TAB: grab_focus()
 				KEY_F2: takeScreenshot()
+				KEY_F3: print(Game.tiles.get_used_cells())
 
 static func eventIs(event:InputEvent, action:StringName, allowEcho:bool=false) -> bool: return event.is_action_pressed(action, allowEcho, true)
 

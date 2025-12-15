@@ -15,6 +15,8 @@ static var idIterStart:int = 20000000
 # values labelled bools are ints; 0 if false and -1 if true
 
 static func exportFile(_file:FileAccess) -> void:
+	if !Mods.activeModpack: return Saving.errorPopup("Cannot export to .room.gmx without a modpack", "Export Error")
+
 	file = _file
 	indents = 0
 	idIter = idIterStart - 1
@@ -133,6 +135,33 @@ static func exportFile(_file:FileAccess) -> void:
 				storeInstance("objPlayerStart", object.position-levelPos)
 				if Game.level.size != Vector2i(800,608): storeInstance("oNewCamera", object.position-levelPos)
 			FloatingTile: storeInstance("objBlock", object.position-levelPos, "", generateInst(), object.size/32)
+	var tiles:Array[Vector2i] = Game.tiles.get_used_cells()
+	tiles.sort()
+	if tiles:
+		var rect:Rect2i = Rect2i(tiles[0], Vector2.ONE)
+		tiles.remove_at(0)
+		while tiles:
+			var expandedSuccessfully:bool = false
+			# horizontal
+			var canExpandHorizontal:bool = true
+			for y in range(rect.position.y, rect.end.y):
+				if Vector2i(rect.end.x, y) not in tiles: canExpandHorizontal = false
+			if canExpandHorizontal:
+				for y in range(rect.position.y, rect.end.y): tiles.erase(Vector2i(rect.end.x, y))
+				expandedSuccessfully = true
+				rect = rect.grow_side(SIDE_RIGHT, 1)
+			# vertical
+			var canExpandVertical:bool = true
+			for x in range(rect.position.x, rect.end.x):
+				if Vector2i(x, rect.end.y) not in tiles: canExpandVertical = false
+			if canExpandVertical:
+				for x in range(rect.position.x, rect.end.x): tiles.erase(Vector2i(x, rect.end.y))
+				expandedSuccessfully = true
+				rect = rect.grow_side(SIDE_BOTTOM, 1)
+			if !expandedSuccessfully:
+				storeInstance("objBlock", Vector2(rect.position*32)-levelPos, "", generateInst(), rect.size)
+				rect = Rect2i(tiles[0], Vector2.ONE)
+				tiles.remove_at(0)
 	endTag("instances")
 	
 	startTag("tiles")

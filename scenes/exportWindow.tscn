@@ -12,7 +12,6 @@ title = "Export Level"
 position = Vector2i(0, 36)
 size = Vector2i(400, 200)
 transient = true
-exclusive = true
 unresizable = true
 theme = ExtResource("1_6sh78")
 script = ExtResource("1_ctwya")
