@@ -85,7 +85,7 @@ static func exportFile(_file:FileAccess) -> void:
 					KeyBulk.TYPE.CURSE: code += "type=key_UNCURSE;&#xA;" if object.un else "type=key_CURSE;&#xA;"
 				if object.type in [KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT]:
 					if M.neq(M.r(object.count), M.ONE): code += "count = %s;&#xA;" % M.str(M.r(object.count))
-					if M.neq(M.i(object.count), M.ZERO): code += "icount = %s;&#xA;" % M.str(M.ir(object.count))
+					if M.ex(M.i(object.count)): code += "icount = %s;&#xA;" % M.str(M.ir(object.count))
 				if object.infinite: code += "inf = 1;&#xA;"
 				storeInstance("oKey" + COLOR_NAMES[object.color], object.position-levelPos, code)
 			Door:
@@ -98,7 +98,7 @@ static func exportFile(_file:FileAccess) -> void:
 				if object.size.x != 32: code += "w = %s;&#xA;" % (object.size.x / 32)
 				if object.size.y != 32: code += "h = %s;&#xA;" % (object.size.y / 32)
 				if M.neq(M.r(object.copies), M.ONE): code += "copies = %s;&#xA;" % M.str(M.r(object.copies))
-				if M.neq(M.i(object.copies), M.ZERO): code += "icopies = %s;&#xA;" % M.str(M.ir(object.copies))
+				if M.ex(M.i(object.copies)): code += "icopies = %s;&#xA;" % M.str(M.ir(object.copies))
 				if object.frozen: code += "aura[0] = 1;&#xA;"
 				if object.crumbled: code += "aura[1] = 1;&#xA;"
 				if object.painted: code += "aura[2] = 1;&#xA;"
@@ -107,14 +107,22 @@ static func exportFile(_file:FileAccess) -> void:
 					if lock.color != object.colorSpend: code += "color = %s;&#xA;" % lock.color
 					if lock.type != Lock.TYPE.NORMAL: code += "type = %s;&#xA;" % lock.type
 					if M.neq(M.r(lock.count), M.ONE): code += "count = %s;&#xA;" % M.str(M.r(lock.count))
-					if M.neq(M.i(lock.count), M.ZERO): code += "icount = %s;&#xA;" % M.str(M.ir(lock.count))
+					if M.ex(M.i(lock.count)): code += "icount = %s;&#xA;" % M.str(M.ir(lock.count))
+					if M.ex(M.r(lock.denominator)): code += "denom = %s;&#xA;" % M.str(M.r(lock.denominator))
+					if M.ex(M.i(lock.denominator)): code += "idenom = %s;&#xA;" % M.str(M.ir(lock.denominator))
+					if M.ex(M.i(lock.count)) or lock.zeroI: code += "exactI = 1;&#xA;"
+					if lock.isPartial: code += "isPartial = 1;&#xA;"
+					if lock.negated: code += "negated = 1;&#xA;"
+					if lock.armament: code += "armament = 1;&#xA;"
 				else:
 					if object.type == Door.TYPE.COMBO: code += "colorSpend = %s;&#xA;" % object.colorSpend
 					for lock in object.locks:
 						var spriteName:String = "sprLock"
 						if lock.configuration != Lock.CONFIGURATION.NONE: spriteName += Lock.CONFIGURATION_NAMES[lock.configuration]
 						else: spriteName += Lock.SIZE_TYPE_NAMES[lock.sizeType]
-						code += "scrComboAdd(color_%s,%s,%s,lock_%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName]
+						var advanced:bool = M.ex(M.i(lock.count)) or lock.zeroI or lock.isPartial or M.ex(lock.denominator) or lock.negated or lock.armament
+						if advanced: code += "scrComboAdvAdd(color_%s,%s,%s,lock_%s,%s,%s,%s,%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName, lock.isPartial or M.ex(M.i(lock.count)) or lock.zeroI, M.str(M.r(lock.denominator)), M.str(M.ir(lock.denominator)), lock.negated, lock.armament]
+						else: code += "scrComboAdd(color_%s,%s,%s,lock_%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName]
 				storeInstance(objName, object.position-levelPos, code)
 			Goal:
 				var code:String = ""
