@@ -71,6 +71,7 @@ static func exportFile(_file:FileAccess) -> void:
 	endTag("views")
 	
 	startTag("instances")
+	storeInstance("objWorld", Vector2.ZERO)
 	for object in Game.objects.values():
 		match object.get_script():
 			KeyBulk:
