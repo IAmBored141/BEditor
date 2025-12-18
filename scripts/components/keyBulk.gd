@@ -13,6 +13,7 @@ static var FRAME:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/
 static var FILL_GLITCH:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/fillGlitch.png")
 static var FRAME_GLITCH:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/frameGlitch.png")
 static var OUTLINE_MASK:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/$t/outlineMask.png")
+static var QUICKSILVER_OUTLINE_MASK:KeyTextureLoader = KeyTextureLoader.new("res://assets/game/key/quicksilver/outlineMask$t.png", true)
 
 const CURSE_FILL_DARK:Texture2D = preload("res://assets/game/key/curse/fillDark.png")
 
@@ -78,9 +79,7 @@ static func getOutlineTexture(keyColor:Game.COLOR, keyType:TYPE=TYPE.NORMAL, key
 				KeyTextureLoader.TYPE.NORMAL: return preload("res://assets/game/key/master/outlineMask.png")
 				KeyTextureLoader.TYPE.EXACT: return preload("res://assets/game/key/master/outlineMaskExact.png")
 		Game.COLOR.QUICKSILVER:
-			match textureType:
-				KeyTextureLoader.TYPE.NORMAL: return preload("res://assets/game/key/quicksilver/outlineMask.png")
-				KeyTextureLoader.TYPE.EXACT: return preload("res://assets/game/key/quicksilver/outlineMaskExact.png")
+			return QUICKSILVER_OUTLINE_MASK.current([textureType])
 		Game.COLOR.DYNAMITE:
 			if textureType == KeyTextureLoader.TYPE.NORMAL: return preload("res://assets/game/key/dynamite/outlineMask.png")
 	return OUTLINE_MASK.current([textureType])

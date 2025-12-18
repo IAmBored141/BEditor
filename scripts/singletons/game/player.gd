@@ -2,7 +2,11 @@ extends CharacterBody2D
 class_name Player
 
 const HELD_SHINE:Texture2D = preload("res://assets/game/player/held/shine.png")
-func getMasterShineColor() -> Color: return Color("#b4b432") if M.positive(M.sign(masterMode)) else Color("#3232b4")
+func getMasterShineColor() -> Color:
+	match MASTER_CYCLE_COLORS[masterCycle]:
+		Game.COLOR.MASTER: return Color("#b4b432") if M.positive(M.sign(masterMode)) else Color("#3232b4")
+		Game.COLOR.QUICKSILVER: return Color("#3232b4") if M.positive(M.sign(masterMode)) else Color("#b4b432")
+		_: return Color() # unreachable
 
 const HELD_MASTER:Texture2D = preload("res://assets/game/player/held/master.png")
 const HELD_QUICKSILVER:Texture2D = preload("res://assets/game/player/held/quicksilver.png")

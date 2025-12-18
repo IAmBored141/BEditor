@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bd8vlwdafxd8q"
-path="res://.godot/imported/curse1.png-bb249068c3a6606ccb46375db01fba92.ctex"
+uid="uid://bx3l7cvwy2x6u"
+path="res://.godot/imported/outlineMaskUncurse.png-ff30aa70980c37b5d02dc5021184f4c7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/game/key/quicksilver/curse1.png"
-dest_files=["res://.godot/imported/curse1.png-bb249068c3a6606ccb46375db01fba92.ctex"]
+source_file="res://assets/game/key/quicksilver/outlineMaskUncurse.png"
+dest_files=["res://.godot/imported/outlineMaskUncurse.png-ff30aa70980c37b5d02dc5021184f4c7.ctex"]
 
 [params]
 
