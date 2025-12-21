@@ -5,6 +5,8 @@ class_name GameObject
 
 var active:bool = true
 
+var gameMakerName:String
+
 func stop() -> void:
 	active = true
 	propertyGameChangedDo(&"active")

@@ -72,6 +72,8 @@ static func exportFile(_file:FileAccess) -> void:
 	
 	startTag("instances")
 	storeInstance("oDropShadow", Vector2.ZERO)
+	if Mods.activeModpack == Mods.modpacks[&"IWLC"]: storeInstance("oRemoteLockConnections", Vector2(32,0))
+	for object in Game.objects.values(): object.gameMakerName = generateInst()
 	for object in Game.objects.values():
 		match object.get_script():
 			KeyBulk:
@@ -88,7 +90,7 @@ static func exportFile(_file:FileAccess) -> void:
 					if M.neq(M.r(object.count), M.ONE): code += "count = %s;&#xA;" % M.str(M.r(object.count))
 					if M.ex(M.i(object.count)): code += "icount = %s;&#xA;" % M.str(M.ir(object.count))
 				if object.infinite: code += "inf = 1;&#xA;"
-				storeInstance("oKey" + COLOR_NAMES[object.color], object.position-levelPos, code)
+				storeInstance("oKey" + COLOR_NAMES[object.color], object.position-levelPos, code, object.gameMakerName)
 			Door:
 				var objName:String = ""
 				var code:String = ""
@@ -124,13 +126,46 @@ static func exportFile(_file:FileAccess) -> void:
 						var advanced:bool = M.ex(M.i(lock.count)) or lock.zeroI or lock.isPartial or M.ex(lock.denominator) or lock.negated or lock.armament
 						if advanced: code += "scrComboAdvAdd(color_%s,%s,%s,lock_%s,%s,%s,%s,%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName, lock.isPartial or M.ex(M.i(lock.count)) or lock.zeroI, M.str(M.r(lock.denominator)), M.str(M.ir(lock.denominator)), lock.negated, lock.armament]
 						else: code += "scrComboAdd(color_%s,%s,%s,lock_%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName]
-				storeInstance(objName, object.position-levelPos, code)
+				if object.remoteLocks:
+					code += "remoteLocks = %s;&#xA;" % len(object.remoteLocks)
+					var index:int = 0
+					for remoteLock in object.remoteLocks:
+						code += "remoteLock[%s] = %s;&#xA;" % [index, remoteLock.gameMakerName]
+						index += 1
+				storeInstance(objName, object.position-levelPos, code, object.gameMakerName)
+			RemoteLock:
+				var code:String = ""
+				if object.configuration != Lock.CONFIGURATION.spr1A:
+					var spriteName:String = "sprLock"
+					if object.configuration != Lock.CONFIGURATION.NONE: spriteName += Lock.CONFIGURATION_NAMES[object.configuration]
+					else: spriteName += Lock.SIZE_TYPE_NAMES[object.sizeType]
+					code += "sprite = %s;&#xA;" % spriteName
+				if object.color != Game.COLOR.WHITE: code += "color = color_%s;&#xA;" % COLOR_NAMES[object.color].to_upper()
+				if object.type != Lock.TYPE.NORMAL: code += "type = lock_%s;&#xA;" % Lock.TYPE_NAMES[object.type].to_upper()
+				if M.neq(M.r(object.count), M.ONE): code += "count = %s;&#xA;" % M.str(M.r(object.count))
+				if M.ex(M.i(object.count)): code += "icount = %s;&#xA;" % M.str(M.ir(object.count))
+				if M.ex(M.r(object.denominator)): code += "denom = %s;&#xA;" % M.str(M.r(object.denominator))
+				if M.ex(M.i(object.denominator)): code += "idenom = %s;&#xA;" % M.str(M.ir(object.denominator))
+				if M.ex(M.i(object.count)) or object.zeroI: code += "exactI = 1;&#xA;"
+				if object.isPartial: code += "isPartial = 1;&#xA;"
+				if object.negated: code += "negated = 1;&#xA;"
+				if object.armament: code += "armament = 1;&#xA;"
+				if object.frozen: code += "aura[0] = 1;&#xA;"
+				if object.crumbled: code += "aura[1] = 1;&#xA;"
+				if object.painted: code += "aura[2] = 1;&#xA;"
+				if object.doors:
+					code += "doors = %s;&#xA;" % len(object.doors)
+					var index:int = 0
+					for door in object.doors:
+						code += "door[%s] = %s;&#xA;" % [index, door.gameMakerName]
+						index += 1
+				storeInstance("oRemoteLock", object.position-levelPos, code, object.gameMakerName)
 			Goal:
 				var code:String = ""
 				match object.type:
 					Goal.TYPE.STAR: code = "type = 5;&#xA;"
 					Goal.TYPE.OMEGA: code = "type = 1;&#xA;"
-				storeInstance("oGoal", object.position-levelPos, code)
+				storeInstance("oGoal", object.position-levelPos, code, object.gameMakerName)
 			KeyCounter:
 				var code:String = ""
 				var index:int = 0
@@ -139,11 +174,11 @@ static func exportFile(_file:FileAccess) -> void:
 					index += 1
 				if object.size.x == KeyCounter.WIDTHS[1]: code += "long = 1;&#xA;"
 				elif object.size.x == KeyCounter.WIDTHS[2]: code += "long = 2;&#xA;"
-				storeInstance("oKeyHandle", object.position-levelPos, code)
+				storeInstance("oKeyHandle", object.position-levelPos, code, object.gameMakerName)
 			PlayerSpawn:
-				storeInstance("objPlayerStart", object.position-levelPos)
+				storeInstance("objPlayerStart", object.position-levelPos, object.gameMakerName)
 				if Game.level.size != Vector2i(800,608): storeInstance("oNewCamera", object.position-levelPos)
-			FloatingTile: storeInstance("objBlock", object.position-levelPos, "", generateInst(), object.size/32)
+			FloatingTile: storeInstance("objBlock", object.position-levelPos, "", object.gameMakerName, object.size/32)
 	var tiles:Array[Vector2i] = Game.tiles.get_used_cells()
 	tiles.sort()
 	if tiles:

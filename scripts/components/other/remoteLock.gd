@@ -63,7 +63,7 @@ func _ready() -> void:
 	drawPainted = RenderingServer.canvas_item_create()
 	drawFrozen = RenderingServer.canvas_item_create()
 	RenderingServer.canvas_item_set_z_index(drawDropShadow,-2)
-	RenderingServer.canvas_item_set_z_index(drawConnections,-1)
+	RenderingServer.canvas_item_set_z_index(drawConnections,-2)
 	RenderingServer.canvas_item_set_parent(drawDropShadow,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawConnections,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawScaled,get_canvas_item())

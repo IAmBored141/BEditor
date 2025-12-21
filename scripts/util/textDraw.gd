@@ -1,4 +1,3 @@
-extends RefCounted
 class_name TextDraw
 
 static func outlined(font:Font,item:RID,string:String,color:Color,outlineColor:Color,fontSize:int,pos:Vector2=Vector2.ZERO,right:bool=false) -> void:
