@@ -176,7 +176,7 @@ static func exportFile(_file:FileAccess) -> void:
 				elif object.size.x == KeyCounter.WIDTHS[2]: code += "long = 2;&#xA;"
 				storeInstance("oKeyHandle", object.position-levelPos, code, object.gameMakerName)
 			PlayerSpawn:
-				storeInstance("objPlayerStart", object.position-levelPos, object.gameMakerName)
+				storeInstance("objPlayerStart", object.position-levelPos, "", object.gameMakerName)
 				if Game.level.size != Vector2i(800,608): storeInstance("oNewCamera", object.position-levelPos)
 			FloatingTile: storeInstance("objBlock", object.position-levelPos, "", object.gameMakerName, object.size/32)
 	var tiles:Array[Vector2i] = Game.tiles.get_used_cells()
