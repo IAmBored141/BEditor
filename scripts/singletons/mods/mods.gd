@@ -103,6 +103,10 @@ static var modpacks:Dictionary[StringName, Modpack] = {
 var activeModpack:Modpack = modpacks[&"Refactored"]
 var activeVersion:Version = activeModpack.versions[0]
 
+var bufferedModsChanged:bool = false
+
+func bufferModsChanged() -> void: bufferedModsChanged = true
+
 func active(id:StringName) -> bool:
 	return mods[id].active
 

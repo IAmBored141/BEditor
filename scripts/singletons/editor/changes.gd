@@ -397,8 +397,11 @@ class GlobalPropertyChange extends Change:
 			return
 		do()
 
-	func do() -> void: singleton.set(property, after)
-	func undo() -> void: singleton.set(property, before)
+	func do() -> void: singleton.set(property, after); check()
+	func undo() -> void: singleton.set(property, before); check()
+
+	func check() -> void:
+		if singleton is Mods.Mod and property == &"active": Mods.bufferModsChanged()
 
 	func _to_string() -> String:
 		return "<GlobalPropertyChange:"+str(singleton)+"."+str(property)+"->"+str(after)+">"

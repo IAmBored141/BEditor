@@ -60,7 +60,7 @@ func _saveChanges():
 	
 	Changes.bufferSave()
 	editor.grab_focus()
-	get_tree().call_group("modUI", "changedMods")
+	Mods.bufferModsChanged()
 	queue_free()
 
 func addMod(mod:StringName):
