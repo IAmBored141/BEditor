@@ -19,7 +19,7 @@ static func exportFile(_file:FileAccess) -> void:
 
 	file = _file
 	indents = 0
-	idIter = idIterStart - 1
+	idIter = idIterStart
 	
 	var levelPos:Vector2 = Game.level.position
 
@@ -38,7 +38,8 @@ static func exportFile(_file:FileAccess) -> void:
 	storeTag("showcolour", convertBool(false)) # whether or not the solid background color is used; if it isnt then the background starts with solid #c0c0c0
 	startTagInline("code")
 	file.store_line("global.roomID = %s;" % roomID)
-	file.store_string('global.msg = "%s";' % sanitize(Game.level.description))
+	file.store_line('global.msg = "%s";' % sanitizeSoft(Game.level.description))
+	file.store_string('global.rm = "%s";' % sanitizeSoft(Game.level.shortNumber))
 	endTagInline("code")
 	storeTag("enableViews", convertBool(true))
 	storeTag("clearViewBackground", convertBool(true))
@@ -111,8 +112,9 @@ static func exportFile(_file:FileAccess) -> void:
 					if lock.type != Lock.TYPE.NORMAL: code += "type = %s;&#xA;" % lock.type
 					if M.neq(M.r(lock.count), M.ONE): code += "count = %s;&#xA;" % M.str(M.r(lock.count))
 					if M.ex(M.i(lock.count)): code += "icount = %s;&#xA;" % M.str(M.ir(lock.count))
-					if M.ex(M.r(lock.denominator)): code += "denom = %s;&#xA;" % M.str(M.r(lock.denominator))
-					if M.ex(M.i(lock.denominator)): code += "idenom = %s;&#xA;" % M.str(M.ir(lock.denominator))
+					if lock.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL] and Mods.activeModpack == Mods.modpacks[&"IWLC"]:
+						if M.ex(M.r(lock.denominator)): code += "denom = %s;&#xA;" % M.str(M.r(lock.denominator))
+						if M.ex(M.i(lock.denominator)): code += "idenom = %s;&#xA;" % M.str(M.ir(lock.denominator))
 					if M.ex(M.i(lock.count)) or lock.zeroI: code += "exactI = 1;&#xA;"
 					if lock.isPartial: code += "isPartial = 1;&#xA;"
 					if lock.negated: code += "negated = 1;&#xA;"
@@ -123,9 +125,9 @@ static func exportFile(_file:FileAccess) -> void:
 						var spriteName:String = "sprLock"
 						if lock.configuration != Lock.CONFIGURATION.NONE: spriteName += Lock.CONFIGURATION_NAMES[lock.configuration]
 						else: spriteName += Lock.SIZE_TYPE_NAMES[lock.sizeType]
-						var advanced:bool = M.ex(M.i(lock.count)) or lock.zeroI or lock.isPartial or M.ex(lock.denominator) or lock.negated or lock.armament
-						if advanced: code += "scrComboAdvAdd(color_%s,%s,%s,lock_%s,%s,%s,%s,%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName, lock.isPartial or M.ex(M.i(lock.count)) or lock.zeroI, M.str(M.r(lock.denominator)), M.str(M.ir(lock.denominator)), lock.negated, lock.armament]
-						else: code += "scrComboAdd(color_%s,%s,%s,lock_%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName]
+						var advanced:bool = Mods.activeModpack == Mods.modpacks[&"IWLC"] and (M.ex(M.i(lock.count)) or lock.zeroI or lock.isPartial or lock.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL] or lock.negated or lock.armament)
+						if advanced: code += ("scrComboAdvAdd(color_%s,%s,%s,lock_%s,%s,%s,%s,%s,%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName, lock.isPartial or M.ex(M.i(lock.count)) or lock.zeroI, M.str(M.r(lock.denominator)), M.str(M.ir(lock.denominator)), lock.negated, lock.armament])
+						else: code += ("scrComboAdd(color_%s,%s,%s,lock_%s,%s,%s,%s);&#xA;" % [COLOR_NAMES[lock.color].to_upper(), M.str(M.r(lock.count)), M.str(M.ir(lock.count)), Lock.TYPE_NAMES[lock.type].to_upper(), lock.position.x, lock.position.y, spriteName])
 				if object.remoteLocks:
 					code += "remoteLocks = %s;&#xA;" % len(object.remoteLocks)
 					var index:int = 0
@@ -174,7 +176,7 @@ static func exportFile(_file:FileAccess) -> void:
 					index += 1
 				if object.size.x == KeyCounter.WIDTHS[1]: code += "long = 1;&#xA;"
 				elif object.size.x == KeyCounter.WIDTHS[2]: code += "long = 2;&#xA;"
-				storeInstance("oKeyHandle", object.position-levelPos, code, object.gameMakerName)
+				storeInstance("oKeyHandle", object.position-levelPos+Vector2(16,16), code, object.gameMakerName)
 			PlayerSpawn:
 				storeInstance("objPlayerStart", object.position-levelPos, "", object.gameMakerName)
 				if Game.level.size != Vector2i(800,608): storeInstance("oNewCamera", object.position-levelPos)
@@ -202,9 +204,9 @@ static func exportFile(_file:FileAccess) -> void:
 				for x in range(rect.position.x, rect.end.x): tiles.erase(Vector2i(x, rect.end.y))
 				expandedSuccessfully = true
 				rect = rect.grow_side(SIDE_BOTTOM, 1)
-			if !expandedSuccessfully:
+			if !tiles or !expandedSuccessfully:
 				storeInstance("objBlock", Vector2(rect.position*32)-levelPos, "", generateInst(), rect.size)
-				rect = Rect2i(tiles[0], Vector2.ONE)
+				if tiles: rect = Rect2i(tiles[0], Vector2.ONE)
 				tiles.remove_at(0)
 	endTag("instances")
 	
@@ -227,8 +229,11 @@ static func exportFile(_file:FileAccess) -> void:
 	
 	endTag("room")
 
+	idIterStart = idIter
+
 static func convertBool(boolean:bool) -> int: return -1 if boolean else 0
-static func sanitize(string:String) -> String: return string.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "&#xA;").replace("&", "&amp;")
+static func sanitize(string:String) -> String: return sanitizeSoft(string).replace("\n", "&#xA;")
+static func sanitizeSoft(string:String) -> String: return string.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
 static func generateInst() -> String: return "inst_" + String.num_int64(randi(), 16, true).lpad(8, "0")
 static func generateId() -> int: idIter += 1; return idIter
 

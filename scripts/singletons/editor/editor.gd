@@ -158,7 +158,9 @@ func _process(delta:float) -> void:
 	%placePreviewCamera.position = editorCamera.position
 	%placePreviewCamera.zoom = editorCamera.zoom
 
-	if Mods.bufferedModsChanged: get_tree().call_group("modUI", "changedMods")
+	if Mods.bufferedModsChanged:
+		get_tree().call_group("modUI", "changedMods")
+		Mods.bufferedModsChanged = false
 
 func _gui_input(event:InputEvent) -> void:
 	if !objectHovered: objectHovered = null

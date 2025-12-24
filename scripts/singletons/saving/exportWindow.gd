@@ -19,7 +19,7 @@ func _ready() -> void:
 	%roomIDEdit.context = self
 	%idIterStartEdit.context = self
 	%roomIDEdit.setValue(M.N(ExportRoomGMX.roomID), true)
-	%idIterStartEdit.setValue(M.N(ExportRoomGMX.idIter), true)
+	%idIterStartEdit.setValue(M.N(ExportRoomGMX.idIterStart), true)
 
 func _setType(index:int) -> void:
 	type = index as EXPORT_TYPES

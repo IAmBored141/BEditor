@@ -302,7 +302,7 @@ func propertyChangedDo(property:StringName) -> void:
 
 func addLock() -> void:
 	Changes.addChange(Changes.CreateComponentChange.new(Lock,{&"position":getFirstFreePosition(),&"parentId":id}))
-	if len(locks) == 1: Changes.addChange(Changes.PropertyChange.new(self,&"type",TYPE.SIMPLE))
+	if len(locks) == 1 and type != Door.TYPE.GATE: Changes.addChange(Changes.PropertyChange.new(self,&"type",TYPE.SIMPLE))
 	elif type == Door.TYPE.SIMPLE: Changes.addChange(Changes.PropertyChange.new(self,&"type",TYPE.COMBO))
 	Changes.bufferSave()
 
@@ -561,7 +561,7 @@ func tryDynamiteOpen(player:Player) -> bool:
 	var openedForwards:bool
 	var openedBackwards:bool
 
-	if M.nonNegative(M.sub(M.along(player.key[Game.COLOR.DYNAMITE], gameCopies), M.acrabs(gameCopies))) and M.nex(infCopies):
+	if M.simplies(gameCopies, player.key[Game.COLOR.DYNAMITE]) and M.nonNegative(M.sub(M.along(player.key[Game.COLOR.DYNAMITE], gameCopies), M.acrabs(gameCopies))) and M.nex(infCopies):
 		# if the door can open, open it
 		GameChanges.addChange(GameChanges.KeyChange.new(Game.COLOR.DYNAMITE, M.sub(player.key[Game.COLOR.DYNAMITE], gameCopies)))
 		GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", M.ZERO))

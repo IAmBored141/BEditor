@@ -201,6 +201,8 @@ class ObjectSelect extends Select:
 	func continueDrag() -> void:
 		object.position = pos()
 		if object is PlayerPlaceholderObject: object.propertyChangedDo(&"position")
+		if object is RemoteLock: object.queue_redraw()
+		if object is Door: for lock in object.remoteLocks: lock.queue_redraw()
 
 	func endDrag() -> void:
 		object.position = startingPosition

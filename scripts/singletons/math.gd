@@ -134,6 +134,13 @@ func ilte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return !igt(a, b)
 
 func divides(a:PackedInt64Array, b:PackedInt64Array) -> bool: return nex(modulo(a,b))
 
+func implies(a:PackedInt64Array, b:PackedInt64Array) -> bool:
+	return (a[0] == 0 || b[0] != 0) && (a[1] == 0 || b[1] != 0)
+
+# signed implies
+func simplies(a:PackedInt64Array, b:PackedInt64Array) -> bool:
+	return (a[0] == 0 || sign(a[0]) == sign(b[0])) && (a[1] == 0 || sign(a[1]) == sign(b[1]))
+
 # deciders
 
 # "exists"

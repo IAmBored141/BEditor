@@ -24,7 +24,7 @@ const AURA_FOREST:Texture2D = preload("res://assets/game/player/aura/forest.png"
 const AURA_NAVY:Texture2D = preload("res://assets/game/player/aura/navy.png")
 const AURA_DRAW_OPACITY:Color = Color(Color.WHITE,0.5)
 const AURA_RECT:Rect2 = Rect2(Vector2(-32,-32),Vector2(64,64))
-const DARK_AURA_RECT:Rect2 = Rect2(Vector2(-41,-36),Vector2(82,67))
+const DARK_AURA_RECT:Rect2 = Rect2(Vector2(-32,-35),Vector2(64,70))
 
 const FPS:float = 60 # godot velocity works in /s so we account for gamemaker's fps, which is 60
 
