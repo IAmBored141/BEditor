@@ -456,36 +456,39 @@ func canOpen(player:Player) -> bool: return getLockCanOpen(self, player)
 static func getLockCanOpen(lock:GameComponent,player:Player) -> bool:
 	var can:bool = true
 	var keyCount:PackedInt64Array = player.key[lock.colorAfterAurabreaker()]
+	var lockCount:PackedInt64Array = lock.effectiveCount()
+	var lockDenominator:PackedInt64Array = lock.effectiveDenominator()
 	match lock.type:
-		TYPE.NORMAL: can = !M.hasNegative(M.sub(M.along(keyCount, lock.effectiveCount()), M.acrabs(lock.effectiveCount())))
+		TYPE.NORMAL: can = !M.hasNegative(M.sub(M.along(keyCount, lockCount), M.acrabs(lockCount)))
 		TYPE.BLANK: can = M.nex(keyCount)
 		TYPE.BLAST:
-			if M.nex(lock.effectiveDenominator()): can = false
-			elif M.ex(M.r(lock.effectiveDenominator())) and M.nonPositive(M.times(M.r(keyCount), M.r(lock.effectiveDenominator()))): can = false
-			elif M.ex(M.i(lock.effectiveDenominator())) and M.nonPositive(M.times(M.ir(keyCount), M.ir(lock.effectiveDenominator()))): can = false
+			if !M.simplies(lockDenominator, keyCount): can = false
 			elif lock.isPartial:
-				if M.ex(M.r(lock.effectiveDenominator())) and !M.divides(M.r(keyCount), M.r(lock.effectiveDenominator())): can = false
-				elif M.ex(M.i(lock.effectiveDenominator())) and !M.divides(M.i(keyCount), M.i(lock.effectiveDenominator())): can = false
+				if !M.divisibleBy(keyCount, lockDenominator): can = false
+				elif M.neq(sign(M.divide(keyCount, lockDenominator)), M.ONE): can = false
 		TYPE.ALL:
-			if M.nex(lock.effectiveDenominator()): can = false
+			if M.nex(lock.lockDenominator): can = false
 			elif M.nex(keyCount): can = false
 			elif lock.isPartial:
-				if !M.divides(keyCount, lock.effectiveDenominator()): can = false
+				if !M.divisibleBy(keyCount, lockDenominator): can = false
 		TYPE.EXACT:
-			if M.nex(lock.effectiveCount()):
-				if lock.zeroI: can = M.nex(M.i(keyCount))
+			if M.nex(lockCount):
+				if lock.effectiveZeroI(): can = M.nex(M.i(keyCount))
 				else: can = M.nex(M.r(keyCount))
-			else: can = M.eq(M.along(keyCount, lock.effectiveCount()), M.acrabs(lock.effectiveCount()))
+			else: can = M.eq(M.along(keyCount, lockCount), M.acrabs(lockCount))
 	return can != lock.negated
 
 func getCost(player:Player, ipow:PackedInt64Array=parent.ipow()) -> PackedInt64Array: return getLockCost(self, player, ipow)
 
 static func getLockCost(lock:GameComponent, player:Player, ipow:PackedInt64Array) -> PackedInt64Array:
 	var cost:PackedInt64Array = M.ZERO
+	var keyCount:PackedInt64Array = player.key[lock.colorAfterAurabreaker()]
+	var lockCount:PackedInt64Array = lock.effectiveCount(ipow)
+	var lockDenominator:PackedInt64Array = lock.effectiveDenominator(ipow)
 	match lock.type:
-		TYPE.NORMAL, TYPE.EXACT: cost = lock.effectiveCount(ipow)
-		TYPE.BLAST: if M.ex(lock.effectiveDenominator(ipow)): cost = M.divide(M.times(M.across(player.key[lock.colorAfterAurabreaker()], M.acrabs(lock.effectiveCount(ipow))), lock.effectiveCount(ipow)),lock.effectiveDenominator(ipow))
-		TYPE.ALL: if M.ex(lock.effectiveDenominator(ipow)): cost = M.divide(M.times(player.key[lock.colorAfterAurabreaker()], lock.effectiveCount(ipow)),lock.effectiveDenominator(ipow))
+		TYPE.NORMAL, TYPE.EXACT: cost = lockCount
+		TYPE.BLAST: if M.ex(lockDenominator): cost = M.divide(M.times(M.alongbs(keyCount, lockDenominator), lockCount), lockDenominator)
+		TYPE.ALL: if M.ex(lockDenominator): cost = M.divide(M.times(keyCount, lockCount), lockDenominator)
 	if lock.negated: return M.negate(cost)
 	return cost
 

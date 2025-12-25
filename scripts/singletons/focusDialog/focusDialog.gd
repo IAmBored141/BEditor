@@ -67,7 +67,7 @@ func focusComponent(component:GameComponent) -> void:
 
 func defocusComponent() -> void:
 	if !componentFocused: return
-	if componentFocused is Lock and !Mods.active(&"ZeroCostLock") and !(Mods.active(&"C3") and componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL]) and M.nex(componentFocused.count): Changes.addChange(Changes.PropertyChange.new(componentFocused,&"count",M.ONE))
+	if componentFocused is Lock and !Mods.active(&"ZeroCostLock") and !(Mods.active(&"C3") and componentFocused.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL, Lock.TYPE.EXACT]) and M.nex(componentFocused.count): Changes.addChange(Changes.PropertyChange.new(componentFocused,&"count",M.ONE))
 	componentFocused = null
 	deinteract()
 

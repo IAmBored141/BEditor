@@ -272,6 +272,7 @@ func isNegative() -> bool:
 
 func effectiveCount(_ipow:PackedInt64Array=M.ONE) -> PackedInt64Array: return count
 func effectiveDenominator(_ipow:PackedInt64Array=M.ONE) -> PackedInt64Array: return denominator
+func effectiveZeroI() -> bool: return zeroI
 
 func checkDoors() -> void:
 	var any:bool = false

@@ -115,7 +115,7 @@ static func exportFile(_file:FileAccess) -> void:
 					if lock.type in [Lock.TYPE.BLAST, Lock.TYPE.ALL] and Mods.activeModpack == Mods.modpacks[&"IWLC"]:
 						if M.ex(M.r(lock.denominator)): code += "denom = %s;&#xA;" % M.str(M.r(lock.denominator))
 						if M.ex(M.i(lock.denominator)): code += "idenom = %s;&#xA;" % M.str(M.ir(lock.denominator))
-					if M.ex(M.i(lock.count)) or lock.zeroI: code += "exactI = 1;&#xA;"
+					if lock.type == Lock.TYPE.EXACT and (M.ex(M.i(lock.count)) or lock.zeroI): code += "exactI = 1;&#xA;"
 					if lock.isPartial: code += "isPartial = 1;&#xA;"
 					if lock.negated: code += "negated = 1;&#xA;"
 					if lock.armament: code += "armament = 1;&#xA;"
@@ -176,7 +176,7 @@ static func exportFile(_file:FileAccess) -> void:
 					index += 1
 				if object.size.x == KeyCounter.WIDTHS[1]: code += "long = 1;&#xA;"
 				elif object.size.x == KeyCounter.WIDTHS[2]: code += "long = 2;&#xA;"
-				storeInstance("oKeyHandle", object.position-levelPos+Vector2(16,16), code, object.gameMakerName)
+				storeInstance("oKeyHandle", object.position-levelPos+Vector2(17,16), code, object.gameMakerName)
 			PlayerSpawn:
 				storeInstance("objPlayerStart", object.position-levelPos, "", object.gameMakerName)
 				if Game.level.size != Vector2i(800,608): storeInstance("oNewCamera", object.position-levelPos)
@@ -206,8 +206,9 @@ static func exportFile(_file:FileAccess) -> void:
 				rect = rect.grow_side(SIDE_BOTTOM, 1)
 			if !tiles or !expandedSuccessfully:
 				storeInstance("objBlock", Vector2(rect.position*32)-levelPos, "", generateInst(), rect.size)
-				if tiles: rect = Rect2i(tiles[0], Vector2.ONE)
-				tiles.remove_at(0)
+				if tiles:
+					rect = Rect2i(tiles[0], Vector2.ONE)
+					tiles.remove_at(0)
 	endTag("instances")
 	
 	startTag("tiles")
@@ -296,8 +297,8 @@ static func storeView(visible:bool=false, objName:String="&lt;undefined&gt;",
 static func storeTile(position:Vector2i, # location in the level
 	scale:Vector2=Vector2.ONE,
 	w:int=32, h:int=32,
-	bgName:String="bAllTiles3", # tile atlas
-	xo:int=32, yo:int=96, # location in the tile atlas
+	bgName:String="bAllTiles2", # tile atlas
+	xo:int=64, yo:int=0, # location in the tile atlas
 	depth:int=1000001, locked:bool=false, colour:int=4294967295
 ) -> void:
 	startThing("tile")

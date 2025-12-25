@@ -68,6 +68,7 @@ func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	return [(a[0]*b[0]+a[1]*b[1])%(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])%(b[0]*b[0]+b[1]*b[1])]
 
 func along(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: return across(a, axis(b))
+func alongbs(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: return across(a, axibs(b))
 
 func negate(n:PackedInt64Array) -> PackedInt64Array:
 	return [-n[0], -n[1]]
@@ -132,7 +133,7 @@ func ilt(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 
 func ilte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return !igt(a, b)
 
-func divides(a:PackedInt64Array, b:PackedInt64Array) -> bool: return nex(modulo(a,b))
+func divisibleBy(a:PackedInt64Array, b:PackedInt64Array) -> bool: return nex(modulo(a,b))
 
 func implies(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 	return (a[0] == 0 || b[0] != 0) && (a[1] == 0 || b[1] != 0)
