@@ -293,12 +293,13 @@ allow_greater = true
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Button" type="Button" parent="c/levelSettings/c/followWorld/c2/c/c2"]
+[node name="generateThumbnail" type="Button" parent="c/levelSettings/c/followWorld/c2/c/c2"]
 layout_mode = 2
 theme_type_variation = &"RadioButtonText"
 text = "Generate Thumbnail"
 
-[node name="clarifier" type="TextureRect" parent="c/levelSettings/c/followWorld/c2/c/c2"]
+[node name="thumbnailClarifier" type="TextureRect" parent="c/levelSettings/c/followWorld/c2/c/c2"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 0
 tooltip_text = "Goes to [puzzles]/_thumbnail.png"
@@ -874,6 +875,6 @@ toneButtonGroup = SubResource("ButtonGroup_tyaol")
 [connection signal="text_changed" from="c/levelSettings/c/followWorld/description/c/c/c/levelDescription" to="." method="_levelDescriptionSet"]
 [connection signal="text_changed" from="c/levelSettings/c/followWorld/description/c/c2/levelShortNumber" to="." method="_levelShortNumberSet"]
 [connection signal="value_changed" from="c/levelSettings/c/followWorld/c2/c/c/levelRevision" to="." method="_levelRevisionSet"]
-[connection signal="pressed" from="c/levelSettings/c/followWorld/c2/c/c2/Button" to="." method="_generateThumbnail"]
+[connection signal="pressed" from="c/levelSettings/c/followWorld/c2/c/c2/generateThumbnail" to="." method="_generateThumbnail"]
 [connection signal="toggled" from="c/editorSettings/c2/c/fileDialogWorkaroundCont/fileDialogWorkaround" to="." method="_fileDialogWorkaroundSet"]
 [connection signal="toggled" from="c/editorSettings/c2/c/fullscreen" to="." method="_fullscreenSet"]
