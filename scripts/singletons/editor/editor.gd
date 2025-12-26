@@ -639,6 +639,8 @@ func takeThumbnailScreenshot() -> void:
 	var thumbnail:Image = %screenshotViewport.get_texture().get_image()
 	%screenshotViewportCont.visible = false
 	thumbnail.save_png("user://puzzles/_thumbnail.png")
+	if OS.has_feature('web'):
+		JavaScriptBridge.download_buffer(FileAccess.get_file_as_bytes("user://puzzles/_thumbnail.png"),"thumbnail.png")
 
 func levelStartCameraCenter(screenSize:Vector2=Vector2(800,608)) -> Vector2:
 	if Game.levelStart:

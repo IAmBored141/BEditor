@@ -516,7 +516,7 @@ metadata/explanation = SubResource("Resource_jke8t")
 
 [node name="screenshotViewportCont" type="SubViewportContainer" parent="."]
 unique_name_in_owner = true
-z_index = 999
+z_index = -999
 layout_mode = 0
 offset_top = 1000.0
 offset_right = 800.0

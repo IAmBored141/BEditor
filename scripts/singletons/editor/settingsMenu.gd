@@ -122,12 +122,16 @@ func closed() -> void:
 	update()
 
 func update() -> void:
-	if InputMap.action_get_events(&"editSave"): editor.fileMenu.menu.set_item_accelerator(2, InputMap.action_get_events(&"editSave")[0].get_physical_keycode_with_modifiers())
-	else: editor.fileMenu.menu.set_item_accelerator(2, KEY_NONE)
-	if InputMap.action_get_events(&"editSaveAs"): editor.fileMenu.menu.set_item_accelerator(3, InputMap.action_get_events(&"editSaveAs")[0].get_physical_keycode_with_modifiers())
-	else: editor.fileMenu.menu.set_item_accelerator(3, KEY_NONE)
-	if InputMap.action_get_events(&"editExport"): editor.fileMenu.menu.set_item_accelerator(4, InputMap.action_get_events(&"editExport")[0].get_physical_keycode_with_modifiers())
-	else: editor.fileMenu.menu.set_item_accelerator(4, KEY_NONE)
+	updateFileMenuAction(2, &"editSave")
+	if OS.has_feature('web'):
+		updateFileMenuAction(3, &"editExport")
+	else:
+		updateFileMenuAction(3, &"editSaveAs")
+		updateFileMenuAction(4, &"editExport")
+
+func updateFileMenuAction(index:int,action:StringName) -> void:
+	if InputMap.action_get_events(action): editor.fileMenu.menu.set_item_accelerator(index, InputMap.action_get_events(action)[0].get_physical_keycode_with_modifiers())
+	else: editor.fileMenu.menu.set_item_accelerator(index, KEY_NONE)
 
 func _fileDialogWorkaroundSet(toggled_on:bool) -> void:
 	editor.saveAsDialog.use_native_dialog = !toggled_on
