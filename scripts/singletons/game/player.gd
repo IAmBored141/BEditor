@@ -312,8 +312,7 @@ func cycleMaster() -> void:
 		if M.ex(relevantCount):
 			masterCycle = 2
 			masterMode = M.axis(relevantCount)
-			if M.positive(M.sign(relevantCount)): AudioManager.play(preload("res://resources/sounds/player/masterEquip.wav"))
-			else: AudioManager.play(preload("res://resources/sounds/player/masterNegativeEquip.wav"))
+			AudioManager.play(preload("res://resources/sounds/player/quicksilverEquip.wav"),2)
 			return
 	if masterCycle != 0:
 		AudioManager.play(preload("res://resources/sounds/player/masterUnequip.wav"))
