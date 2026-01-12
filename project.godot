@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="IWLCEditor"
-config/version="1.0.2"
+config/version="1.0.3"
 run/main_scene="uid://djnt51xv7wn52"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="uid://b5g2tn4r1674k"
@@ -436,10 +436,6 @@ renderer/rendering_method.mobile="gl_compatibility"
 
 [shader_globals]
 
-NOISE_OFFSET={
-"type": "vec2",
-"value": Vector2(314, 159)
-}
 RCAMERA_ZOOM={
 "type": "float",
 "value": 1.0

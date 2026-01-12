@@ -228,7 +228,6 @@ func _process(delta:float) -> void:
 	if goldIndex != int(goldIndexFloat):
 		goldIndex = int(goldIndexFloat)
 		goldIndexChanged.emit()
-	RenderingServer.global_shader_parameter_set(&"NOISE_OFFSET", Vector2(randf_range(-1000, 1000), randf_range(-1000, 1000)))
 	# fast anims
 	if fastAnimTimer > 0:
 		fastAnimTimer -= delta
