@@ -513,6 +513,7 @@ label = "Save Puzzle"
 action = &"editSave"
 
 [node name="editSaveAs" parent="c/editorSettings/c2/c/hotkeys" instance=ExtResource("6_dkncv")]
+unique_name_in_owner = true
 layout_mode = 2
 label = "Save Puzzle As"
 action = &"editSaveAs"
