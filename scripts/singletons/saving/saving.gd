@@ -156,6 +156,7 @@ func save(path:String="") -> void:
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.WRITE_READ)
 	if !file:
 		print("error opening, " + str(FileAccess.get_open_error()))
+		if OS.has_feature('web'): return
 		print("trying to save to some default")
 		file = FileAccess.open("user://backup.cedit",FileAccess.ModeFlags.WRITE_READ)
 		if !file:
