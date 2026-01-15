@@ -56,7 +56,7 @@ func open() -> void:
 
 func saveAs() -> void:
 	editor.saveAsDialog.current_dir = "puzzles"
-	editor.saveAsDialog.current_file = "puzzles/"+Game.level.name+".cedit"
+	editor.saveAsDialog.current_file = Game.level.name+".cedit"
 	editor.saveAsDialog.visible = true
 	editor.saveAsDialog.grab_focus()
 
@@ -157,7 +157,11 @@ func save(path:String="") -> void:
 	if !file:
 		print("error opening, " + str(FileAccess.get_open_error()))
 		print("trying to save to some default")
-		file = FileAccess.open("user://temp.cedit",FileAccess.ModeFlags.WRITE_READ)
+		file = FileAccess.open("user://backup.cedit",FileAccess.ModeFlags.WRITE_READ)
+		if !file:
+			print("error opening again, " + str(FileAccess.get_open_error()))
+			print("giving up")
+			return
 
 	# HEADER
 	file.store_pascal_string("IWLCEditorLevel")
