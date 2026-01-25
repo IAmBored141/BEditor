@@ -31,7 +31,7 @@
 [ext_resource type="Script" uid="uid://c7ptucaohcnil" path="res://scripts/singletons/editor/outline.gd" id="23_lo5f0"]
 [ext_resource type="PackedScene" uid="uid://uojm0pynavni" path="res://scenes/settingsMenu.tscn" id="25_6lm8n"]
 [ext_resource type="PackedScene" uid="uid://ccqphk3fjcl1e" path="res://scenes/mouseover.tscn" id="26_lo5f0"]
-[ext_resource type="Material" uid="uid://bknd0n765hjfq" path="res://resources/materials/multiselectOutlineMaterial.tres" id="26_mxdmd"]
+[ext_resource type="Material" uid="uid://bknd0n765hjfq" path="res://resources/materials/outlineMaterial.tres" id="26_mxdmd"]
 [ext_resource type="Texture2D" uid="uid://ba540b55427af" path="res://assets/ui/settings/setings.png" id="27_1abrv"]
 [ext_resource type="Texture2D" uid="uid://d10g6pdt4sjs2" path="res://assets/ui/mods/iconSmall/Refactored.png" id="33_mxdmd"]
 
@@ -408,23 +408,23 @@ unique_name_in_owner = true
 layout_mode = 2
 script = ExtResource("13_0u1f5")
 
-[node name="multiselectViewportCont" type="SubViewportContainer" parent="c/gameCont"]
+[node name="outlineViewportCont" type="SubViewportContainer" parent="c/gameCont"]
 material = ExtResource("26_mxdmd")
 layout_mode = 2
 mouse_filter = 2
 stretch = true
 
-[node name="multiselectViewport" type="SubViewport" parent="c/gameCont/multiselectViewportCont"]
+[node name="outlineViewport" type="SubViewport" parent="c/gameCont/outlineViewportCont"]
 transparent_bg = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
 size = Vector2i(820, 628)
 render_target_update_mode = 4
 
-[node name="multiselectParent" type="Node2D" parent="c/gameCont/multiselectViewportCont/multiselectViewport"]
+[node name="outlineParent" type="Node2D" parent="c/gameCont/outlineViewportCont/outlineViewport"]
 unique_name_in_owner = true
 
-[node name="multiselectCamera" type="Camera2D" parent="c/gameCont/multiselectViewportCont/multiselectViewport/multiselectParent"]
+[node name="outlineCamera" type="Camera2D" parent="c/gameCont/outlineViewportCont/outlineViewport/outlineParent"]
 unique_name_in_owner = true
 anchor_mode = 0
 

@@ -26,7 +26,7 @@ var findProblems:FindProblems
 
 @onready var gameViewport:SubViewport = %gameViewport
 @onready var explainText:RichTextLabel = %explainText
-@onready var multiselectParent:Node2D = %multiselectParent
+@onready var outlineParent:Node2D = %outlineParent
 @onready var placePreviewWorld:World = %placePreviewWorld
 
 @onready var fileMenu:FileMenu = %fileMenu
@@ -160,8 +160,8 @@ func _process(delta:float) -> void:
 		queue_redraw()
 		if autoRunTimer >= 2: autoRunTimer = 2
 
-	%multiselectCamera.position = editorCamera.position
-	%multiselectCamera.zoom = editorCamera.zoom
+	%outlineCamera.position = editorCamera.position
+	%outlineCamera.zoom = editorCamera.zoom
 	%placePreviewWorld.visible = Game.playState != Game.PLAY_STATE.PLAY and !settingsOpen
 	placePreviewWorld.tiles.position = floor(mouseWorldPosition/32)*32
 	placePreviewWorld.tilesDropShadow.position = floor(mouseWorldPosition/32)*32 + Vector2(3,3)
@@ -571,6 +571,7 @@ func _toggleSettingsMenu(toggled_on:bool) -> void:
 	get_tree().call_group(&"hotkeyButton", &"queue_redraw")
 	topBar._updateButtons()
 	if toggled_on:
+		focusDialog.defocus()
 		%settingsMenu.opened()
 		%settingsMenu.grab_focus()
 	else:
