@@ -75,6 +75,8 @@ var drawThumbnail:RID
 var thumbnailHideDescription:bool = false
 var thumbnailEntireLevel:bool = true
 
+var edgeResizing:bool = false
+
 var playerObject:GameObject = PlayerPlaceholderObject.new()
 
 func _ready() -> void:

@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=52 format=3 uid="uid://bvfthh0vm4fbp"]
+[gd_resource type="Theme" load_steps=59 format=3 uid="uid://bvfthh0vm4fbp"]
 
 [ext_resource type="FontFile" uid="uid://cjub6sxbu8elx" path="res://resources/fonts/RobotoMono-SemiBold.ttf" id="1_bmmxy"]
 [ext_resource type="FontFile" uid="uid://c1cbi8by5johg" path="res://resources/fonts/fTalk.fnt" id="2_0b2ua"]
@@ -54,6 +54,18 @@ corner_detail = 5
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2ry82"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3rwxy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1c2oq"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rair1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k2n8v"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_06353"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_11jks"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mh3pu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wu0u2"]
 bg_color = Color(0.25323758, 0.2532376, 0.2532375, 1)
@@ -206,6 +218,13 @@ border_width_bottom = 2
 border_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
 corner_detail = 5
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8clmk"]
+bg_color = Color(0.13333334, 0.13333334, 0.13333334, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bmmxy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0b2ua"]
@@ -312,6 +331,18 @@ CheckBox/styles/hover = SubResource("StyleBoxEmpty_vukqh")
 CheckBox/styles/hover_pressed = SubResource("StyleBoxEmpty_420dv")
 CheckBox/styles/normal = SubResource("StyleBoxEmpty_2ry82")
 CheckBox/styles/pressed = SubResource("StyleBoxEmpty_3rwxy")
+CheckButton/colors/font_color = Color(0.7490196, 0.7490196, 0.7490196, 1)
+CheckButton/colors/font_focus_color = Color(0.7490196, 0.7490196, 0.7490196, 1)
+CheckButton/colors/font_hover_color = Color(0.84705883, 0.84705883, 0.84705883, 1)
+CheckButton/colors/font_pressed_color = Color(0.9254902, 0.9254902, 0.9254902, 1)
+CheckButton/font_sizes/font_size = 12
+CheckButton/fonts/font = ExtResource("1_bmmxy")
+CheckButton/styles/disabled = SubResource("StyleBoxEmpty_1c2oq")
+CheckButton/styles/focus = SubResource("StyleBoxEmpty_rair1")
+CheckButton/styles/hover = SubResource("StyleBoxEmpty_k2n8v")
+CheckButton/styles/hover_pressed = SubResource("StyleBoxEmpty_06353")
+CheckButton/styles/normal = SubResource("StyleBoxEmpty_11jks")
+CheckButton/styles/pressed = SubResource("StyleBoxEmpty_mh3pu")
 ColorSelector/base_type = &"GridContainer"
 DialogPanelContainer/base_type = &"PanelContainer"
 DialogPanelContainer/styles/panel = SubResource("StyleBoxFlat_wu0u2")
@@ -377,6 +408,8 @@ RadioButtonText/styles/focus = SubResource("StyleBoxEmpty_51dj7")
 RadioButtonText/styles/hover = SubResource("StyleBoxFlat_waqcv")
 RadioButtonText/styles/normal = SubResource("StyleBoxFlat_vqwi6")
 RadioButtonText/styles/pressed = SubResource("StyleBoxFlat_51dj7")
+ResizeHandleButton/base_type = &"Button"
+ResizeHandleButton/styles/normal = SubResource("StyleBoxFlat_8clmk")
 SelectorButton/base_type = &"Button"
 SelectorButton/styles/normal = SubResource("StyleBoxFlat_sy460")
 SettingsMenuButton/base_type = &"MenuButton"

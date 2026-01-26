@@ -165,7 +165,7 @@ func receiveKey(event:InputEvent) -> bool:
 	return true
 
 const EDGE_MARGIN:float = 4
-const OBJECT_MARGIN:float = 8 # between the dialog and the object; where the speech bubbler goes
+const OBJECT_MARGIN:float = 16 # between the dialog and the object; where the speech bubbler goes
 const SPEECH_BUBBLER_MARGIN:float = 10 # between speech bubbler and edge of dialog
 
 func _process(_delta:float) -> void:

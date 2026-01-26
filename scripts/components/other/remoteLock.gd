@@ -149,7 +149,7 @@ func propertyChangedDo(property:StringName) -> void:
 
 func receiveMouseInput(event:InputEventMouse) -> bool:
 	# resizing
-	if editor.componentDragged: return false
+	if !editor.edgeResizing or editor.componentDragged: return false
 	var dragCornerSize:Vector2 = Vector2(8,8)/editor.cameraZoom
 	var diffSign:Vector2 = Editor.rectSign(Rect2(position-getOffset()+dragCornerSize,size-dragCornerSize*2), editor.mouseWorldPosition)
 	if !diffSign: return false

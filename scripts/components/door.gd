@@ -243,7 +243,7 @@ static func drawAuras(objectDrawCrumbled:RID,objectDrawPainted:RID,objectDrawFro
 
 func receiveMouseInput(event:InputEventMouse) -> bool:
 	# resizing
-	if editor.componentDragged: return false
+	if !editor.edgeResizing or editor.componentDragged: return false
 	var dragCornerSize:Vector2 = Vector2(8,8)/editor.cameraZoom
 	var diffSign:Vector2 = Editor.rectSign(Rect2(position+dragCornerSize,size-dragCornerSize*2), editor.mouseWorldPosition)
 	if !diffSign: return false

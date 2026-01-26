@@ -407,6 +407,12 @@ size_flags_vertical = 0
 tooltip_text = "Currently, increasing this lowers the resolution of the game. Sorry about that."
 texture = ExtResource("5_iswfj")
 
+[node name="edgeResizing" type="CheckButton" parent="c/editorSettings/c2/c"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Resizing Controls (Handles/Edge)"
+
 [node name="c" type="HBoxContainer" parent="c/editorSettings/c2/c"]
 layout_mode = 2
 
@@ -945,3 +951,4 @@ toneButtonGroup = SubResource("ButtonGroup_tyaol")
 [connection signal="toggled" from="c/editorSettings/c2/c/fullscreen" to="." method="_fullscreenSet"]
 [connection signal="drag_ended" from="c/editorSettings/c2/c/c2/uiScale" to="." method="_uiScaleSet" unbinds=1]
 [connection signal="value_changed" from="c/editorSettings/c2/c/c2/uiScale" to="." method="_uiScaleChanged"]
+[connection signal="toggled" from="c/editorSettings/c2/c/edgeResizing" to="." method="_edgeResizingSet"]

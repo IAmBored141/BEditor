@@ -12,7 +12,7 @@ class_name OutlineViewport
 func createChild() -> RID:
 	var canvasItem:RID = RenderingServer.canvas_item_create()
 	RenderingServer.canvas_item_set_parent(canvasItem, %parent.get_canvas_item())
-	RenderingServer.canvas_item_set_material(canvasItem, Game.ADDITIVE_MATERIAL)
+	RenderingServer.canvas_item_set_material(canvasItem, Game.ADDITIVE_FLAT_COLOR_MATERIAL)
 	return canvasItem
 
 func _process(_delta) -> void:

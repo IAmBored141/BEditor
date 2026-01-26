@@ -33,6 +33,8 @@ func updateLevelSettingsPosition() -> void:
 	%followWorld.worldOffset = editor.levelStartCameraCenter()
 
 func receiveMouseInput(event:InputEvent) -> void:
+	# resizing
+	if !editor.edgeResizing: return
 	var dragCornerSize:Vector2 = Vector2(8,8)/editor.cameraZoom
 	var diffSign:Vector2 = Editor.rectSign(Rect2(Vector2(Game.levelBounds.position)+dragCornerSize,Vector2(Game.levelBounds.size)-dragCornerSize*2), editor.mouseWorldPosition)
 	if !diffSign or !Game.levelBounds.has_point(editor.mouseWorldPosition): return
@@ -107,6 +109,7 @@ func opened() -> void:
 	%fileDialogWorkaround.button_pressed = configFile.get_value("editor", "fileDialogWorkaround", false)
 	%fullscreen.button_pressed = configFile.get_value("editor", "fullscreen", false)
 	%uiScale.value = configFile.get_value("editor", "logUiScale", log(DisplayServer.screen_get_dpi()/96.0)/0.6931471806) # log2
+	%edgeResizing.button_pressed = configFile.get_value("editor", "edgeResizing", false)
 	_uiScaleSet()
 	for setting in get_tree().get_nodes_in_group("hotkeySetting"):
 		InputMap.action_erase_events(setting.action)
@@ -123,6 +126,7 @@ func closed() -> void:
 	configFile.set_value("editor", "fileDialogWorkaround", %fileDialogWorkaround.button_pressed)
 	configFile.set_value("editor", "fullscreen", %fullscreen.button_pressed)
 	configFile.set_value("editor", "logUiScale", %uiScale.value)
+	configFile.set_value("editor", "edgeResizing", %edgeResizing.button_pressed)
 	for setting in get_tree().get_nodes_in_group("hotkeySetting"):
 		configFile.set_value("editor", "hotkey_"+setting.action, InputMap.action_get_events(setting.action))
 	configFile.set_value("editor", "quicksetColorMatches", ColorQuicksetSetting.matches)
@@ -167,3 +171,6 @@ func _uiScaleChanged(value:float) -> void:
 
 func _uiScaleSet() -> void:
 	Game.uiScale = 2**Game.logUiScale
+
+func _edgeResizingSet(toggled_on:bool) -> void:
+	editor.edgeResizing = toggled_on
