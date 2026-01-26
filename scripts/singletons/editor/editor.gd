@@ -657,4 +657,4 @@ func levelStartCameraCenter(screenSize:Vector2=Vector2(800,608)) -> Vector2:
 	return Vector2(Game.levelBounds.position) + (Vector2(Game.levelBounds.size) - screenSize)/2
 
 func _gameViewportResized():
-	RenderingServer.global_shader_parameter_set(&"SCREEN_SIZE", %gameViewportCont.size)
+	RenderingServer.global_shader_parameter_set(&"SCREEN_SIZE", %gameViewportCont.size * Game.uiScale)

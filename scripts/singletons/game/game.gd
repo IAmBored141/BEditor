@@ -195,6 +195,7 @@ var uiScale:float = 1:
 		uiScale = value
 		if editor:
 			get_window().content_scale_factor = uiScale
+			editor._gameViewportResized()
 
 var simpleLocks:bool = false:
 	set(value):
