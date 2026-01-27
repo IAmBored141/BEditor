@@ -49,6 +49,7 @@ func editorReady() -> void:
 func open() -> void:
 	confirmAction = ACTION.OPEN
 	if Game.anyChanges:
+		@warning_ignore("integer_division")
 		editor.unsavedChangesPopup.position = get_window().position+(get_window().size-editor.unsavedChangesPopup.size)/2
 		editor.unsavedChangesPopup.visible = true
 		editor.unsavedChangesPopup.grab_focus()
@@ -63,6 +64,7 @@ func saveAs() -> void:
 func new() -> void:
 	confirmAction = ACTION.NEW
 	if Game.anyChanges:
+		@warning_ignore("integer_division")
 		editor.unsavedChangesPopup.position = get_window().position+(get_window().size-editor.unsavedChangesPopup.size)/2
 		editor.unsavedChangesPopup.visible = true
 		editor.unsavedChangesPopup.grab_focus()
@@ -220,6 +222,7 @@ func IDArraytoComponents(type:GDScript,array:Array) -> Array:
 
 func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 	var openWindow:OpenWindow = preload("res://scenes/openWindow.tscn").instantiate()
+	@warning_ignore("integer_division")
 	openWindow.position = get_window().position+(get_window().size-openWindow.size)/2
 	openWindow.path = path
 
@@ -260,6 +263,7 @@ func loadJs(result) -> void:
 func errorPopup(message:String,title:="Load Error") -> void:
 	editor.loadErrorPopup.title = title
 	editor.loadErrorPopup.dialog_text = message
+	@warning_ignore("integer_division")
 	editor.loadErrorPopup.position = get_window().position+(get_window().size-editor.loadErrorPopup.size)/2
 	editor.loadErrorPopup.visible = true
 	editor.loadErrorPopup.grab_focus()
@@ -270,4 +274,5 @@ func openExportWindow() -> void:
 	else:
 		var window:Window = preload("res://scenes/exportWindow.tscn").instantiate()
 		editor.add_child(window)
+		@warning_ignore("integer_division")
 		window.position = get_window().position+(get_window().size-window.size)/2

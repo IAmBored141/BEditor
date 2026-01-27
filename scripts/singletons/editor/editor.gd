@@ -520,6 +520,7 @@ func pipette() -> void:
 		multiselect.clipboard.assign([multiselect.createObjectCopy(objectHovered)])
 		paste.disabled = false
 		modes.setMode(MODE.PASTE)
+		@warning_ignore("integer_division")
 	elif Game.tiles.get_cell_source_id(mouseTilePosition/32) != -1: modes.setMode(MODE.TILE)
 	else: modes.setMode(MODE.SELECT)
 

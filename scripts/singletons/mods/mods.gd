@@ -128,6 +128,7 @@ func openModsWindow() -> void:
 	else:
 		var window:Window = preload("res://scenes/mods/modsWindow.tscn").instantiate()
 		editor.add_child(window)
+		@warning_ignore("integer_division")
 		window.position = get_window().position+(get_window().size-window.size)/2
 
 func listDependencies(mod:Mod) -> String:

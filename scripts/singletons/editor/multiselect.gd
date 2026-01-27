@@ -235,6 +235,7 @@ class TileCopy extends Copy: # definitely rethink this at some point
 		position = select.position - editor.multiselect.selectRect.position
 
 	func paste() -> void:
+		@warning_ignore("integer_division")
 		if Game.levelBounds.has_point(Vector2i(position)+editor.mouseTilePosition): Changes.addChange(Changes.TileChange.new((Vector2i(position)+editor.mouseTilePosition)/32,true))
 
 class ObjectCopy extends Copy:
