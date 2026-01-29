@@ -136,6 +136,7 @@ func clear() -> void:
 	Mods.activeModpack = Mods.modpacks[&"Refactored"]
 	Mods.activeVersion = Mods.activeModpack.versions[0]
 	for mod in Mods.mods.values(): mod.active = false
+	Mods.updateNumberSystem()
 	Mods.bufferModsChanged()
 	Game.level.activate()
 	if editor: editor.home()

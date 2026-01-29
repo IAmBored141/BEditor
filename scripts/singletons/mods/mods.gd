@@ -117,6 +117,11 @@ var bufferedModsChanged:bool = false
 
 func bufferModsChanged() -> void: bufferedModsChanged = true
 
+func updateNumberSystem() -> void:
+	var previousNumberSystem:M.SYSTEM = M.system
+	M.system = int(active(&"Fractions")) as M.SYSTEM
+	if M.system != previousNumberSystem: get_tree().call_group("hasNumbers", "convertNumbers", previousNumberSystem)
+
 func active(id:StringName) -> bool:
 	return mods[id].active
 

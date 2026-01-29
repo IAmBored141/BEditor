@@ -125,6 +125,11 @@ func _freed() -> void:
 	RenderingServer.free_rid(drawCopies)
 	RenderingServer.free_rid(drawNegative)
 
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"copies"))
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"infCopies"))
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"gameCopies"))
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawDropShadow)
 	RenderingServer.canvas_item_clear(drawScaled)

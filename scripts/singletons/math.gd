@@ -1,8 +1,7 @@
 extends Node
 
 enum SYSTEM {COMPLEX, FRACTIONS}
-var system:SYSTEM = SYSTEM.FRACTIONS
-const HAS_FRACTIONS:int = 1
+var system:SYSTEM = SYSTEM.COMPLEX
 
 # COMPLEX: [a,b], represents a + bi
 
@@ -39,13 +38,13 @@ var nONE:PackedInt64Array:
 var I:PackedInt64Array:
 	get():
 		match system:
-			SYSTEM.COMPLEX: return [1,0]
+			SYSTEM.COMPLEX: return [0,1]
 			SYSTEM.FRACTIONS, _: return [0,1,1]
 
 var nI:PackedInt64Array:
 	get():
 		match system:
-			SYSTEM.COMPLEX: return [1,0]
+			SYSTEM.COMPLEX: return [0,-1]
 			SYSTEM.FRACTIONS, _: return [0,-1,1]
 
 # initialisers
@@ -380,7 +379,7 @@ func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 		if infAxes[1]: iComponent += "-~i" if inum < 0 else "~i"
 		else: iComponent += str(inum) + "i"
 	if !rnum and !inum: return "0"
-	if system & HAS_FRACTIONS:
+	if system & SYSTEM.FRACTIONS:
 		var den:int = toInt(denom(n))
 		if den != 1: iComponent += "/" + str(den)
 	return rComponent + iComponent

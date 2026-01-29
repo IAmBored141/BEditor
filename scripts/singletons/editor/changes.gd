@@ -610,3 +610,85 @@ class LevelResizeChange extends Change:
 	
 	func _to_string() -> String:
 		return "<LeveLResizeChange:"+str(before)+"->"+str(after)+">"
+
+class ComponentConvertNumberChange extends Change:
+	var id:int
+	var dictionary:Dictionary
+	var before:PackedInt64Array
+	var property:StringName
+	var from:M.SYSTEM
+
+	func _init(component:GameComponent, _from:M.SYSTEM, _property:StringName) -> void:
+		id = component.id
+		if component is GameObject: dictionary = Game.objects
+		else: dictionary = Game.components
+		from = _from
+		property = _property
+		before = Changes.copy(component.get(property))
+		do()
+	
+	func do() -> void: dictionary[id].set(property, M.convert(before, from))
+	func undo() -> void: dictionary[id].set(property, before)
+	
+	func _to_string() -> String:
+		return "<ComponentConvertNumberChange:"+str(before)+","+str(from)+">"
+
+class ComponentConvertNumberArrayChange extends Change:
+	var id:int
+	var dictionary:Dictionary
+	var before:Array[PackedInt64Array]
+	var array:StringName
+	var from:M.SYSTEM
+
+	func _init(component:GameComponent, _from:M.SYSTEM, _array:StringName) -> void:
+		id = component.id
+		if component is GameObject: dictionary = Game.objects
+		else: dictionary = Game.components
+		from = _from
+		array = _array
+		before = Changes.copy(component.get(array))
+		do()
+	
+	func do() -> void: dictionary[id].get(array).assign(before.map(func(number): return M.convert(number, from)))
+	func undo() -> void: dictionary[id].get(array).assign(before)
+	
+	func _to_string() -> String:
+		return "<ComponentConvertNumberArrayChange:"+str(before)+","+str(from)+">"
+
+class ConvertNumberChange extends Change:
+	var singleton:Variant
+	var before:PackedInt64Array
+	var property:StringName
+	var from:M.SYSTEM
+
+	func _init(_singleton:Variant, _from:M.SYSTEM, _property:StringName) -> void:
+		singleton = _singleton
+		from = _from
+		property = _property
+		before = Changes.copy(singleton.get(property))
+		do()
+	
+	func do() -> void: singleton.set(property, M.convert(before, from))
+	func undo() -> void: singleton.set(property, before)
+	
+	func _to_string() -> String:
+		return "<ComponentConvertNumberChange:"+str(before)+","+str(from)+">"
+
+class ConvertNumberArrayChange extends Change:
+	var singleton:Variant
+	var before:Array[PackedInt64Array]
+	var array:StringName
+	var from:M.SYSTEM
+
+	func _init(_singleton:Variant, _from:M.SYSTEM, _array:StringName) -> void:
+		singleton = _singleton
+		from = _from
+		array = _array
+		before = Changes.copy(singleton.get(array))
+		do()
+	
+	func do() -> void: singleton.get(array).assign(before.map(func(number): return M.convert(number, from)))
+	func undo() -> void: singleton.get(array).assign(before)
+	
+	func _to_string() -> String:
+		return "<ConvertNumberArrayChange:"+str(before)+","+str(from)+">"

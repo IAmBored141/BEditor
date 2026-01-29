@@ -140,6 +140,7 @@ static func getConfigurationColor(_isNegative:bool) -> Color:
 func _init() -> void: size = Vector2(18,18)
 
 func _ready() -> void:
+	add_to_group(&"hasNumbers", true)
 	drawScaled = RenderingServer.canvas_item_create()
 	drawAuraBreaker = RenderingServer.canvas_item_create()
 	drawGlitch = RenderingServer.canvas_item_create()
@@ -158,6 +159,10 @@ func _freed() -> void:
 	RenderingServer.free_rid(drawGlitch)
 	RenderingServer.free_rid(drawMain)
 	RenderingServer.free_rid(drawConfiguration)
+
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"count"))
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"denominator"))
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawScaled)

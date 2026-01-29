@@ -61,13 +61,14 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawSymbol,get_canvas_item())
 	Game.connect(&"goldIndexChanged",func():if color in Game.ANIMATED_COLORS: queue_redraw())
 
-
 func _freed() -> void:
 	RenderingServer.free_rid(drawDropShadow)
 	RenderingServer.free_rid(drawGlitch)
 	RenderingServer.free_rid(drawMain)
 	RenderingServer.free_rid(drawSymbol)
 
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"count"))
 
 func outlineTex() -> Texture2D: return getOutlineTexture(color, type, un)
 

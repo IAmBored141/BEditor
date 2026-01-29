@@ -17,6 +17,10 @@ var isZeroI:bool = false
 func _ready() -> void:
 	Explainer.addControl(self,ControlExplanation.new("/ Number Edit("+Explainer.ARROWS_UD+"±1 [%s]×-1 [%s]×i) /", [&"numberNegate", &"numberTimesI"]))
 
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"value"))
+	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"bufferedSign"))
+
 func _gui_input(event:InputEvent) -> void:
 	if Editor.isLeftClick(event): editor.focusDialog.interact(self)
 

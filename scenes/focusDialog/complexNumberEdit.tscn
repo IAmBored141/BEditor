@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://sm362bc2r4fm" path="res://scenes/focusDialog/numberEdit.tscn" id="3_dqp57"]
 [ext_resource type="Texture2D" uid="uid://dy5pu0dl7us8k" path="res://assets/ui/focusDialog/numberEdit/complexNumberEditI.png" id="4_dqp57"]
 
-[node name="complexNumberEdit" type="HBoxContainer" unique_id=399422665]
+[node name="complexNumberEdit" type="HBoxContainer" unique_id=399422665 groups=["hasNumbers"]]
 offset_right = 88.0
 offset_bottom = 17.0
 theme = ExtResource("1_n5xw7")

@@ -58,6 +58,7 @@ func resolve() -> void:
 	for mod in mods: Mods.mods[mod].active = true
 	Mods.activeModpack = modpack
 	Mods.activeVersion = version
+	Mods.updateNumberSystem()
 	loader.loadFile(file)
 	if levelStart != -1:
 		Game.levelStart = Game.objects[levelStart]

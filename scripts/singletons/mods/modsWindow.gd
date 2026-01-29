@@ -46,8 +46,12 @@ func _saveChanges():
 	Changes.addChange(Changes.GlobalPropertyChange.new(Mods,&"activeVersion",tempActiveVersion))
 	for mod in Mods.mods.values():
 		Changes.addChange(Changes.GlobalPropertyChange.new(mod,&"active",mod.tempActive))
+	
+	Mods.updateNumberSystem()
+
 	for mod in modsAdded: addMod(mod)
 	for mod in modsRemoved: removeMod(mod)
+
 	if !Mods.objectAvailable(editor.otherObjects.selected): editor.otherObjects.objectSelected(PlayerSpawn, true)
 	
 	var availableColors:Array[Game.COLOR] = Mods.colors()
@@ -57,7 +61,7 @@ func _saveChanges():
 		for color in Game.COLORS:
 			if color in availableColors: continue
 			playerSpawn.resetColor(color)
-	
+
 	Changes.bufferSave()
 	editor.grab_focus()
 	Mods.bufferModsChanged()

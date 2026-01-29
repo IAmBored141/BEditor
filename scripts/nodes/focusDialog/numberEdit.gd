@@ -20,6 +20,9 @@ func _ready() -> void:
 	await editor.ready
 	context = editor.focusDialog
 
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"value"))
+
 func _gui_input(event:InputEvent) -> void:
 	if Editor.isLeftClick(event): context.interact(self)
 

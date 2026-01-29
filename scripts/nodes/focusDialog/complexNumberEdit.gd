@@ -7,7 +7,10 @@ class_name ComplexNumberEdit
 
 signal valueSet(value:PackedInt64Array)
 
-var value:PackedInt64Array
+var value:PackedInt64Array = M.ZERO
+
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"value"))
 
 func setValue(_value:PackedInt64Array,manual:bool=false) -> void:
 	value = _value

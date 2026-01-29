@@ -88,6 +88,11 @@ func _freed() -> void:
 	RenderingServer.free_rid(drawPainted)
 	RenderingServer.free_rid(drawFrozen)
 
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"count"))
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"denominator"))
+	Changes.addChange(Changes.ComponentConvertNumberChange.new(self, from, &"cost"))
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawDropShadow)
 	RenderingServer.canvas_item_clear(drawConnections)

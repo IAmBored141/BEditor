@@ -7,7 +7,7 @@
 [sub_resource type="LabelSettings" id="LabelSettings_n5xw7"]
 font = ExtResource("2_tcfpl")
 
-[node name="numberEdit" type="PanelContainer" unique_id=1703551654]
+[node name="numberEdit" type="PanelContainer" unique_id=1703551654 groups=["hasNumbers"]]
 custom_minimum_size = Vector2(70, 0)
 theme = ExtResource("1_tcfpl")
 theme_type_variation = &"NumberEditPanelContainer"

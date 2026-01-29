@@ -61,6 +61,9 @@ func _ready() -> void:
 func _freed() -> void:
 	RenderingServer.free_rid(drawMain)
 
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ComponentConvertNumberArrayChange.new(self, from, &"key"))
+
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawMain)
 	if Game.playState == Game.PLAY_STATE.PLAY: return

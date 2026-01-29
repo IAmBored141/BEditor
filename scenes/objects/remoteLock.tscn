@@ -6,7 +6,7 @@
 resource_local_to_scene = true
 size = Vector2(18, 18)
 
-[node name="remoteLock" type="Node2D" unique_id=1361206256]
+[node name="remoteLock" type="Node2D" unique_id=1361206256 groups=["hasNumbers"]]
 z_index = 1
 script = ExtResource("1_kxkn4")
 

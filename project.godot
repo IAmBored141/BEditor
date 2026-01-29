@@ -44,6 +44,7 @@ modUI="UI affected by mod changes"
 explained=""
 hotkeyButton=""
 hotkeySetting=""
+hasNumbers=""
 
 [input]
 
