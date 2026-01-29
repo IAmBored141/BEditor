@@ -13,6 +13,11 @@ static var ModTree:Array = [
 		[&"NstdLockSize",&"MoreLockConfigs",&"ZeroCostLock",&"ZeroCopies"]
 	),
 	SubTree.new(
+		"Systems",
+		"Mods that change core systems of the game",
+		[&"Fractions"]
+	),
+	SubTree.new(
 		"I Wanna Lockpick: Continued",
 		"Mods that were made for the I Wanna Lockpick: Continued modpack.",
 		[&"C1",&"C2",&"C3",&"C4",&"C5"]

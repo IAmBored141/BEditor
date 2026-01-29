@@ -67,6 +67,11 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Objects placed out of level bounds",
 		[&"OutOfBounds"], true
 	),
+	&"Fractions": Mod.new(
+		"Fractions",
+		"The fractional number type",
+		[]
+	)
 }
 
 static var modpacks:Dictionary[StringName, Modpack] = {
