@@ -275,4 +275,5 @@ func openExportWindow() -> void:
 		var window:Window = preload("res://scenes/exportWindow.tscn").instantiate()
 		editor.add_child(window)
 		@warning_ignore("integer_division")
-		window.position = get_window().position+(get_window().size-window.size)/2
+		if OS.has_feature("web"): window.position = get_window().position+Vector2i((get_window().size-window.size)/Game.uiScale/2)
+		else: @warning_ignore("integer_division") window.position = get_window().position+(get_window().size-window.size)/2
