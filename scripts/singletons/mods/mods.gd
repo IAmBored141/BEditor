@@ -133,8 +133,8 @@ func openModsWindow() -> void:
 	else:
 		var window:Window = preload("res://scenes/mods/modsWindow.tscn").instantiate()
 		editor.add_child(window)
-		if OS.has_feature("web"): window.position = get_window().position+Vector2i((get_window().size-window.size)/Game.uiScale/2)
-		else: @warning_ignore("integer_division") window.position = get_window().position+(get_window().size-window.size)/2
+		if !OS.has_feature("web"):
+			@warning_ignore("integer_division") window.position = get_window().position+(get_window().size-window.size)/2
 
 func listDependencies(mod:Mod) -> String:
 	if mod.dependencies == []: return "No dependencies"

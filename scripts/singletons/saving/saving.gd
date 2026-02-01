@@ -223,7 +223,6 @@ func IDArraytoComponents(type:GDScript,array:Array) -> Array:
 func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 	var openWindow:OpenWindow = preload("res://scenes/openWindow.tscn").instantiate()
 	@warning_ignore("integer_division")
-	openWindow.position = get_window().position+(get_window().size-openWindow.size)/2
 	openWindow.path = path
 
 	if path.get_extension() != "cedit": errorPopup("Unrecognised file format"); return null
@@ -275,5 +274,4 @@ func openExportWindow() -> void:
 		var window:Window = preload("res://scenes/exportWindow.tscn").instantiate()
 		editor.add_child(window)
 		@warning_ignore("integer_division")
-		if OS.has_feature("web"): window.position = get_window().position+Vector2i((get_window().size-window.size)/Game.uiScale/2)
-		else: @warning_ignore("integer_division") window.position = get_window().position+(get_window().size-window.size)/2
+		if !OS.has_feature("web"): window.position = get_window().position+(get_window().size-window.size)/2
