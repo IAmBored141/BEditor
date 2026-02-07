@@ -77,8 +77,8 @@ func findProblems(component:GameComponent) -> void:
 			findColorProblems(component, component.color)
 			if &"C5" in modsWindow.modsRemoved:
 				noteProblem(&"C5", &"CurseKeyType", component, component.type == KeyBulk.TYPE.CURSE)
-			if &"PartialInfKeys" in modsWindow.modsRemoved:
-				noteProblem(&"PartialInfKeys", &"PartialInfKeys", component, component.infinite not in [0, 1])
+			if &"PartialInfKey" in modsWindow.modsRemoved:
+				noteProblem(&"PartialInfKey", &"PartialInfKey", component, component.infinite not in [0, 1])
 			if &"Glistening" in modsWindow.modsRemoved:
 				noteProblem(&"Glistening", &"GlisteningKey", component, component.glistening)
 		Lock, RemoteLock:

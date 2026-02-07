@@ -14,7 +14,7 @@ func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	%keyCountEdit.setValue(focused.count, true)
 	%keyInfiniteToggle.button_pressed = focused.infinite
 	%keyGlisteningToggle.button_pressed = focused.glistening
-	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
+	%keyPartialInfinite.visible = Mods.active(&"PartialInfKey") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
 	%keyPartialInfiniteEdit.setValue(M.N(focused.infinite), true)
 	%keyRotorSelector.visible = focused.type == KeyBulk.TYPE.ROTOR
 	%keyUn.visible = focused.type in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE]
@@ -52,7 +52,7 @@ func editDeinteracted(edit:PanelContainer) -> void:
 
 func changedMods() -> void:
 	%keyGlisteningToggle.visible = Mods.active(&"Glistening")
-	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and main.focused is KeyBulk and main.focused.infinite
+	%keyPartialInfinite.visible = Mods.active(&"PartialInfKey") and main.focused is KeyBulk and main.focused.infinite
 
 func _keyColorSelected(color:Game.COLOR) -> void:
 	if main.focused is not KeyBulk: return
