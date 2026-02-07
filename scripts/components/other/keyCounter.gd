@@ -9,12 +9,16 @@ const SEARCH_KEYWORDS:Array[String] = ["oKeyHandle", "key box"]
 const SHORT:Texture2D = preload("res://assets/game/keyCounter/short.png")
 const MEDIUM:Texture2D = preload("res://assets/game/keyCounter/medium.png")
 const LONG:Texture2D = preload("res://assets/game/keyCounter/long.png")
-const WIDTHS:Array[float] = [107, 139, 203]
+const VLONG:Texture2D = preload("res://assets/game/keyCounter/vlong.png")
+const EXLONG:Texture2D = preload("res://assets/game/keyCounter/exlong.png")
+const WIDTHS:Array[float] = [107, 139, 203,253,353]
 func getSprite() -> Texture2D:
 	match size.x:
 		WIDTHS[0]: return SHORT
 		WIDTHS[1]: return MEDIUM
 		WIDTHS[2]: return LONG
+		WIDTHS[3]: return VLONG
+		WIDTHS[4]: return EXLONG
 	return LONG
 
 # the ninepatch (or i guess 3 since we dont care about horizontally) tiling for this is weird

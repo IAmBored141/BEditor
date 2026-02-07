@@ -1,9 +1,9 @@
 extends GameComponent
 class_name Lock
 
-const TYPES:int = 5
-enum TYPE {NORMAL, BLANK, BLAST, ALL, EXACT}
-const TYPE_NAMES:Array[String] = ["Normal", "Blank", "Blast", "All", "Exact"]
+const TYPES:int = 6
+enum TYPE {NORMAL, BLANK, BLAST, ALL, EXACT, GLISTENING}
+const TYPE_NAMES:Array[String] = ["Normal", "Blank", "Blast", "All", "Exact", "Glistening"]
 const SIZE_TYPES:int = 7
 enum SIZE_TYPE {AnyS, AnyH, AnyV, AnyM, AnyL, AnyXL, ANY}
 const SIZE_TYPE_NAMES:Array[String] = ["AnyS", "AnyH", "AnyV", "AnyM", "AnyL", "AnyXL", "Any"]
@@ -81,6 +81,7 @@ const SYMBOL_BLASTI = preload("res://assets/game/lock/symbols/blasti.png")
 const SYMBOL_EXACT = preload("res://assets/game/lock/symbols/exact.png")
 const SYMBOL_EXACTI = preload("res://assets/game/lock/symbols/exacti.png")
 const SYMBOL_ALL = preload("res://assets/game/lock/symbols/all.png")
+const SYMBOL_GLISTENING = preload("res://assets/game/lock/symbols/glistening.png")
 const SYMBOL_SIZE:Vector2 = Vector2(32,32)
 
 static var GLITCH_FILL:LockTextureLoader = LockTextureLoader.new("res://assets/game/lock/fill/$tglitch.png")
@@ -227,7 +228,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 	# configuration
 	if lockConfiguration == CONFIGURATION.NONE:
 		match lockType:
-			TYPE.NORMAL,TYPE.EXACT:
+			TYPE.NORMAL,TYPE.EXACT,TYPE.GLISTENING:
 				var string:String = M.str(M.abs(lockCount))
 				if string == "1": string = ""
 				if M.isNonzeroImag(lockCount) and lockType == TYPE.NORMAL: string += "i"
@@ -258,6 +259,7 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 					else: lockRect = Rect2(Vector2(startX+lockOffsetX/2,lockSize.y/2)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
 					var lockSymbol:Texture2D
 					if lockType == TYPE.NORMAL: lockSymbol = SYMBOL_NORMAL
+					elif lockType == TYPE.GLISTENING: lockSymbol = SYMBOL_GLISTENING
 					elif M.isNonzeroImag(lockCount) or lockZeroI: lockSymbol = SYMBOL_EXACTI
 					else: lockSymbol = SYMBOL_EXACT
 					if lockNegated: lockRect = Rect2(lockSize-lockRect.position-lockRect.size-offsetFromType(lockSizeType)*2,lockRect.size)
@@ -452,6 +454,7 @@ func canOpen(player:Player) -> bool: return getLockCanOpen(self, player)
 static func getLockCanOpen(lock:GameComponent,player:Player) -> bool:
 	var can:bool = true
 	var keyCount:PackedInt64Array = player.key[lock.colorAfterAurabreaker()]
+	var glistCount:PackedInt64Array = player.glisten[lock.colorAfterAurabreaker()]
 	var lockCount:PackedInt64Array = lock.effectiveCount()
 	var lockDenominator:PackedInt64Array = lock.effectiveDenominator()
 	match lock.type:
@@ -473,6 +476,7 @@ static func getLockCanOpen(lock:GameComponent,player:Player) -> bool:
 				if lock.effectiveZeroI(): can = M.nex(M.i(keyCount))
 				else: can = M.nex(M.r(keyCount))
 			else: can = M.eq(M.along(keyCount, lockCount), M.acrabs(lockCount))
+		TYPE.GLISTENING: can = !M.hasNegative(M.sub(M.along(glistCount, lockCount), M.acrabs(lockCount)))
 	return can != lock.negated
 
 func getCost(player:Player, ipow:PackedInt64Array=parent.ipow()) -> PackedInt64Array: return getLockCost(self, player, ipow)
@@ -483,7 +487,7 @@ static func getLockCost(lock:GameComponent, player:Player, ipow:PackedInt64Array
 	var lockCount:PackedInt64Array = lock.effectiveCount(ipow)
 	var lockDenominator:PackedInt64Array = lock.effectiveDenominator(ipow)
 	match lock.type:
-		TYPE.NORMAL, TYPE.EXACT: cost = lockCount
+		TYPE.NORMAL, TYPE.EXACT, TYPE.GLISTENING: cost = lockCount
 		TYPE.BLAST: if M.ex(lockDenominator): cost = M.divide(M.times(M.alongbs(keyCount, lockDenominator), lockCount), lockDenominator)
 		TYPE.ALL: if M.ex(lockDenominator): cost = M.divide(M.times(keyCount, lockCount), lockDenominator)
 	if lock.negated: return M.negate(cost)

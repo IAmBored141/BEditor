@@ -35,6 +35,7 @@ const Y_MAXSPEED:float = 9
 
 var canDoubleJump:bool = true
 var key:Array[PackedInt64Array] = []
+var glisten:Array[PackedInt64Array] = [] #your glistening count
 var star:Array[bool]
 var curse:Array[bool]
 
@@ -94,6 +95,7 @@ func _init() -> void:
 	for color in Game.COLORS:
 		# if color == Game.COLOR.STONE:
 		key.append(M.ZERO)
+		glisten.append(M.ZERO)
 		star.append(false)
 		curse.append(color == Game.COLOR.BROWN)
 

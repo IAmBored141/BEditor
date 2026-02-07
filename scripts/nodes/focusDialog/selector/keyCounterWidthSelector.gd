@@ -5,11 +5,13 @@ const ICONS:Array[Texture2D] = [
 	preload("res://assets/ui/focusDialog/lockConfiguration/AnyS.png"),
 	preload("res://assets/ui/focusDialog/lockConfiguration/AnyM.png"),
 	preload("res://assets/ui/focusDialog/lockConfiguration/AnyL.png"),
+	preload("res://assets/ui/focusDialog/lockConfiguration/AnyXL.png"),
+	preload("res://assets/ui/focusDialog/lockConfiguration/AnyXXL.png"),
 ]
 
 func _ready() -> void:
-	columns = 3
-	options = range(3)
+	columns = 5
+	options = range(5)
 	defaultValue = 0
 	buttonType = KeyCounterWidthSelectorButton
 	super()

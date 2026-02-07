@@ -71,6 +71,16 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Partial Infinite Keys",
 		"Adds the option for infinite keys to only become re-available every N key collects",
 		[&"PartialInfKeys"]
+	),
+	&"BoringItems": Mod.new(
+		"Bored's Items",
+		"Nothing strange here, move on. Has been clensed of AIDS, sorry.",
+		[&"BoringItems"]
+	),
+	&"AIDS": Mod.new(
+		"AIDS",
+		"Adds AIDS. Does not affect gameplay.",
+		[&"AIDS"], true
 	)
 }
 
@@ -191,6 +201,7 @@ func lockTypes() -> Array[Lock.TYPE]:
 		Lock.TYPE.BLAST, Lock.TYPE.ALL
 	]
 	if active(&"C3"): array.append(Lock.TYPE.EXACT)
+	if active(&"BoringItems"): array.append(Lock.TYPE.GLISTENING)
 	return array
 
 func objectAvailable(object:GDScript) -> bool:

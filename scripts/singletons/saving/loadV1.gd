@@ -17,7 +17,7 @@ static var PROPERTIES:Dictionary[GDScript,Array] = {
 	],
 	KeyBulk: [
 		&"id", &"position", &"size",
-		&"color", &"type", &"count", &"infinite", &"un"
+		&"color", &"type", &"count", &"infinite", &"glistening", &"un"
 	],
 	Door: [
 		&"id", &"position", &"size",

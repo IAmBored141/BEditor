@@ -128,6 +128,16 @@ class StarChange extends ColorChange:
 class CurseChange extends ColorChange:
 	# a change to the cursed state
 	static func array() -> StringName: return &"curse"
+	
+class GlistenChange extends ColorChange:
+	# a change to the glistening count
+	static func array() -> StringName: return &"glisten"
+
+	func cancelCondition() -> bool: return super() or Game.player.star[color]
+
+	func do() -> void:
+		super()
+		Game.bufferGateCheck()
 
 class PropertyChange extends Change:
 	var id:int

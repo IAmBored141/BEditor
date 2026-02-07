@@ -214,3 +214,24 @@ func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 		else: iComponent += str(n[1]) + "i"
 	if !n[0] and !n[1]: return "0"
 	return rComponent + iComponent
+	
+func returnGreaterParts(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
+	# compares  and b
+	# for each part (real + imag):
+	# if b > 0, check if a > b, if yes return a else return b
+	# if b < 0, check if a < b, if yes return a else return b
+	# if b = 0, just return a
+	var real:int
+	var imag:int
+	if (gt(b,ZERO) and gte(a,b)) or (lt(b,ZERO) and lte(a,b)) or (eq(r(b),ZERO)):
+		real = a[0]
+	else:
+		real = b[0]
+	if (igt(b,ZERO) and igte(a,b)) or (ilt(b,ZERO) and ilte(a,b)) or (eq(i(b),ZERO)):
+		imag = a[1]
+	else:
+		imag = b[1]
+	return Nc(real,imag)
+
+func isAStrictlyGreater(a:PackedInt64Array,b:PackedInt64Array) -> bool:
+	return eq(a,returnGreaterParts(a,b))

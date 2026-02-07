@@ -59,7 +59,7 @@ func focusComponent(component:GameComponent, _new:bool) -> void: # Lock or Remot
 	
 	%remoteLockConvert.visible = Mods.active(&"C1") and component is not RemoteLock
 
-	%doorAxialNumberEdit.visible = component.type == Lock.TYPE.NORMAL or component.type == Lock.TYPE.EXACT
+	%doorAxialNumberEdit.visible = component.type == Lock.TYPE.NORMAL or component.type == Lock.TYPE.EXACT or component.type == Lock.TYPE.GLISTENING
 	%doorAxialNumberEdit.zeroIValid = component.type == Lock.TYPE.EXACT
 	%doorAxialNumberEdit.setValue(component.count, true)
 	if component.zeroI: %doorAxialNumberEdit.setZeroI()
