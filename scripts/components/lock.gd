@@ -262,14 +262,10 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 					elif symbolLast: lockRect = Rect2(Vector2(startX+strWidth-lockOffsetX/2,lockSize.y/2)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
 					else: lockRect = Rect2(Vector2(startX+lockOffsetX/2,lockSize.y/2)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
 					var lockSymbol:Texture2D
-					if lockType == TYPE.NORMAL: lockSymbol = SYMBOL_NORMAL
-					elif lockType == TYPE.GLISTENING: 
-						if M.isNonzeroImag(lockCount):
-							lockSymbol = SYMBOL_GLISTENINGI
-						else:
-							lockSymbol = SYMBOL_GLISTENING
-					elif M.isNonzeroImag(lockCount) or lockZeroI: lockSymbol = SYMBOL_EXACTI
-					else: lockSymbol = SYMBOL_EXACT
+					match lockType:
+						TYPE.NORMAL: lockSymbol = SYMBOL_NORMAL
+						TYPE.GLISTENING: lockSymbol = SYMBOL_GLISTENINGI if M.isNonzeroImag(lockCount) else SYMBOL_GLISTENING
+						TYPE.EXACT: lockSymbol = SYMBOL_EXACTI if M.isNonzeroImag(lockCount) else SYMBOL_EXACT
 					if lockNegated: lockRect = Rect2(lockSize-lockRect.position-lockRect.size-offsetFromType(lockSizeType)*2,lockRect.size)
 					RenderingServer.canvas_item_add_texture_rect(lockDrawConfiguration,lockRect,lockSymbol,false,getConfigurationColor(negative))
 				if symbolLast: Game.FTALK.draw_string(lockDrawMain,Vector2(startX,startY)-offsetFromType(lockSizeType),string,HORIZONTAL_ALIGNMENT_LEFT,-1,12,getConfigurationColor(negative))
