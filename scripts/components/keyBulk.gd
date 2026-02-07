@@ -191,8 +191,14 @@ func collect(player:Player) -> void:
 
 	var collectColor:Game.COLOR = effectiveColor()
 
+	if glistening:
+		match type:
+			TYPE.NORMAL: player.changeGlisten(collectColor, M.add(player.glisten[collectColor], count))
+			TYPE.EXACT: player.changeGlisten(collectColor, count)
+			TYPE.ROTOR: player.changeGlisten(collectColor, M.times(player.glisten[collectColor], count))
+
 	match type:
-		TYPE.NORMAL:  player.changeKeys(collectColor, M.add(player.key[collectColor], count))
+		TYPE.NORMAL: player.changeKeys(collectColor, M.add(player.key[collectColor], count))
 		TYPE.EXACT: player.changeKeys(collectColor, count)
 		TYPE.ROTOR: player.changeKeys(collectColor, M.times(player.key[collectColor], count))
 		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(effectiveColor(), !un))

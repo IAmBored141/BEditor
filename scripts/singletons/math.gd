@@ -230,4 +230,4 @@ func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 
 func keepAbove(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
 	# in both axes, keeps the magnitude of a greater than or equal to the magnitude of b, in the direction of b. if b doesnt exist in that axis, it will be unaffected
-	return along(max(along(a,orelse(b,allAxes())), acrabs(b)), orelse(b,allAxes()))
+	return along(M.max(along(a,orelse(b,allAxes())), acrabs(b)), orelse(b,allAxes()))

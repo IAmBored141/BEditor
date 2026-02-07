@@ -439,4 +439,4 @@ func changeKeys(color:Game.COLOR, after:PackedInt64Array) -> void:
 
 func changeGlisten(color:Game.COLOR, after:PackedInt64Array) -> void:
 	if star[color]: return
-	GameChanges.addChange(GameChanges.KeyChange.new(color, after))
+	GameChanges.addChange(GameChanges.GlistenChange.new(color, after))
