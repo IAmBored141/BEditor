@@ -44,6 +44,7 @@ func _init() -> void:
 		key.append(M.ZERO)
 		star.append(false)
 		curse.append(color == Game.COLOR.BROWN)
+		glisten.append(M.ZERO)
 
 func resetColors() -> void:
 	for color in Game.COLORS:
