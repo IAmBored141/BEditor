@@ -82,6 +82,7 @@ const SYMBOL_EXACT = preload("res://assets/game/lock/symbols/exact.png")
 const SYMBOL_EXACTI = preload("res://assets/game/lock/symbols/exacti.png")
 const SYMBOL_ALL = preload("res://assets/game/lock/symbols/all.png")
 const SYMBOL_GLISTENING = preload("res://assets/game/lock/symbols/glistening.png")
+const SYMBOL_GLISTENINGI = preload("res://assets/game/lock/symbols/glisteningi.png")
 const SYMBOL_SIZE:Vector2 = Vector2(32,32)
 
 static var GLITCH_FILL:LockTextureLoader = LockTextureLoader.new("res://assets/game/lock/fill/$tglitch.png")
@@ -233,14 +234,17 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 				if string == "1": string = ""
 				if M.isNonzeroImag(lockCount) and lockType == TYPE.NORMAL: string += "i"
 				var lockOffsetX:float = 0
-				var showLock:bool = lockType == TYPE.EXACT || (!M.isNonzeroImag(lockCount) && (lockSize != Vector2(18,18) || string == ""))
+				var showLock:bool = (lockType == TYPE.EXACT or lockType == TYPE.GLISTENING) || (!M.isNonzeroImag(lockCount) && (lockSize != Vector2(18,18) || string == ""))
 				if lockType == TYPE.EXACT and !showLock: string = "=" + string
 				var vertical:bool = lockSize.x == 18 && lockSize.y != 18 && string != ""
 
-				var symbolLast:bool = lockType == TYPE.EXACT and M.isNonzeroImag(lockCount) and !vertical
+				var symbolLast:bool = (lockType == TYPE.EXACT or lockType == TYPE.GLISTENING) and M.isNonzeroImag(lockCount) and !vertical
 				if showLock and !vertical:
-					if lockType == TYPE.EXACT:
+					if (lockType == TYPE.EXACT):
 						if symbolLast: lockOffsetX = 6
+						else: lockOffsetX = 12
+					elif lockType == TYPE.GLISTENING:
+						if symbolLast: lockOffsetX = 8
 						else: lockOffsetX = 12
 					else: lockOffsetX = 14
 
@@ -259,7 +263,11 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 					else: lockRect = Rect2(Vector2(startX+lockOffsetX/2,lockSize.y/2)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
 					var lockSymbol:Texture2D
 					if lockType == TYPE.NORMAL: lockSymbol = SYMBOL_NORMAL
-					elif lockType == TYPE.GLISTENING: lockSymbol = SYMBOL_GLISTENING
+					elif lockType == TYPE.GLISTENING: 
+						if M.isNonzeroImag(lockCount):
+							lockSymbol = SYMBOL_GLISTENINGI
+						else:
+							lockSymbol = SYMBOL_GLISTENING
 					elif M.isNonzeroImag(lockCount) or lockZeroI: lockSymbol = SYMBOL_EXACTI
 					else: lockSymbol = SYMBOL_EXACT
 					if lockNegated: lockRect = Rect2(lockSize-lockRect.position-lockRect.size-offsetFromType(lockSizeType)*2,lockRect.size)

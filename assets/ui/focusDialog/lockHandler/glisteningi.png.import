@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jseh5qk1q6ji"
-path="res://.godot/imported/glistening.png-d631e7e54319c2b23e99412ccd46f9bb.ctex"
+uid="uid://35aijd812ucv"
+path="res://.godot/imported/glisteningi.png-d5228bffd967b3ea5a3f1bd851f5f500.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/game/lock/symbols/glistening.png"
-dest_files=["res://.godot/imported/glistening.png-d631e7e54319c2b23e99412ccd46f9bb.ctex"]
+source_file="res://assets/ui/focusDialog/lockHandler/glisteningi.png"
+dest_files=["res://.godot/imported/glisteningi.png-d5228bffd967b3ea5a3f1bd851f5f500.ctex"]
 
 [params]
 
