@@ -41,7 +41,7 @@ func receiveKey(event:InputEventKey) -> bool:
 			if main.focused.type == KeyBulk.TYPE.CURSE: Changes.PropertyChange.new(main.focused,&"un",!main.focused.un)
 			else: _keyTypeSelected(KeyBulk.TYPE.CURSE)
 	elif Editor.eventIs(event, &"focusKeyInfinite"): _keyInfiniteToggled(0 if main.focused.infinite else 1)
-	# elif Editor.eventIs(event, &"focusKeyGlistening"): _keyGlisteningToggled(false if main.focused.glistening else true)
+	elif Editor.eventIs(event, &"focusKeyGlistening"): _keyGlisteningToggled(!main.focused.glistening)
 	elif Editor.eventIs(event, &"quicksetColor"): editor.quickSet.startQuick(&"quicksetColor", main.focused)
 	else: return false
 	return true
