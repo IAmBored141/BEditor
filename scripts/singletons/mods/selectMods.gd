@@ -31,7 +31,7 @@ static var ModTree:Array = [
 	SubTree.new(
 		"Unverified",
 		"Mods not make by the IWLC team. May: Not work, break, cause crashes, explode, give Lily AIDS, give you AIDS in real life.",
-		[&"BoringItems",&"AIDS"]
+		[&"BoringItems"]
 	)
 ]
 

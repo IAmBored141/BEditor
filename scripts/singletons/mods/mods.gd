@@ -77,11 +77,6 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Nothing strange here, move on. Has been clensed of AIDS, sorry.",
 		[&"BoringItems"]
 	),
-	&"AIDS": Mod.new(
-		"AIDS",
-		"Adds AIDS. Does not affect gameplay.",
-		[&"AIDS"], true
-	)
 }
 
 static var modpacks:Dictionary[StringName, Modpack] = {
