@@ -51,7 +51,7 @@ func editDeinteracted(edit:PanelContainer) -> void:
 	if edit == %keyPartialInfiniteEdit and !main.focused.infinite: %keyPartialInfinite.visible = false
 
 func changedMods() -> void:
-	%keyGlisteningToggle.visible = Mods.active(&"BoringItems")
+	%keyGlisteningToggle.visible = Mods.active(&"Glistening")
 	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and main.focused is KeyBulk and main.focused.infinite
 
 func _keyColorSelected(color:Game.COLOR) -> void:

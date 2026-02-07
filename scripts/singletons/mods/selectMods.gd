@@ -7,7 +7,7 @@ class_name SelectMods
 
 # the way the select tree is laid out
 static var ModTree:Array = [
-	&"PartialInfKeys",
+	&"PartialInfKeys", &"Glistening",
 	SubTree.new(
 		"Benign",
 		"Mods that don't do much.",
@@ -28,11 +28,6 @@ static var ModTree:Array = [
 		"Surely this is a good idea",
 		[&"DisconnectedLock",&"OutOfBounds"]
 	),
-	SubTree.new(
-		"Unverified",
-		"Mods not make by the IWLC team. May: Not work, break, cause crashes, explode, give Lily AIDS, give you AIDS in real life.",
-		[&"BoringItems"]
-	)
 ]
 
 class SubTree extends RefCounted:
