@@ -69,13 +69,12 @@ static var BASE_ARRAYS:Dictionary[GDScript,Dictionary] = {
 # - objects
 
 static func loadFile(file:FileAccess, formatVersion:int) -> void:
-	var PROPERTIES:Dictionary[GDScript,Array] = BASE_PROPERTIES.duplicate_deep()
-	var ARRAYS:Dictionary[GDScript, Dictionary] = BASE_ARRAYS.duplicate_deep()
+	var PROPERTIES:Dictionary[GDScript,Array] = BASE_PROPERTIES.duplicate(true)
+	var ARRAYS:Dictionary[GDScript, Dictionary] = BASE_ARRAYS.duplicate(true)
 	# format version 2 is v1.0.18
 	if formatVersion > 1:
 		PROPERTIES.get(KeyBulk).insert(7, &"glistening")
 		ARRAYS.get(PlayerSpawn)[&"glisten"] = TYPE_PACKED_INT64_ARRAY
-	
 	# LEVEL DATA
 	# tiles
 	Game.tiles.tile_map_data = file.get_var()
