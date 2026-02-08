@@ -64,6 +64,13 @@ var frozen:bool = false
 var crumbled:bool = false
 var painted:bool = false
 
+var starred:bool = false # if this door is starred
+
+var starredColor:Game.COLOR = Game.COLOR.WHITE
+var starredSpendKey:PackedInt64Array = M.ZERO
+var starredSpendGlisten:PackedInt64Array = M.ZERO
+
+
 var drawDropShadow:RID
 var drawScaled:RID # also draws aura breaker fills
 var drawAuraBreaker:RID
@@ -597,6 +604,11 @@ func tryDynamiteOpen(player:Player) -> bool:
 
 	GameChanges.bufferSave()
 	return true
+	
+#func tryCosmicOpen(player:Player) -> bool:
+	#if hasColor(Game.COLOR.COSMIC): return false
+	#if hasColor(Game.COLOR.PURE): return false
+	#
 
 func hasColor(color:Game.COLOR) -> bool:
 	if colorAfterGlitch() == color: return true
