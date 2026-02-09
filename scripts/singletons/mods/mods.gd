@@ -76,7 +76,17 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Fractions",
 		"The fractional number type",
 		[]
-    )
+    ),
+	&"Glistening": Mod.new(
+		"Glistening",
+		"Adds Glistening keys and locks. Added by Bored",
+		[&"GlisteningKey", &"GlisteningLock"]
+	),
+	&"MoreKeyCounterWidths": Mod.new(
+		"More Key Counter Widths",
+		"Adds larger sizes for key counters. Added by Bored",
+		[&"NstdKeyCounterWidth"]
+	)
 }
 
 static var modpacks:Dictionary[StringName, Modpack] = {
@@ -143,8 +153,8 @@ func openModsWindow() -> void:
 	else:
 		var window:Window = preload("res://scenes/mods/modsWindow.tscn").instantiate()
 		editor.add_child(window)
-		@warning_ignore("integer_division")
-		window.position = get_window().position+(get_window().size-window.size)/2
+		if !OS.has_feature("web"):
+			@warning_ignore("integer_division") window.position = get_window().position+(get_window().size-window.size)/2
 
 func listDependencies(mod:Mod) -> String:
 	if mod.dependencies == []: return "No dependencies"
@@ -201,6 +211,16 @@ func lockTypes() -> Array[Lock.TYPE]:
 		Lock.TYPE.BLAST, Lock.TYPE.ALL
 	]
 	if active(&"C3"): array.append(Lock.TYPE.EXACT)
+	if active(&"Glistening"): array.append(Lock.TYPE.GLISTENING)
+	return array
+
+func keyCounterWidths() -> Array[KeyCounter.WIDTH]:
+	var array:Array[KeyCounter.WIDTH] = [
+		KeyCounter.WIDTH.SHORT,
+		KeyCounter.WIDTH.MEDIUM,
+		KeyCounter.WIDTH.LONG,
+	]
+	if active(&"MoreKeyCounterWidths"): array.append_array([KeyCounter.WIDTH.VLONG, KeyCounter.WIDTH.EXLONG])
 	return array
 
 func objectAvailable(object:GDScript) -> bool:

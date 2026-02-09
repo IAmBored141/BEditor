@@ -49,49 +49,49 @@ var nI:PackedInt64Array:
 
 # initialisers
 
-# New number
+## New number
 func N(n:int) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n, 0]
 		SYSTEM.FRACTIONS, _: return [n,0,1]
 
-# New imaginary number
+## New imaginary number
 func Ni(n:int) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [0, n]
 		SYSTEM.FRACTIONS, _: return [0,n,1]
 
-# New complex number
+## New complex number
 func Nc(a:int,b:int) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [a, b]
 		SYSTEM.FRACTIONS, _: return [a,b,1]
 
-# New fractional number
+## New fractional number
 func Nf(n:int,d:int) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: assert(false); return ZERO
 		SYSTEM.FRACTIONS, _: return [n,0,d]
 
-# New fractional imaginary number
+## New fractional imaginary number
 func Nfi(n:int,d:int) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: assert(false); return ZERO
 		SYSTEM.FRACTIONS, _: return [0,n,d]
 
-# New fractional complex number
+## New fractional complex number
 func Nfc(a:int,b:int,d:int) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: assert(false); return ZERO
 		SYSTEM.FRACTIONS, _: return [a,b,d]
 
-# New Complex number from Numbers (a,b -> r(a) + r(b)i)
+## New Complex number from Numbers (a,b -> r(a) + r(b)i)
 func Ncn(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [a[0], b[0]]
 		SYSTEM.FRACTIONS, _: return simplify([a[0]*b[2], b[0]*a[2], a[2]*b[2]])
 
-# New Fractional number from Numbers (a,b -> numer(a) / rnumer(b))
+## New Fractional number from Numbers (a,b -> numer(a) / rnumer(b))
 func Nfn(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: assert(false); return ZERO
@@ -104,65 +104,73 @@ func allAxes() -> PackedInt64Array:
 
 # operators
 
-# (a,b -> a + b)
+## (a,b -> a + b)
 func add(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [a[0]+b[0], a[1]+b[1]]
 		SYSTEM.FRACTIONS, _: return simplify([a[0]*b[2] + b[0]*a[2], a[1]*b[2] + b[1]*a[2], a[2]*b[2]])
 
-# (a,b -> a - b)
+## (a,b -> a - b)
 func sub(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [a[0]-b[0], a[1]-b[1]]
 		SYSTEM.FRACTIONS, _: return simplify([a[0]*b[2] - b[0]*a[2], a[1]*b[2] - b[1]*a[2], a[2]*b[2]])
 
-# (a,b -> a * b)
+## (a,b -> a * b)
 func times(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]]
 		SYSTEM.FRACTIONS, _: return simplify([a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0], a[2]*b[2]])
 
-# (a,b -> r(a) * r(b) + (ir(a) * ir(b))i)
+## (a,b -> r(a) * r(b) + (ir(a) * ir(b))i)
 func across(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [a[0]*b[0], a[1]*b[1]]
 		SYSTEM.FRACTIONS, _: return simplify([a[0]*b[0], a[1]*b[1], a[2]*b[2]])
 
-# (a,b -> a / b)
-# truncates if fractions are unrepresentable
+## (a,b -> a / b)
+## truncates if fractions are unrepresentable
 func divide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		@warning_ignore("integer_division") SYSTEM.COMPLEX: return [(a[0]*b[0]+a[1]*b[1])/(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])/(b[0]*b[0]+b[1]*b[1])]
 		SYSTEM.FRACTIONS, _: return simplify([(a[0]*b[0]+a[1]*b[1])*b[2], (a[1]*b[0]-a[0]*b[1])*b[2], (b[0]*b[0]+b[1]*b[1])*a[2]])
 
-# (a,b -> a - floor(a/b)*b)
+## (a,b -> a - floor(a/b)*b)
 func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [(a[0]*b[0]+a[1]*b[1])%(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])%(b[0]*b[0]+b[1]*b[1])]
 		SYSTEM.FRACTIONS, _: return simplify([((a[0]*b[0]+a[1]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), ((a[1]*b[0]-a[0]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), a[2]*b[2]])
 
-# a "along" the axes of b
-# (a,b -> (r(a) * sign(r(b))) + (ir(a) * sign(ir(b)))i)
+## a "along" the axes of b
+## (a,b -> (r(a) * sign(r(b))) + (ir(a) * sign(ir(b)))i)
 func along(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: return across(a, axis(b))
-# a "along" the axes of b, ignoring signs
-# (a,b -> (r(a) * exists(r(b))) + (ir(a) * exists(ir(b)))i)
+## a "along" the axes of b, ignoring signs
+## (a,b -> (r(a) * exists(r(b))) + (ir(a) * exists(ir(b)))i)
 func alongbs(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: return across(a, axibs(b))
 
-# (a -> -a)
+## (a -> -a)
 func negate(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [-n[0], -n[1]]
 		SYSTEM.FRACTIONS, _: return [-n[0], -n[1], n[2]]
 
-# (a -> ai)
+## (a -> ai)
 func rotate(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [-n[1], n[0]]
 		SYSTEM.FRACTIONS, _: return [-n[1], n[0], n[2]]
 
+## componentwise max
+func max(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
+	return [max(a[0], b[0]), max(a[1], b[1])]
+
+## componentwise orelse
+func orelse(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
+	return [a[0] if a[0] else b[0], a[1] if a[1] else b[1]]
+
 # reducers
 
-# (n -> n)
+## (n -> n)
 func simplify(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
@@ -170,146 +178,155 @@ func simplify(n:PackedInt64Array) -> PackedInt64Array:
 			var divisor:int = gcd(gcd(n[0], n[1]), n[2])
 			@warning_ignore("integer_division") return [n[0]/divisor, n[1]/divisor, n[2]/divisor]
 
-# (n -> r(n))
+## (n -> r(n))
 func r(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[0], 0]
 		SYSTEM.FRACTIONS, _: return [n[0], 0, n[2]]
 
-# (n -> i(n))
+## (n -> i(n))
 func i(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [0, n[1]]
 		SYSTEM.FRACTIONS, _: return [0, n[1], n[2]]
 
-# (n -> ir(n))
+## (n -> ir(n))
 func ir(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[1], 0]
 		SYSTEM.FRACTIONS, _: return [n[1], 0, n[2]]
 
-# (n -> r(n)*denom(n))
+## (n -> r(n)*denom(n))
 func rnumer(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[0], 0]
 		SYSTEM.FRACTIONS, _: return [n[0], 0, 1]
 
-# (n -> i(n)*denom(n))
+## (n -> i(n)*denom(n))
 func inumer(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [0, n[1]]
 		SYSTEM.FRACTIONS, _: return [0, n[1], 1]
 
-# (n -> r(n)*denom(n))
+## (n -> r(n)*denom(n))
 func numer(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[0], n[1]]
 		SYSTEM.FRACTIONS, _: return [n[0], n[1], 1]
 
-# (n -> denom(n))
+## (n -> denom(n))
 func denom(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return ONE
 		SYSTEM.FRACTIONS, _: return [n[2], 0, 1]
 
-# (n -> sign(r(n)) + sign(ir(n)))
+## (n -> sign(r(n)) + sign(ir(n)))
 func sign(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [sign(n[0])+sign(n[1]), 0]
 		SYSTEM.FRACTIONS, _: return [sign(n[0])+sign(n[1]), 0, 1]
 
-# (n -> abs(r(n)) + abs(ir(n)))
+## (n -> abs(r(n)) + abs(ir(n)))
 func abs(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [abs(n[0])+abs(n[1]), 0]
 		SYSTEM.FRACTIONS, _: return [abs(n[0])+abs(n[1]), 0, n[2]]
 
-# (n -> r(n) + ir(n))
+## (n -> r(n) + ir(n))
 func reduce(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[0]+n[1], 0]
 		SYSTEM.FRACTIONS, _: return [n[0]+n[1], 0, n[2]]
 
-# the axes present in the number
-# (n -> sign(r(n)) + sign(ir(n))i)
+## the axes present in the number
+## (n -> sign(r(n)) + sign(ir(n))i)
 func axis(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [sign(n[0]), sign(n[1])]
 		SYSTEM.FRACTIONS, _: return [sign(n[0]), sign(n[1]), 1]
 
-# the axes present in the number, but 0+0i counts as positive real
-# (n -> 1 if n == 0 else axis(n))
+## the axes present in the number, but 0+0i counts as positive real
+## (n -> 1 if n == 0 else axis(n))
 func saxis(n:PackedInt64Array) -> PackedInt64Array: return ONE if n == ZERO else axis(n)
 
-# abs of axes independently
-# (n -> abs(r(n)) + abs(ir(n))i)
+## abs of axes independently
+## (n -> abs(r(n)) + abs(ir(n))i)
 func acrabs(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [abs(n[0]), abs(n[1])]
 		SYSTEM.FRACTIONS, _: return [abs(n[0]), abs(n[1]), n[2]]
 
-# the axes present in the number, ignoring sign
+## the axes present in the number, ignoring sign
 func axibs(n:PackedInt64Array) -> PackedInt64Array: return acrabs(axis(n))
 
 # comparators
 
-# (a,b -> a == b)
+## (a,b -> a == b)
 func eq(a:PackedInt64Array, b:PackedInt64Array) -> bool: return a == b
 
-# (a,b -> a != b)
+## (a,b -> a != b)
 func neq(a:PackedInt64Array, b:PackedInt64Array) -> bool: return a != b
 
-# (a,b -> r(a) > r(b))
+## (a,b -> r(a) > r(b))
 func gt(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 	match system:
 		SYSTEM.COMPLEX: return a[0] > b[0]
 		SYSTEM.FRACTIONS, _: return a[0]*b[2] > b[0]*a[2]
 
-# (a,b -> r(a) >= r(b))
+## (a,b -> r(a) >= r(b))
 func gte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return !lt(a, b)
 
-# (a,b -> r(a) < r(b))
+## (a,b -> r(a) < r(b))
 func lt(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 	match system:
 		SYSTEM.COMPLEX: return a[0] < b[0]
 		SYSTEM.FRACTIONS, _: return a[0]*b[2] < b[0]*a[2]
 
-# (a,b -> r(a) <= r(b))
+## (a,b -> r(a) <= r(b))
 func lte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return !gt(a, b)
 
-# (a,b -> ir(a) > ir(b))
+## (a,b -> ir(a) > ir(b))
 func igt(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 	match system:
 		SYSTEM.COMPLEX: return a[1] > b[1]
 		SYSTEM.FRACTIONS, _: return a[1]*b[2] > b[1]*a[2]
 
-# (a,b -> ir(a) >= ir(b))
+## (a,b -> ir(a) >= ir(b))
 func igte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return !ilt(a, b)
 
-# (a,b -> ir(a) < ir(b))
+## (a,b -> ir(a) < ir(b))
 func ilt(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 	match system:
 		SYSTEM.COMPLEX: return a[1] < b[1]
 		SYSTEM.FRACTIONS, _: return a[1]*b[2] < b[1]*a[2]
 
-# (a,b -> ir(a) <= ir(b))
+## (a,b -> ir(a) <= ir(b))
 func ilte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return !igt(a, b)
 
-# (a,b -> floor(a / b) == a / b)
+## (a,b -> gt(a,b) && igt(a,b))
+func cgt(a:PackedInt64Array, b:PackedInt64Array) -> bool: return gt(a,b) && igt(a,b)
+## (a,b -> gte(a,b) && igte(a,b))
+func cgte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return gte(a,b) && igte(a,b)
+## (a,b -> lt(a,b) && ilt(a,b))
+func clt(a:PackedInt64Array, b:PackedInt64Array) -> bool: return lt(a,b) && ilt(a,b)
+## (a,b -> lte(a,b) && ilte(a,b))
+func clte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return lte(a,b) && ilte(a,b)
+
+## (a,b -> floor(a / b) == a / b)
 func divisibleBy(a:PackedInt64Array, b:PackedInt64Array) -> bool: return nex(modulo(a,b))
 
-# (a,b -> exists(r(a)) implies exists(r(b)) and exists(ir(a)) implies exists(ir(b)))
+## (a,b -> exists(r(a)) implies exists(r(b)) and exists(ir(a)) implies exists(ir(b)))
 func implies(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 	return (a[0] == 0 || b[0] != 0) && (a[1] == 0 || b[1] != 0)
 
-# signed implies
-# (a,b -> exists(r(a)) implies sign(r(a)) == sign(r(b)) and exists(ir(a)) implies sign(ir(a)) == sign(ir(b)))
+## signed implies
+## (a,b -> exists(r(a)) implies sign(r(a)) == sign(r(b)) and exists(ir(a)) implies sign(ir(a)) == sign(ir(b)))
 func simplies(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 	return (a[0] == 0 || sign(a[0]) == sign(b[0])) && (a[1] == 0 || sign(a[1]) == sign(b[1]))
 
 # deciders
 
-# "exists"
+## "exists"
 func ex(n:PackedInt64Array) -> bool:
 	return neq(n, ZERO)
 
@@ -366,7 +383,7 @@ func toIpow(n:PackedInt64Array) -> int:
 	elif eq(n, nI): return 3
 	else: assert(false); return 0
 
-# only needs to work for real integers
+## only needs to work for real integers
 func toInt(n:PackedInt64Array) -> int:
 	return n[0]
 
@@ -390,8 +407,8 @@ func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 		if den != 1: iComponent += "/" + str(den)
 	return rComponent + iComponent
 
-# greatest (positive) common divisor
-# https://en.wikipedia.org/wiki/Euclidean_algorithm
+## greatest (positive) common divisor
+## https://en.wikipedia.org/wiki/Euclidean_algorithm
 func gcd(a:int, b:int) -> int:
 	a = abs(a)
 	b = abs(b)
@@ -402,3 +419,7 @@ func gcd(a:int, b:int) -> int:
 		b = a % b
 		a = temp
 	return a
+
+## in both axes, keeps the magnitude of a greater than or equal to the magnitude of b, in the direction of b. if b doesnt exist in that axis, it will be unaffected
+func keepAbove(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
+	return along(M.max(along(a,orelse(b,a)), acrabs(b)), orelse(b,a))

@@ -401,12 +401,6 @@ layout_mode = 2
 text = " (1.00x)"
 label_settings = SubResource("LabelSettings_3e3b5")
 
-[node name="clarifier" type="TextureRect" parent="c/editorSettings/c2/c/c2" unique_id=598608214]
-layout_mode = 2
-size_flags_vertical = 0
-tooltip_text = "Currently, increasing this lowers the resolution of the game. Sorry about that."
-texture = ExtResource("5_iswfj")
-
 [node name="edgeResizing" type="CheckButton" parent="c/editorSettings/c2/c" unique_id=1487025343]
 unique_name_in_owner = true
 layout_mode = 2
@@ -721,6 +715,12 @@ layout_mode = 2
 label = "Toggle Infinite"
 action = &"focusKeyInfinite"
 
+[node name="focusKeyGlistening" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/keyFocused/c" unique_id=427433704 instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Toggle Glistening"
+action = &"focusKeyGlistening"
+prerequisite = &"Glistening"
+
 [node name="l2" type="Label" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c" unique_id=372084689]
 layout_mode = 2
 text = "Door Focused"
@@ -812,6 +812,12 @@ layout_mode = 2
 label = "Set Exact Type"
 action = &"focusLockExact"
 prerequisite = &"C3"
+
+[node name="focusLockGlistening" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" unique_id=1770787322 instance=ExtResource("6_dkncv")]
+layout_mode = 2
+label = "Set Glistening Type"
+action = &"focusLockGlistening"
+prerequisite = &"Glistening"
 
 [node name="focusLockNegated" parent="c/editorSettings/c2/c/hotkeys/componentFocused/c/doorFocused/c/editingLockProperties/c" unique_id=1810499545 instance=ExtResource("6_dkncv")]
 layout_mode = 2

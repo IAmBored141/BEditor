@@ -8,6 +8,7 @@ var screenshot:Image
 var mods:Array[StringName]
 var modpack:Mods.Modpack = null
 var version:Mods.Version = null
+var formatVersion:int
 
 var path:String
 var loader:GDScript
@@ -59,7 +60,7 @@ func resolve() -> void:
 	Mods.activeModpack = modpack
 	Mods.activeVersion = version
 	Mods.updateNumberSystem()
-	loader.loadFile(file)
+	loader.loadFile(file, formatVersion)
 	if levelStart != -1:
 		Game.levelStart = Game.objects[levelStart]
 		if Game.editor:
