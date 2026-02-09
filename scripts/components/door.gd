@@ -494,14 +494,11 @@ func tryOpen(player:Player) -> void:
 		else:
 			cost = M.add(cost, lock.getCost(player))
 	for lock in remoteLocks:
-		if lock.type == Lock.TYPE.GLISTENING:
-			glistenCost = M.add(cost, lock.getCost(player))
-		else:
-			cost = M.add(cost, lock.getCost(player))
+		cost = M.add(cost, lock.cost)
 	
 	var spendColor:Game.COLOR = colorAfterAurabreaker()
-	player.changeGlisten(spendColor, M.sub(player.glisten[spendColor], glistenCost))
 	player.changeKeys(spendColor, M.sub(player.key[spendColor],cost))
+	player.changeGlisten(spendColor, M.sub(player.glisten[spendColor], glistenCost))
 	
 	GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", M.sub(gameCopies, M.across(ipow(), M.sub(M.allAxes(), infCopies)))))
 	
@@ -551,14 +548,11 @@ func tryQuicksilverOpen(player:Player) -> bool:
 		else:
 			cost = M.add(cost, lock.getCost(player, player.masterMode))
 	for lock in remoteLocks:
-		if lock.type == Lock.TYPE.GLISTENING:
-			glistenCost = M.add(cost, lock.cost)
-		else:
-			cost = M.add(cost, lock.cost)
+		cost = M.add(cost, lock.cost)
 	player.changeKeys(Game.COLOR.QUICKSILVER, M.sub(player.key[Game.COLOR.QUICKSILVER], player.masterMode))
 	var spendColor:Game.COLOR = colorAfterAurabreaker()
-	player.changeGlisten(spendColor, M.sub(player.glisten[spendColor], glistenCost))
 	player.changeKeys(spendColor, M.sub(player.key[spendColor],cost))
+	player.changeGlisten(spendColor, M.sub(player.glisten[spendColor], glistenCost))
 
 	AudioManager.play(preload("res://resources/sounds/door/master.wav"))
 	relockAnimation()
