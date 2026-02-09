@@ -6,22 +6,15 @@ func getMasterShineColor() -> Color:
 	match MASTER_CYCLE_COLORS[masterCycle]:
 		Game.COLOR.MASTER: return Color("#b4b432") if M.positive(M.sign(masterMode)) else Color("#3232b4")
 		Game.COLOR.QUICKSILVER: return Color("#3232b4") if M.positive(M.sign(masterMode)) else Color("#b4b432")
-		Game.COLOR.COSMIC: return Color("#240a44") if M.positive(M.sign(masterMode)) else Color("#d5cbec")
 		_: return Color() # unreachable
 
 const HELD_MASTER:Texture2D = preload("res://assets/game/player/held/master.png")
 const HELD_QUICKSILVER:Texture2D = preload("res://assets/game/player/held/quicksilver.png")
 const HELD_MASTER_NEGATIVE:Texture2D = preload("res://assets/game/player/held/masterNegative.png")
 const HELD_QUICKSILVER_NEGATIVE:Texture2D = preload("res://assets/game/player/held/quicksilverNegative.png")
-# WIP
-const HELD_COSMIC:Texture2D = preload("res://assets/game/player/held/master.png")
-const HELD_COSMIC_NEGATIVE:Texture2D = preload("res://assets/game/player/held/masterNegative.png")
-
-
 func getHeldKeySprite() -> Texture2D:
 	if masterCycle == 1: return HELD_MASTER if M.positive(M.sign(masterMode)) else HELD_MASTER_NEGATIVE
-	elif masterCycle == 2: return HELD_QUICKSILVER if M.positive(M.sign(masterMode)) else HELD_QUICKSILVER_NEGATIVE
-	else: return HELD_COSMIC if M.positive(M.sign(masterMode)) else HELD_COSMIC_NEGATIVE
+	else: return HELD_QUICKSILVER if M.positive(M.sign(masterMode)) else HELD_QUICKSILVER_NEGATIVE
 
 const AURA_RED:Texture2D = preload("res://assets/game/player/aura/red.png")
 const AURA_GREEN:Texture2D = preload("res://assets/game/player/aura/green.png")
@@ -49,8 +42,8 @@ var glisten:Array[PackedInt64Array] = [] #your glistening count
 var cantSave:bool = false # cant save if near a door
 
 var masterMode:PackedInt64Array = M.ZERO
-var masterCycle:int = 0 # 0 = None, 1 = Master, 2 = Silver, 3 = Cosmic
-const MASTER_CYCLE_COLORS:Array[Game.COLOR] = [Game.COLOR.WHITE, Game.COLOR.MASTER, Game.COLOR.QUICKSILVER, Game.COLOR.COSMIC]
+var masterCycle:int = 0 # 0 = None, 1 = Master, 2 = Silver
+const MASTER_CYCLE_COLORS:Array[Game.COLOR] = [Game.COLOR.WHITE, Game.COLOR.MASTER, Game.COLOR.QUICKSILVER]
 
 var complexMode:PackedInt64Array = M.ONE # C(1,0) for real view, C(0,1) for i-view
 
@@ -324,12 +317,6 @@ func cycleMaster() -> void:
 			masterCycle = 2
 			masterMode = M.axis(relevantCount)
 			AudioManager.play(preload("res://resources/sounds/player/quicksilverEquip.wav"),2)
-			return
-	if masterCycle < 3 and Game.COLOR.COSMIC not in armamentImmunities: # COSMIC
-		var relevantCount:PackedInt64Array = M.across(M.r(key[Game.COLOR.COSMIC]), complexMode)
-		if M.ex(relevantCount):
-			masterCycle = 3
-			masterMode = M.axis(relevantCount)
 			return
 	if masterCycle != 0:
 		AudioManager.play(preload("res://resources/sounds/player/masterUnequip.wav"))
