@@ -6,13 +6,13 @@ static var NON_OBJECT_COMPONENTS:Array[GDScript] = [Lock, KeyCounterElement]
 static var RECTANGLE_COMPONENTS:Array[GDScript] = [Door, Lock, KeyCounter, RemoteLock, PlaceholderObject, FloatingTile]
 static var RESIZABLE_COMPONENTS:Array[GDScript] = [Door, Lock, KeyCounter, RemoteLock, PlaceholderObject, FloatingTile]
 
-const COLORS:int = 24
-enum COLOR {MASTER, WHITE, ORANGE, PURPLE, RED, GREEN, BLUE, PINK, CYAN, BLACK, BROWN, PURE, GLITCH, STONE, DYNAMITE, QUICKSILVER, MAROON, FOREST, NAVY, ICE, MUD, GRAFFITI, NONE, COSMIC}
-const COLOR_NAMES:Array[String] = ["Master", "White", "Orange", "Purple", "Red", "Green", "Blue", "Pink", "Cyan", "Black", "Brown", "Pure", "Glitch", "Stone", "Dynamite", "Quicksilver", "Maroon", "Forest", "Navy", "Ice", "Mud", "Graffiti", "None", "Cosmic"]
-const NONFLAT_COLORS:Array[COLOR] = [COLOR.MASTER, COLOR.PURE, COLOR.GLITCH, COLOR.STONE, COLOR.DYNAMITE, COLOR.QUICKSILVER, COLOR.NONE, COLOR.COSMIC] # colors that cant be edited in colorblind settings
-const ANIMATED_COLORS:Array[COLOR] = [COLOR.MASTER, COLOR.PURE, COLOR.DYNAMITE, COLOR.QUICKSILVER, COLOR.COSMIC]
-const TEXTURED_COLORS:Array[COLOR] = [COLOR.MASTER, COLOR.PURE, COLOR.STONE, COLOR.DYNAMITE, COLOR.QUICKSILVER, COLOR.COSMIC]
-const TILED_TEXTURED_COLORS:Array[COLOR] = [COLOR.DYNAMITE, COLOR.COSMIC]
+const COLORS:int = 23
+enum COLOR {MASTER, WHITE, ORANGE, PURPLE, RED, GREEN, BLUE, PINK, CYAN, BLACK, BROWN, PURE, GLITCH, STONE, DYNAMITE, QUICKSILVER, MAROON, FOREST, NAVY, ICE, MUD, GRAFFITI, NONE}
+const COLOR_NAMES:Array[String] = ["Master", "White", "Orange", "Purple", "Red", "Green", "Blue", "Pink", "Cyan", "Black", "Brown", "Pure", "Glitch", "Stone", "Dynamite", "Quicksilver", "Maroon", "Forest", "Navy", "Ice", "Mud", "Graffiti", "None"]
+const NONFLAT_COLORS:Array[COLOR] = [COLOR.MASTER, COLOR.PURE, COLOR.GLITCH, COLOR.STONE, COLOR.DYNAMITE, COLOR.QUICKSILVER, COLOR.NONE] # colors that cant be edited in colorblind settings
+const ANIMATED_COLORS:Array[COLOR] = [COLOR.MASTER, COLOR.PURE, COLOR.DYNAMITE, COLOR.QUICKSILVER]
+const TEXTURED_COLORS:Array[COLOR] = [COLOR.MASTER, COLOR.PURE, COLOR.STONE, COLOR.DYNAMITE, COLOR.QUICKSILVER]
+const TILED_TEXTURED_COLORS:Array[COLOR] = [COLOR.DYNAMITE]
 
 const DROP_SHADOW_COLOR:Color = Color(Color.BLACK, 0.35)
 
@@ -34,8 +34,7 @@ const DEFAULT_HIGH:Array[Color] = [
 	Color("#d18866"), Color("#ffffff"),
 	Color("#6d4040"), Color("#3f5c3f"), Color("#49496b"),
 	Color("#d1ffff"), Color("#b57ea7"), Color("#f2e380"),
-	Color("#00000000"),
-	Color("#240a44")
+	Color("#00000000")
 ]
 const BRIGHT_HIGH:Array[Color] = [
 	Color("#e7bf98"),
@@ -49,8 +48,7 @@ const BRIGHT_HIGH:Array[Color] = [
 	Color("#d18866"), Color("#ffffff"),
 	Color("#6d4040"), Color("#3f5c3f"), Color("#49496b"),
 	Color("#d1ffff"), Color("#b57ea7"), Color("#f2e380"),
-	Color("#00000000"),
-	Color("#340e62")
+	Color("#00000000")
 ]
 
 var mainTone:Array[Color] = DEFAULT_MAIN.duplicate()
@@ -66,8 +64,7 @@ const DEFAULT_MAIN:Array[Color] = [
 	Color("#d34728"), Color("#b8b8b8"),
 	Color("#583232"), Color("#2c3b2c"), Color("#333352"),
 	Color("#82f0ff"), Color("#966489"), Color("#e2c961"),
-	Color("#00000000"),
-	Color("#19072f")
+	Color("#00000000")
 ]
 const BRIGHT_MAIN:Array[Color] = [
 	Color("#d68f49"),
@@ -81,8 +78,7 @@ const BRIGHT_MAIN:Array[Color] = [
 	Color("#d34728"), Color("#b8b8b8"),
 	Color("#583232"), Color("#2c3b2c"), Color("#333352"),
 	Color("#82f0ff"), Color("#966489"), Color("#e2c961"),
-	Color("#00000000"),
-	Color("#240a44")
+	Color("#00000000")
 ]
 
 var darkTone:Array[Color] = DEFAULT_DARK.duplicate()
@@ -98,8 +94,7 @@ const DEFAULT_DARK:Array[Color] = [
 	Color("#7a3117"), Color("#818181"),
 	Color("#3b1f1f"), Color("#1d2b1d"), Color("#262633"),
 	Color("#62b6c1"), Color("#7f4972"), Color("#c6af51"),
-	Color("#00000000"),
-	Color("#110521")
+	Color("#00000000")
 ]
 const BRIGHT_DARK:Array[Color] = [
 	Color("#9c6023"),
@@ -113,8 +108,7 @@ const BRIGHT_DARK:Array[Color] = [
 	Color("#7a3117"), Color("#818181"),
 	Color("#3b1f1f"), Color("#1d2b1d"), Color("#262633"),
 	Color("#62b6c1"), Color("#7f4972"), Color("#c6af51"),
-	Color("#00000000"),
-	Color("#19072f")
+	Color("#00000000")
 ]
 
 @onready var editor:Editor = get_node("/root/editor")
