@@ -50,6 +50,7 @@ func getCurseColor() -> Color:
 		Game.COLOR.STONE: return Color("#7e8892")
 		Game.COLOR.QUICKSILVER: return Color("#cccccc")
 		Game.COLOR.DYNAMITE: return Color("#b97328")
+		Game.COLOR.COSMIC: return Color("#19072f")
 		_: return Game.mainTone[color]
 
 class Temporary extends CurseParticle:

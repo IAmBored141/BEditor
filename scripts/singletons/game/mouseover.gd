@@ -100,5 +100,12 @@ func effects(object:GameObject) -> String:
 	if object.gameFrozen: string += "\nFrozen! (1xRed)"
 	if object.gameCrumbled: string += "\nEroded! (5xGreen)"
 	if object.gamePainted: string += "\nPainted! (3xBlue)"
+	if object.starred == 1: string += "\nStarred! (Can open)"
+	if object.starred == -1: string += "\nStarred! (Can't open)"
+	if object.starred != 0: 
+		string += "\n(Spends " + M.str(object.starredSpendKey)
+		if object.starredSpendGlisten != M.ZERO:
+			string += " (" + M.str(object.starredSpendGlisten) + ")"
+		string += " " + Game.COLOR_NAMES[object.starredColor] + ")"
 	if string: string = "\n- Effects -" + string
 	return string
