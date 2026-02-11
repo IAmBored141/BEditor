@@ -9,7 +9,7 @@ var confirmAction:ACTION
 
 var jsCallback:JavaScriptObject
 
-const FILE_FORMAT_VERSION:int = 1
+const FILE_FORMAT_VERSION:int = 2
 
 # Okay.
 # Here's how we'll do it
@@ -224,7 +224,6 @@ func IDArraytoComponents(type:GDScript,array:Array) -> Array:
 func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 	var openWindow:OpenWindow = preload("res://scenes/openWindow.tscn").instantiate()
 	@warning_ignore("integer_division")
-	openWindow.position = get_window().position+(get_window().size-openWindow.size)/2
 	openWindow.path = path
 
 	if path.get_extension() != "cedit": errorPopup("Unrecognised file format"); return null
@@ -234,13 +233,16 @@ func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 	if file.get_pascal_string() != "IWLCEditorLevel": errorPopup("Unrecognised file format"); return null
 	var formatVersion:int = file.get_32()
 	var editorVersion:String = file.get_pascal_string()
-	if formatVersion == 1: openWindow.loader = LoadV1
-	else:
+	openWindow.formatVersion = formatVersion
+	if formatVersion == 0:
 		openWindow.queue_free()
 		if formatVersion == 0: errorPopup("File version 0 is unrecognised")
-		else: errorPopup("File version %s is unrecognised. File last opened in IWLCEditor v%s" % [formatVersion, editorVersion])
 		return null
-
+	elif formatVersion <= 2: openWindow.loader = LoadV1to2
+	else:
+		openWindow.queue_free()
+		errorPopup("File version %s is unrecognised. File last opened in IWLCEditor v%s" % [formatVersion, editorVersion])
+		return null
 	openWindow.level = file.get_var(true)
 	openWindow.screenshot = file.get_var(true)
 	openWindow.mods = file.get_var()
@@ -251,7 +253,9 @@ func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 	openWindow.levelStart = file.get_64()
 	openWindow.file = file
 	if immediate: openWindow.resolve()
-	else: editor.add_child(openWindow)
+	else:
+		@warning_ignore("integer_division") if !OS.has_feature("web"): openWindow.position = get_window().position+(get_window().size-openWindow.size)/2
+		editor.add_child(openWindow)
 	return openWindow
 
 func loadJs(result) -> void:
@@ -276,4 +280,4 @@ func openExportWindow() -> void:
 		var window:Window = preload("res://scenes/exportWindow.tscn").instantiate()
 		editor.add_child(window)
 		@warning_ignore("integer_division")
-		window.position = get_window().position+(get_window().size-window.size)/2
+		if !OS.has_feature("web"): window.position = get_window().position+(get_window().size-window.size)/2

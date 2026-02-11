@@ -115,10 +115,15 @@ func opened() -> void:
 		InputMap.action_erase_events(setting.action)
 		setting._reset(configFile.get_value("editor", "hotkey_"+setting.action, setting.default))
 		for button in setting.buttons: button.check()
-	%colorQuicksetSetting.setMatches(configFile.get_value("editor", "quicksetColorMatches", ColorQuicksetSetting.DEFAULT_MATCHES.duplicate()))
-	%lockSizeQuicksetSetting.setMatches(configFile.get_value("editor", "quicksetLockSizeMatches", LockSizeQuicksetSetting.DEFAULT_MATCHES.duplicate()))
+	%colorQuicksetSetting.setMatches(getMatches("quicksetColorMatches", ColorQuicksetSetting.DEFAULT_MATCHES))
+	%lockSizeQuicksetSetting.setMatches(getMatches("quicksetLockSizeMatches", LockSizeQuicksetSetting.DEFAULT_MATCHES))
 	%gameSettings.opened(configFile)
 	update()
+
+func getMatches(matchName:String, default:Array[String]) -> Array[String]:
+	var matches:Array[String] = configFile.get_value("editor", matchName, default.duplicate())
+	for i in range(len(matches), len(default)): matches.append(default[i])
+	return matches
 
 func closed() -> void:
 	configFile.set_value("editor", "thumbnailHideDescription", %thumbnailHideDescription.button_pressed)

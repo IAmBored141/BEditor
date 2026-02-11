@@ -197,7 +197,7 @@ var uiScale:float = 1:
 		uiScale = value
 		if editor:
 			get_window().content_scale_factor = uiScale
-			editor._gameViewportResized()
+			editor._gameViewportDisplayResized()
 
 var simpleLocks:bool = false:
 	set(value):
@@ -274,7 +274,7 @@ func playTest(spawn:PlayerSpawn) -> void:
 	Changes.bufferSave()
 	
 	if playState == PLAY_STATE.EDIT:
-		camera.zoom = Vector2.ONE
+		camera.zoom = Vector2.ONE*uiScale
 		starting = true
 		player = preload("res://scenes/player.tscn").instantiate()
 		world.add_child(player)
@@ -285,6 +285,7 @@ func playTest(spawn:PlayerSpawn) -> void:
 			player.key.assign(spawn.key.map(func(number): return number.duplicate()))
 			player.star.assign(spawn.star)
 			player.curse.assign(spawn.curse)
+			player.glisten.assign(spawn.glisten.map(func(number): return number.duplicate()))
 		else: GameChanges.start()
 	playState = PLAY_STATE.PLAY
 	latestSpawn = spawn
@@ -331,6 +332,7 @@ func savestate() -> void:
 	Changes.addChange(Changes.PropertyChange.new(state,&"key",player.key.map(func(count): return count.duplicate())))
 	Changes.addChange(Changes.PropertyChange.new(state,&"star",player.star))
 	Changes.addChange(Changes.PropertyChange.new(state,&"curse",player.curse))
+	Changes.addChange(Changes.PropertyChange.new(state,&"glisten",player.glisten.map(func(count): return count.duplicate())))
 	Changes.addChange(Changes.PropertyChange.new(state,&"undoStack",GameChanges.undoStack.duplicate()))
 	Changes.addChange(Changes.PropertyChange.new(state,&"saveBuffered",GameChanges.saveBuffered))
 
@@ -411,7 +413,7 @@ func win(goal:Goal) -> void:
 		editor.cameraZoom = camera.zoom.x
 		editor.editorCamera.zoom = camera.zoom
 		editor.targetCameraZoom = camera.zoom.x
-		editor.editorCamera.position = camera.position - editor.gameCont.size/2
+		editor.editorCamera.position = (camera.get_screen_center_position() - editor.gameCont.size/2)
 	else:
 		playGame.win(goal)
 
