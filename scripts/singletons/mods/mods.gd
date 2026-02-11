@@ -67,7 +67,7 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Allows objects to be placed out of level bounds",
 		[&"OutOfBounds"], true
 	),
-    &"PartialInfKeys": Mod.new(
+	&"PartialInfKeys": Mod.new(
 		"Partial Infinite Keys",
 		"Adds the option for infinite keys to only become re-available every N key collects",
 		[&"PartialInfKeys"]
@@ -76,7 +76,7 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Fractions",
 		"The fractional number type",
 		[]
-    ),
+	),
 	&"Glistening": Mod.new(
 		"Glistening",
 		"Adds Glistening keys and locks. Added by Bored",

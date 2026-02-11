@@ -239,6 +239,10 @@ func _process(delta:float) -> void:
 	drawCurse.color = curseColor
 	drawCurse.queue_redraw()
 
+func convertNumbers(from:M.SYSTEM) -> void:
+	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"key"))
+	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"glisten"))
+
 func receiveKey(event:InputEventKey):
 	if paused(): return
 	if Editor.eventIs(event, &"editPausePlaytest") and Game.editor: Game.pauseTest()

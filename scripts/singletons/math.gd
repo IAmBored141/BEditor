@@ -143,7 +143,8 @@ func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 
 ## a "along" the axes of b
 ## (a,b -> (r(a) * sign(r(b))) + (ir(a) * sign(ir(b)))i)
-func along(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: return across(a, axis(b))
+func along(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: 
+	return across(a, axis(b))
 ## a "along" the axes of b, ignoring signs
 ## (a,b -> (r(a) * exists(r(b))) + (ir(a) * exists(ir(b)))i)
 func alongbs(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array: return across(a, axibs(b))
@@ -162,7 +163,16 @@ func rotate(n:PackedInt64Array) -> PackedInt64Array:
 
 ## componentwise max
 func max(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
-	return [max(a[0], b[0]), max(a[1], b[1])]
+	match system:
+		SYSTEM.COMPLEX: return [max(a[0], b[0]), max(a[1], b[1])]
+		SYSTEM.FRACTIONS, _: 
+			# multiplys the numberator of each part of a with the denominator of b
+			# and vise versa
+			# takes the max of that
+			# then simplifies the resulting fraction
+			# with the denominator as the product of both
+			# checking desmos, this is equivalent to running the max functions directly on the fractions.
+			return simplify([max(a[0]*b[2], b[0]*a[2]), max(a[1]*b[2], b[1]*a[2]), a[2]*b[2]])
 
 ## componentwise orelse
 func orelse(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
