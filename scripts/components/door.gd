@@ -36,7 +36,8 @@ const GLITCH_HIGH:Texture2D = preload("res://assets/game/door/glitch/high.png")
 const GLITCH_MAIN:Texture2D = preload("res://assets/game/door/glitch/main.png")
 const GLITCH_DARK:Texture2D = preload("res://assets/game/door/glitch/dark.png")
 
-const STARRED_SYMBOL:Texture2D = preload("res://assets/game/door/symbols/star.png")
+const STARRED_SYMBOL_ON:Texture2D = preload("res://assets/game/door/symbols/starOn.png")
+const STARRED_SYMBOL_OFF:Texture2D = preload("res://assets/game/door/symbols/starOff.png")
 
 static var GLITCH:ColorsTextureLoader = ColorsTextureLoader.new("res://assets/game/door/glitch/$c.png",Game.TEXTURED_COLORS, false, false, {capitalised=false})
 
@@ -257,10 +258,12 @@ static func drawAuras(objectDrawCrumbled:RID,objectDrawPainted:RID,objectDrawFro
 			RenderingServer.canvas_item_set_instance_shader_parameter(objectDrawFrozen, &"size", rect.size)
 			RenderingServer.canvas_item_add_rect(objectDrawFrozen,rect,Color.WHITE)
 
-func drawSymbols(objectDrawSymbols:RID,objectIsStarred:bool,doorSize:Vector2) -> void:
-	if objectIsStarred:
-		RenderingServer.canvas_item_add_texture_rect(objectDrawSymbols,Rect2(Vector2(doorSize[0]/2-12, doorSize[1]-12),Vector2(25,25)),STARRED_SYMBOL)
-
+func drawSymbols(objectDrawSymbols:RID,objectIsStarred:int,doorSize:Vector2) -> void:
+	if objectIsStarred == 1:
+		RenderingServer.canvas_item_add_texture_rect(objectDrawSymbols,Rect2(Vector2(doorSize[0]/2-12, doorSize[1]-12),Vector2(24,24)),STARRED_SYMBOL_ON)
+	elif objectIsStarred == -1:
+		RenderingServer.canvas_item_add_texture_rect(objectDrawSymbols,Rect2(Vector2(doorSize[0]/2-12, doorSize[1]-12),Vector2(24,24)),STARRED_SYMBOL_OFF)
+		
 func receiveMouseInput(event:InputEventMouse) -> bool:
 	# resizing
 	if !editor.edgeResizing or editor.componentDragged: return false
@@ -635,14 +638,11 @@ func calculateCanOpen(player:Player) -> bool:
 func calculateCosts(player:Player, returnGlisten:bool) -> PackedInt64Array:
 	var cost:PackedInt64Array = M.ZERO
 	var glistenCost:PackedInt64Array = M.ZERO
-	print("---")
 	for lock in locks:
 		if lock.type == lock.TYPE.GLISTENING:
 			glistenCost = M.add(glistenCost, lock.getCost(player))
 		else:
 			cost = M.add(cost, lock.getCost(player))
-		print(cost)
-		print(glistenCost)
 	for lock in remoteLocks:
 		if lock.type == Lock.TYPE.GLISTENING:
 			glistenCost = M.add(glistenCost, lock.getCost(player))
