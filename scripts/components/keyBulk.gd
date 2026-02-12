@@ -19,10 +19,15 @@ static var QUICKSILVER_OUTLINE_MASK:KeyTextureLoader = KeyTextureLoader.new("res
 
 const CURSE_FILL_DARK:Texture2D = preload("res://assets/game/key/curse/fillDark.png")
 
+const NULL_ROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/null.png")
 const SIGNFLIP_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/signflip.png")
 const POSROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/posrotor.png")
 const NEGROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/negrotor.png")
 const INFINITE_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/infinite.png")
+const RECI_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/reci.png")
+const RECIFLIP_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/reciflip.png")
+const RECIPOS_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/recipos.png")
+const RECINEG_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/recineg.png")
 const GLISTENING_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/glistening.png")
 
 static var TEXTURE:KeyColorsTextureLoader = KeyColorsTextureLoader.new("res://assets/game/key/$c/$t.png", TEXTURE_COLORS, true, false, {capitalised=false})
@@ -103,9 +108,15 @@ func _draw() -> void:
 		KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT:
 			if !M.eq(count, M.ONE): TextDraw.outlined2(FKEYBULK,drawSymbol,M.str(count),keycountColor(),keycountOutlineColor(),14,Vector2(1,25))
 		KeyBulk.TYPE.ROTOR:
-			if M.eq(count, M.nONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,SIGNFLIP_SYMBOL)
-			elif M.eq(count, M.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,POSROTOR_SYMBOL)
-			elif M.eq(count, M.nI): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,NEGROTOR_SYMBOL)
+			if un:
+				if M.eq(count, M.nONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECIFLIP_SYMBOL)
+				elif M.eq(count, M.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECIPOS_SYMBOL)
+				elif M.eq(count, M.nI): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECINEG_SYMBOL)
+				elif M.eq(count, M.ONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect, RECI_SYMBOL)
+			else:
+				if M.eq(count, M.nONE) or M.eq(count,M.ONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,SIGNFLIP_SYMBOL)
+				elif M.eq(count, M.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,POSROTOR_SYMBOL)
+				elif M.eq(count, M.nI): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,NEGROTOR_SYMBOL)
 	if infinite:
 		if glistening:
 			RenderingServer.canvas_item_add_texture_rect(drawSymbol,Rect2(Vector2(MULTITYPEOFFSET,-MULTITYPEOFFSET), size),INFINITE_SYMBOL)
@@ -189,19 +200,26 @@ func stop() -> void:
 
 func collect(player:Player) -> void:
 	if partialInfiniteCount: return
-
 	var collectColor:Game.COLOR = effectiveColor()
 
 	if glistening:
 		match type:
 			TYPE.NORMAL: player.changeGlisten(collectColor, M.add(player.glisten[collectColor], count))
 			TYPE.EXACT: player.changeGlisten(collectColor, count)
-			TYPE.ROTOR: player.changeGlisten(collectColor, M.times(player.glisten[collectColor], count))
+			TYPE.ROTOR:
+				if un:
+					player.changeGlisten(collectColor, M.divide(count,player.glisten[collectColor]))
+				else:
+					player.changeGlisten(collectColor, M.times(player.glisten[collectColor], count))
 
 	match type:
 		TYPE.NORMAL: player.changeKeys(collectColor, M.add(player.key[collectColor], count))
 		TYPE.EXACT: player.changeKeys(collectColor, count)
-		TYPE.ROTOR: player.changeKeys(collectColor, M.times(player.key[collectColor], count))
+		TYPE.ROTOR:
+			if un:
+				player.changeKeys(collectColor, M.divide(count,player.key[collectColor]))
+			else:
+				player.changeKeys(collectColor, M.times(player.key[collectColor], count))
 		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(effectiveColor(), !un))
 		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new(effectiveColor(), !un))
 	

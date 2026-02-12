@@ -15,9 +15,16 @@ func describe(object:GameObject, pos:Vector2, screenBottomRight:Vector2) -> void
 				KeyBulk.TYPE.EXACT: string += "Exact "
 				KeyBulk.TYPE.STAR: string += "Unstar " if object.un else "Star "
 				KeyBulk.TYPE.ROTOR:
-					if M.eq(object.count, M.nONE): string += "Signflip "
-					elif M.eq(object.count, M.I): string += "Rotor (i) "
-					elif M.eq(object.count, M.nI): string += "Rotor (-i) "
+					if object.un:
+						if M.eq(object.count, M.nONE): string += "Negative Reciprocate "
+						elif M.eq(object.count, M.I): string += "Imaginary Reciprocate "
+						elif M.eq(object.count, M.nI): string += "Negative Imaginary Reciprocate "
+						elif M.eq(object.count, M.ONE): string += "Reciprocate  "
+					else:
+						if M.eq(object.count, M.nONE): string += "Signflip "
+						elif M.eq(object.count, M.I): string += "Rotor (i) "
+						elif M.eq(object.count, M.nI): string += "Rotor (-i) "
+						elif M.eq(object.count, M.ONE): string += "No Rotation "
 				KeyBulk.TYPE.CURSE: string += "Uncurse " if object.un else "Curse "
 			string += Game.COLOR_NAMES[object.color] + " Key"
 			if object.type in [KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT]:

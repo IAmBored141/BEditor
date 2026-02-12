@@ -133,7 +133,8 @@ func across(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 func divide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		@warning_ignore("integer_division") SYSTEM.COMPLEX: return [(a[0]*b[0]+a[1]*b[1])/(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])/(b[0]*b[0]+b[1]*b[1])]
-		SYSTEM.FRACTIONS, _: return simplify([(a[0]*b[0]+a[1]*b[1])*b[2], (a[1]*b[0]-a[0]*b[1])*b[2], (b[0]*b[0]+b[1]*b[1])*a[2]])
+		SYSTEM.FRACTIONS, _: 
+			return simplify([(a[0]*b[0]+a[1]*b[1])*b[2], (a[1]*b[0]-a[0]*b[1])*b[2], (b[0]*b[0]+b[1]*b[1])*a[2]])
 
 ## (a,b -> a - floor(a/b)*b)
 func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
@@ -185,6 +186,7 @@ func simplify(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
 		SYSTEM.FRACTIONS, _:
+			if n[2] == 0: return n
 			var divisor:int = gcd(gcd(n[0], n[1]), n[2])
 			@warning_ignore("integer_division") return [n[0]/divisor, n[1]/divisor, n[2]/divisor]
 
@@ -397,24 +399,31 @@ func toIpow(n:PackedInt64Array) -> int:
 func toInt(n:PackedInt64Array) -> int:
 	return n[0]
 
+# so apparently thats wrong
+func imaginaryPartToInt(n:PackedInt64Array) -> int:
+	return n[1]
+
 func str(n:PackedInt64Array) -> String:
 	return strWithInf(n,ZERO)
 
 func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 	var rComponent:String
 	var iComponent:String = ""
-	var rnum = toInt(rnumer(n))
-	var inum = toInt(inumer(n))
+	var rnum = toInt(n)
+	var inum = imaginaryPartToInt(n)
 	if infAxes[0]: rComponent = "-~" if rnum < 0 else "~"
 	elif rnum: rComponent = str(rnum)
 	if inum:
 		if inum > 0 and rnum: iComponent += "+"
 		if infAxes[1]: iComponent += "-~i" if inum < 0 else "~i"
 		else: iComponent += str(inum) + "i"
-	if !rnum and !inum: return "0"
 	if system & SYSTEM.FRACTIONS:
 		var den:int = toInt(denom(n))
 		if den != 1: iComponent += "/" + str(den)
+		if den == 0:
+			rComponent = "ERROR"
+			iComponent = ""
+	if !rnum and !inum and rComponent != "ERROR": return "0"
 	return rComponent + iComponent
 
 ## greatest (positive) common divisor
