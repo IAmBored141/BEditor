@@ -16,8 +16,8 @@ var cursorEnd:int = 0
 
 var cursorSelectedNumber:int = 0 # used in NUMBER mode
 
-var text:String = "(123-2i)/-7"
-var textLen:int = 10
+var text:String = ""
+var textLen:int = 0
 
 var numbers:int = 0
 var numberStarts:Array[int] = []
@@ -179,7 +179,6 @@ func receiveKey(key:InputEventKey) -> bool:
 						cursorEnd = cursorStart
 						parseText()
 						buildText()
-						print(%cursor.position.x)
 				CURSOR_MODE.NUMBER:
 					if Editor.eventIs(key, &"numberTimesI"): pass
 					elif Editor.eventIs(key, &"numberNegate"):
@@ -218,6 +217,7 @@ func setNumber(number:int, to:int) -> void:
 	for shiftedNumber in range(number+1, numbers):
 		numberStarts[shiftedNumber] += lenChange
 		numberEnds[shiftedNumber] += lenChange
+	textLen += lenChange
 
 func numberCheckSign(number:int) -> void:
 	if numberSemiNegative[number]:
