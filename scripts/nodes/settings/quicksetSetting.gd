@@ -80,7 +80,7 @@ class QuicksetSettingButton extends Button:
 
 	func _input(event:InputEvent) -> void:
 		if !setting or event is InputEventMouse or !event.pressed: return
-		if event is InputEventKey and event.keycode in [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META]: return
+		if event is InputEventKey and (event.keycode < 32 or event.keycode >= 128): return
 		var match:String = char(event.unicode).to_upper()
 		setMatch.append(match)
 		setMatch.sort()

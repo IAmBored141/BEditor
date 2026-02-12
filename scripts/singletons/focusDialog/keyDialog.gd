@@ -27,6 +27,7 @@ func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	else: main.deinteract()
 
 func receiveKey(event:InputEventKey) -> bool:
+	return %newNumberEdit.receiveKey(event)
 	if Editor.eventIs(event, &"focusKeyNormal"): _keyTypeSelected(KeyBulk.TYPE.NORMAL)
 	elif Editor.eventIs(event, &"focusKeyExact"): _keyTypeSelected(KeyBulk.TYPE.EXACT if main.focused.type != KeyBulk.TYPE.EXACT else KeyBulk.TYPE.NORMAL)
 	elif Editor.eventIs(event, &"focusKeyStar"):
