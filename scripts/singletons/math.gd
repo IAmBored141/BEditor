@@ -256,15 +256,15 @@ func axis(n:PackedInt64Array) -> PackedInt64Array:
 ## (n -> 1 if n == 0 else axis(n))
 func saxis(n:PackedInt64Array) -> PackedInt64Array: return ONE if n == ZERO else axis(n)
 
-## abs of axes independently
+## componentwise abs
 ## (n -> abs(r(n)) + abs(ir(n))i)
-func acrabs(n:PackedInt64Array) -> PackedInt64Array:
+func cabs(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [abs(n[0]), abs(n[1])]
 		SYSTEM.FRACTIONS, _: return [abs(n[0]), abs(n[1]), n[2]]
 
 ## the axes present in the number, ignoring sign
-func axibs(n:PackedInt64Array) -> PackedInt64Array: return acrabs(axis(n))
+func axibs(n:PackedInt64Array) -> PackedInt64Array: return cabs(axis(n))
 
 # comparators
 
@@ -434,4 +434,4 @@ func gcd(a:int, b:int) -> int:
 
 ## in both axes, keeps the magnitude of a greater than or equal to the magnitude of b, in the direction of b. if b doesnt exist in that axis, it will be unaffected
 func keepAbove(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
-	return along(M.max(along(a,orelse(b,a)), acrabs(b)), orelse(b,a))
+	return along(M.max(along(a,orelse(b,a)), cabs(b)), orelse(b,a))

@@ -282,7 +282,7 @@ func propertyChangedInit(property:StringName) -> void:
 				Changes.addChange(Changes.PropertyChange.new(self,&"crumbled",false))
 				Changes.addChange(Changes.PropertyChange.new(self,&"painted",false))
 	if property == &"size" and type == TYPE.SIMPLE and len(locks) > 0: locks[0]._simpleDoorUpdate() # ghhghghhh TODO: figure this out
-	if property in [&"copies", &"infCopies"] and M.neq(M.across(M.acrabs(copies), infCopies), infCopies):
+	if property in [&"copies", &"infCopies"] and M.neq(M.across(M.cabs(copies), infCopies), infCopies):
 		if M.ex(M.r(infCopies)) and M.nex(M.r(copies)): Changes.addChange(Changes.PropertyChange.new(self,&"copies", M.Ncn(M.saxis(M.r(copies)), M.ir(copies))))
 		if M.ex(M.i(infCopies)) and M.nex(M.i(copies)): Changes.addChange(Changes.PropertyChange.new(self,&"copies",M.Ncn(M.r(copies), M.saxis(M.ir(copies)))))
 
@@ -582,7 +582,7 @@ func tryDynamiteOpen(player:Player) -> bool:
 	var openedForwards:bool
 	var openedBackwards:bool
 
-	if M.simplies(gameCopies, player.key[Game.COLOR.DYNAMITE]) and M.nonNegative(M.sub(M.along(player.key[Game.COLOR.DYNAMITE], gameCopies), M.acrabs(gameCopies))) and M.nex(infCopies):
+	if M.simplies(gameCopies, player.key[Game.COLOR.DYNAMITE]) and M.nonNegative(M.sub(M.along(player.key[Game.COLOR.DYNAMITE], gameCopies), M.cabs(gameCopies))) and M.nex(infCopies):
 		# if the door can open, open it
 		player.changeKeys(Game.COLOR.DYNAMITE, M.sub(player.key[Game.COLOR.DYNAMITE], gameCopies))
 		GameChanges.addChange(GameChanges.PropertyChange.new(self, &"gameCopies", M.ZERO))
