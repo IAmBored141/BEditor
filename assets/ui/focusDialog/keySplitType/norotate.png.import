@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbd4sybev11bp"
-path="res://.godot/imported/times.png-cbe9b6782f992b6d809aea894a827162.ctex"
+uid="uid://b0p7j723ffg3a"
+path="res://.godot/imported/norotate.png-9d993ad3cd835505a48d74ccd44e0cc3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/focusDialog/keySplitType/times.png"
-dest_files=["res://.godot/imported/times.png-cbe9b6782f992b6d809aea894a827162.ctex"]
+source_file="res://assets/ui/focusDialog/keySplitType/norotate.png"
+dest_files=["res://.godot/imported/norotate.png-9d993ad3cd835505a48d74ccd44e0cc3.ctex"]
 
 [params]
 

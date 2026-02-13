@@ -6,8 +6,6 @@ class_name KeyDialog
 
 const STAR_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/keySplitType/star.png"), preload("res://assets/ui/focusDialog/keySplitType/unstar.png") ]
 const CURSE_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/keySplitType/curse.png"), preload("res://assets/ui/focusDialog/keySplitType/uncurse.png") ]
-const ROTOR_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/keySplitType/times.png"), preload("res://assets/ui/focusDialog/keySplitType/div.png")]
-
 
 func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	%keyColorSelector.setSelect(focused.color)
@@ -19,9 +17,10 @@ func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
 	%keyPartialInfiniteEdit.setValue(M.N(focused.infinite), true)
 	%keyRotorSelector.visible = focused.type == KeyBulk.TYPE.ROTOR
-	%keyUn.visible = focused.type in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE] or (focused.type == KeyBulk.TYPE.ROTOR and Mods.active(&"Fractions"))
+	%keyUn.visible = focused.type in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE]
 	%keyUn.button_pressed = !focused.un
-	%keyRotorSelector.isInRecMode = focused.un
+	%keyRotorSelector.setup(focused)
+	%keyReciprocal.visible = focused.type == KeyBulk.TYPE.ROTOR && Mods.active(&"Fractions")
 	setKeyUnIcon()
 	if focused.type == KeyBulk.TYPE.ROTOR: %keyRotorSelector.setValue(focused.count)
 	if main.interacted and !main.interacted.is_visible_in_tree(): main.deinteract()
@@ -55,7 +54,9 @@ func editDeinteracted(edit:PanelContainer) -> void:
 
 func changedMods() -> void:
 	%keyGlisteningToggle.visible = Mods.active(&"Glistening")
-	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and main.focused is KeyBulk and main.focused.infinite
+	if main.focused is KeyBulk:
+		%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and main.focused.infinite
+		%keyReciprocal.visible = main.focused.type == KeyBulk.TYPE.ROTOR && Mods.active(&"Fractions")
 
 func _keyColorSelected(color:Game.COLOR) -> void:
 	if main.focused is not KeyBulk: return
@@ -89,20 +90,15 @@ func _keyGlisteningToggled(value:bool) -> void:
 func _keyRotorSelected(value:KeyRotorSelector.VALUE):
 	if main.focused is not KeyBulk: return
 	match value:
+		KeyRotorSelector.VALUE.NOROTATE: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.ONE))
 		KeyRotorSelector.VALUE.SIGNFLIP: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nONE))
 		KeyRotorSelector.VALUE.POSROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.I))
 		KeyRotorSelector.VALUE.NEGROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nI))
-		KeyRotorSelector.VALUE.NULL: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.ONE))
 	Changes.bufferSave()
 
-func _keyUnToggled(value:bool):
+func _keyUnToggled(value:bool) -> void:
 	if main.focused is not KeyBulk: return
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"un",!value))
-	if main.focused.type == KeyBulk.TYPE.ROTOR:
-		if main.focused.un and M.eq(main.focused.count,M.nONE):
-			Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.ONE))
-		elif !main.focused.un and M.eq(main.focused.count,M.ONE):
-			Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nONE))
 	Changes.bufferSave()
 	setKeyUnIcon()
 
@@ -110,9 +106,13 @@ func setKeyUnIcon() -> void:
 	match main.focused.type:
 		KeyBulk.TYPE.STAR: %keyUn.icon = STAR_UN_ICONS[int(main.focused.un)]
 		KeyBulk.TYPE.CURSE: %keyUn.icon = CURSE_UN_ICONS[int(main.focused.un)]
-		KeyBulk.TYPE.ROTOR: %keyUn.icon = ROTOR_UN_ICONS[int(main.focused.un)]
 
 func _keyPartialInfiniteSet(value:PackedInt64Array) -> void:
 	if main.focused is not KeyBulk: return
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infinite",M.toInt(value)))
+	Changes.bufferSave()
+
+func _keyReciprocalToggled(value:bool) -> void:
+	if main.focused is not KeyBulk: return
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"reciprocal",value))
 	Changes.bufferSave()

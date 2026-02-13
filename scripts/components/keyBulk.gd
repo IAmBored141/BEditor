@@ -24,10 +24,10 @@ const SIGNFLIP_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/signfli
 const POSROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/posrotor.png")
 const NEGROTOR_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/negrotor.png")
 const INFINITE_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/infinite.png")
-const RECI_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/reci.png")
-const RECIFLIP_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/reciflip.png")
-const RECIPOS_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/recipos.png")
-const RECINEG_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/recineg.png")
+const RECIPROCAL__SYMBOL:Texture2D = preload("res://assets/game/key/symbols/reci.png")
+const RECIPROCAL_FLIP_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/reciflip.png")
+const RECIPROCAL_POS_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/recipos.png")
+const RECIPROCAL_NEG_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/recineg.png")
 const GLISTENING_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/glistening.png")
 
 static var TEXTURE:KeyColorsTextureLoader = KeyColorsTextureLoader.new("res://assets/game/key/$c/$t.png", TEXTURE_COLORS, true, false, {capitalised=false})
@@ -48,8 +48,9 @@ var color:Game.COLOR = Game.COLOR.WHITE
 var type:TYPE = TYPE.NORMAL
 var count:PackedInt64Array = M.ONE
 var infinite:int = 0
-var glistening:bool = false # whether the key affects glistening count or no
+var glistening:bool = false # whether the key affects glistening count or not
 var un:bool = false # whether a star or curse key is an unstar or uncurse key
+var reciprocal:bool = false # whether a rotor key is reciprocal or not
 
 var drawDropShadow:RID
 var drawGlitch:RID
@@ -108,11 +109,11 @@ func _draw() -> void:
 		KeyBulk.TYPE.NORMAL, KeyBulk.TYPE.EXACT:
 			if !M.eq(count, M.ONE): TextDraw.outlined2(FKEYBULK,drawSymbol,M.str(count),keycountColor(),keycountOutlineColor(),14,Vector2(1,25))
 		KeyBulk.TYPE.ROTOR:
-			if un:
-				if M.eq(count, M.nONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECIFLIP_SYMBOL)
-				elif M.eq(count, M.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECIPOS_SYMBOL)
-				elif M.eq(count, M.nI): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECINEG_SYMBOL)
-				elif M.eq(count, M.ONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect, RECI_SYMBOL)
+			if reciprocal:
+				if M.eq(count, M.nONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECIPROCAL_FLIP_SYMBOL)
+				elif M.eq(count, M.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECIPROCAL_POS_SYMBOL)
+				elif M.eq(count, M.nI): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,RECIPROCAL_NEG_SYMBOL)
+				elif M.eq(count, M.ONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect, RECIPROCAL__SYMBOL)
 			else:
 				if M.eq(count, M.nONE) or M.eq(count,M.ONE): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,SIGNFLIP_SYMBOL)
 				elif M.eq(count, M.I): RenderingServer.canvas_item_add_texture_rect(drawSymbol,rect,POSROTOR_SYMBOL)
@@ -165,8 +166,11 @@ static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID,keyOffset:Vector2,keyColor
 func propertyChangedInit(property:StringName) -> void:
 	if property == &"type":
 		if type not in [TYPE.NORMAL, TYPE.EXACT] and M.neq(count, M.ONE): Changes.addChange(Changes.PropertyChange.new(self,&"count",M.ONE))
-		if type == TYPE.ROTOR and (M.neq(M.abs(count), M.ONE) or M.eq(count, M.ONE)): Changes.addChange(Changes.PropertyChange.new(self,&"count",M.nONE))
 		if type not in [TYPE.STAR, TYPE.CURSE] and un: Changes.addChange(Changes.PropertyChange.new(self,&"un",false))
+		if type != TYPE.ROTOR: Changes.addChange(Changes.PropertyChange.new(self,&"reciprocal",false))
+	if property == &"reciprocal":
+		if reciprocal and M.eq(count, M.nONE): Changes.addChange(Changes.PropertyChange.new(self,&"count",M.ONE))
+		if !reciprocal and M.eq(count, M.ONE): Changes.addChange(Changes.PropertyChange.new(self,&"count",M.nONE))
 
 # ==== PLAY ==== #
 var glitchMimic:Game.COLOR = Game.COLOR.GLITCH
@@ -207,19 +211,15 @@ func collect(player:Player) -> void:
 			TYPE.NORMAL: player.changeGlisten(collectColor, M.add(player.glisten[collectColor], count))
 			TYPE.EXACT: player.changeGlisten(collectColor, count)
 			TYPE.ROTOR:
-				if un:
-					player.changeGlisten(collectColor, M.divide(count,player.glisten[collectColor]))
-				else:
-					player.changeGlisten(collectColor, M.times(player.glisten[collectColor], count))
+				if reciprocal: player.changeGlisten(collectColor, M.divide(count,player.glisten[collectColor]))
+				else: player.changeGlisten(collectColor, M.times(player.glisten[collectColor], count))
 
 	match type:
 		TYPE.NORMAL: player.changeKeys(collectColor, M.add(player.key[collectColor], count))
 		TYPE.EXACT: player.changeKeys(collectColor, count)
 		TYPE.ROTOR:
-			if un:
-				player.changeKeys(collectColor, M.divide(count,player.key[collectColor]))
-			else:
-				player.changeKeys(collectColor, M.times(player.key[collectColor], count))
+			if reciprocal: player.changeKeys(collectColor, M.divide(count,player.key[collectColor]))
+			else: player.changeKeys(collectColor, M.times(player.key[collectColor], count))
 		TYPE.STAR: GameChanges.addChange(GameChanges.StarChange.new(effectiveColor(), !un))
 		TYPE.CURSE: GameChanges.addChange(GameChanges.CurseChange.new(effectiveColor(), !un))
 	

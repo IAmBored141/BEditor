@@ -166,18 +166,13 @@ func rotate(n:PackedInt64Array) -> PackedInt64Array:
 func max(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [max(a[0], b[0]), max(a[1], b[1])]
-		SYSTEM.FRACTIONS, _: 
-			# multiplys the numberator of each part of a with the denominator of b
-			# and vise versa
-			# takes the max of that
-			# then simplifies the resulting fraction
-			# with the denominator as the product of both
-			# checking desmos, this is equivalent to running the max functions directly on the fractions.
-			return simplify([max(a[0]*b[2], b[0]*a[2]), max(a[1]*b[2], b[1]*a[2]), a[2]*b[2]])
+		SYSTEM.FRACTIONS, _: return simplify([max(a[0]*b[2], b[0]*a[2]), max(a[1]*b[2], b[1]*a[2]), a[2]*b[2]])
 
 ## componentwise orelse
 func orelse(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
-	return [a[0] if a[0] else b[0], a[1] if a[1] else b[1]]
+	match system:
+		SYSTEM.COMPLEX: return [a[0] if a[0] else b[0], a[1] if a[1] else b[1]]
+		SYSTEM.FRACTIONS, _: return simplify([a[0]*b[2] if a[0] else b[0]*a[2], a[1]*b[2] if a[1] else b[1]*a[2], a[2]*b[2]])
 
 # reducers
 
@@ -186,7 +181,7 @@ func simplify(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
 		SYSTEM.FRACTIONS, _:
-			if n[2] == 0: return n
+			if n[2] == 0: return n # propagate error state
 			var divisor:int = gcd(gcd(n[0], n[1]), n[2])
 			@warning_ignore("integer_division") return [n[0]/divisor, n[1]/divisor, n[2]/divisor]
 
@@ -419,11 +414,9 @@ func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 		else: iComponent += str(inum) + "i"
 	if system & SYSTEM.FRACTIONS:
 		var den:int = toInt(denom(n))
+		if den == 0: return "ERROR"
 		if den != 1: iComponent += "/" + str(den)
-		if den == 0:
-			rComponent = "ERROR"
-			iComponent = ""
-	if !rnum and !inum and rComponent != "ERROR": return "0"
+	if !rnum and !inum: return "0"
 	return rComponent + iComponent
 
 ## greatest (positive) common divisor
