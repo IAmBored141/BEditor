@@ -30,8 +30,11 @@ func _ready() -> void:
 	parseText()
 	buildText()
 
+enum TOKEN {NUMBER, LBRACKET, RBRACKET, CROSS, DASH, X, SLASH, I}
+
 func parseText() -> void:
 	textLen = len(text)
+	# tokenize; extract numbers
 	var i:int = 0
 	var thisNumberStart:int = -1 # -1 for not currently parsing a number
 	var previousNumberEnd:int = 0
@@ -42,6 +45,7 @@ func parseText() -> void:
 	texts.clear()
 	numbers = 0
 	var isNumber:bool
+	var tokens:Array[Array] = [] # array[array[token type, data?]]
 	for symbol in text + " ":
 		isNumber = "0123456789".contains(symbol) or (!isNumber and symbol == "-" and i + 1 != textLen and "0123456789".contains(text[i+1]))
 		# end of text
@@ -55,14 +59,37 @@ func parseText() -> void:
 				numberSemiNegative.append(i > 0 && text[i-1] == "-")
 				thisNumberStart = i
 				previousNumberEnd = -1
-		# end of number
-		elif thisNumberStart != -1:
-			numberEnds.append(i)
-			numberValues.append(text.substr(thisNumberStart,i-thisNumberStart).to_int())
-			thisNumberStart = -1
-			previousNumberEnd = i
+		else:
+			# end of number
+			if thisNumberStart != -1:
+				var value:int = text.substr(thisNumberStart,i-thisNumberStart).to_int()
+				numberEnds.append(i)
+				numberValues.append(value)
+				thisNumberStart = -1
+				previousNumberEnd = i
+				tokens.append([TOKEN.NUMBER, value])
+			match symbol:
+				"(": tokens.append([TOKEN.LBRACKET])
+				")": tokens.append([TOKEN.RBRACKET])
+				"+": tokens.append([TOKEN.CROSS])
+				"-": tokens.append([TOKEN.DASH])
+				"x": tokens.append([TOKEN.X])
+				"/": tokens.append([TOKEN.SLASH])
+				"i": tokens.append([TOKEN.I])
 		i += 1
 	print(textLen, numberStarts, numberEnds, numberValues, texts)
+	# build tree
+
+# 2+3i)/7
+# p(2 + 3 i ) / 7)
+# p(div{2 + 3 i, p(7)})
+# p(div{add{p(2), p(3 i)}, p(7)})
+# p(div{add{[2], [3i]}, [7]})
+
+# Sum     ← Iprod (('+' / '-') Sum)
+# Iprod   ← Product 'i'?
+# Product ← Value (('*' / '/') Product)
+# Value   ← [0-9]+ / '(' Sum ')'
 
 func buildText() -> void:
 	var formattedText:String = texts[0]
@@ -174,6 +201,21 @@ func receiveKey(key:InputEventKey) -> bool:
 						var character:String = char(key.unicode)
 						if cursorEnd > cursorStart:
 							text = text.erase(cursorStart, cursorEnd - cursorStart)
+						elif "0123456789".contains(character):
+							var endNumber:int = numberEnds.find(cursorStart)
+							if endNumber != -1:
+								setNumber(endNumber, numberValues[endNumber]*10+character.to_int())
+								cursorStart = numberValues[endNumber]
+								cursorEnd = cursorStart
+								buildText()
+								return true
+							var startNumber:int = numberStarts.find(cursorStart)
+							if startNumber != -1:
+								setNumber(startNumber, character.to_int()*(10**len(numberValues[startNumber])) + numberValues[startNumber])
+								cursorStart += 1
+								cursorEnd = cursorStart
+								buildText()
+								return true
 						text = text.insert(cursorStart, character)
 						cursorStart += 1
 						cursorEnd = cursorStart
