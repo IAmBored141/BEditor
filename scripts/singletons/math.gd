@@ -381,6 +381,11 @@ func isInteger(n:PackedInt64Array) -> bool:
 		SYSTEM.COMPLEX: return true
 		SYSTEM.FRACTIONS, _: return n[2] == 1
 
+func isError(n:PackedInt64Array) -> bool:
+	match system:
+		SYSTEM.COMPLEX: return false
+		SYSTEM.FRACTIONS, _: return n[2] == 0
+
 # util
 
 func toIpow(n:PackedInt64Array) -> int:

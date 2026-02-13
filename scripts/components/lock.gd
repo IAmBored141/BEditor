@@ -466,6 +466,7 @@ static func getLockCanOpen(lock:GameComponent,player:Player) -> bool:
 	var glistCount:PackedInt64Array = player.glisten[lock.colorAfterAurabreaker()]
 	var lockCount:PackedInt64Array = lock.effectiveCount()
 	var lockDenominator:PackedInt64Array = lock.effectiveDenominator()
+	if M.isError(keyCount): return lock.negated
 	match lock.type:
 		TYPE.NORMAL: can = M.cgte(M.along(keyCount, lockCount), M.cabs(lockCount))
 		TYPE.BLANK: can = M.nex(keyCount)
