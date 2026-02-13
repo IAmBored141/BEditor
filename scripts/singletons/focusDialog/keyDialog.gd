@@ -14,11 +14,13 @@ func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	%keyCountEdit.setValue(focused.count, true)
 	%keyInfiniteToggle.button_pressed = focused.infinite
 	%keyGlisteningToggle.button_pressed = focused.glistening
-	%keyPartialInfinite.visible = Mods.active(&"PartialInfKey") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
+	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
 	%keyPartialInfiniteEdit.setValue(M.N(focused.infinite), true)
 	%keyRotorSelector.visible = focused.type == KeyBulk.TYPE.ROTOR
 	%keyUn.visible = focused.type in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE]
 	%keyUn.button_pressed = !focused.un
+	%keyRotorSelector.setup(focused)
+	%keyReciprocal.visible = focused.type == KeyBulk.TYPE.ROTOR && Mods.active(&"Fractions")
 	setKeyUnIcon()
 	if focused.type == KeyBulk.TYPE.ROTOR: %keyRotorSelector.setValue(focused.count)
 	if main.interacted and !main.interacted.is_visible_in_tree(): main.deinteract()
@@ -53,7 +55,9 @@ func editDeinteracted(edit:PanelContainer) -> void:
 
 func changedMods() -> void:
 	%keyGlisteningToggle.visible = Mods.active(&"Glistening")
-	%keyPartialInfinite.visible = Mods.active(&"PartialInfKey") and main.focused is KeyBulk and main.focused.infinite
+	if main.focused is KeyBulk:
+		%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and main.focused.infinite
+		%keyReciprocal.visible = main.focused.type == KeyBulk.TYPE.ROTOR && Mods.active(&"Fractions")
 
 func _keyColorSelected(color:Game.COLOR) -> void:
 	if main.focused is not KeyBulk: return
@@ -87,12 +91,13 @@ func _keyGlisteningToggled(value:bool) -> void:
 func _keyRotorSelected(value:KeyRotorSelector.VALUE):
 	if main.focused is not KeyBulk: return
 	match value:
+		KeyRotorSelector.VALUE.NOROTATE: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.ONE))
 		KeyRotorSelector.VALUE.SIGNFLIP: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nONE))
 		KeyRotorSelector.VALUE.POSROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.I))
 		KeyRotorSelector.VALUE.NEGROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nI))
 	Changes.bufferSave()
 
-func _keyUnToggled(value:bool):
+func _keyUnToggled(value:bool) -> void:
 	if main.focused is not KeyBulk: return
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"un",!value))
 	Changes.bufferSave()
@@ -106,4 +111,9 @@ func setKeyUnIcon() -> void:
 func _keyPartialInfiniteSet(value:PackedInt64Array) -> void:
 	if main.focused is not KeyBulk: return
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infinite",M.toInt(value)))
+	Changes.bufferSave()
+
+func _keyReciprocalToggled(value:bool) -> void:
+	if main.focused is not KeyBulk: return
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"reciprocal",value))
 	Changes.bufferSave()

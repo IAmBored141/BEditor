@@ -22,7 +22,7 @@ func draw() -> void:
 			if editor.objectHovered and editor.objectHovered != editor.focusDialog.focused: drawOutline(editor.objectHovered,Color("#0f08"))
 			if editor.componentHovered and editor.componentHovered != editor.focusDialog.componentFocused: drawOutline(editor.componentHovered,Color("#f008"))
 
-func drawOutline(component:GameComponent,color) -> void:
+func drawOutline(component:GameComponent,color:Color) -> void:
 	var pos:Vector2 = component.getDrawPosition()
 	if component is PlayerPlaceholderObject: pos -= component.getOffset()
 	if component.get_script() in Game.RECTANGLE_COMPONENTS:

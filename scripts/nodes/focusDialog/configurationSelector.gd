@@ -61,6 +61,7 @@ func _select(button:ConfigurationSelectorButton) -> void:
 func setup(lock:GameComponent) -> void: # Lock or RemoteLock
 	var specificAAvailable:bool = false
 	var specificBAvailable:bool = false
+	# TODO: REFACTOR THIS
 	for configuration in lock.getAvailableConfigurations():
 		match configuration[1]:
 			Lock.CONFIGURATION.spr1A, Lock.CONFIGURATION.spr4A, Lock.CONFIGURATION.spr5A, Lock.CONFIGURATION.spr6A, Lock.CONFIGURATION.spr8A, Lock.CONFIGURATION.spr12A, Lock.CONFIGURATION.spr24A, \
