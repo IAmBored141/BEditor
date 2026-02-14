@@ -133,14 +133,24 @@ func across(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 func divide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		@warning_ignore("integer_division") SYSTEM.COMPLEX: return [(a[0]*b[0]+a[1]*b[1])/(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])/(b[0]*b[0]+b[1]*b[1])]
-		SYSTEM.FRACTIONS, _: 
-			return simplify([(a[0]*b[0]+a[1]*b[1])*b[2], (a[1]*b[0]-a[0]*b[1])*b[2], (b[0]*b[0]+b[1]*b[1])*a[2]])
+		SYSTEM.FRACTIONS, _: return simplify([(a[0]*b[0]+a[1]*b[1])*b[2], (a[1]*b[0]-a[0]*b[1])*b[2], (b[0]*b[0]+b[1]*b[1])*a[2]])
 
-## (a,b -> a - floor(a/b)*b)
-func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
+## (a,b -> floor(a / b))
+func floorDivide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
-		SYSTEM.COMPLEX: return [(a[0]*b[0]+a[1]*b[1])%(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])%(b[0]*b[0]+b[1]*b[1])]
-		SYSTEM.FRACTIONS, _: return simplify([((a[0]*b[0]+a[1]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), ((a[1]*b[0]-a[0]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), a[2]*b[2]])
+		SYSTEM.COMPLEX: return [intDiv(a[0]*b[0]+a[1]*b[1],b[0]*b[0]+b[1]*b[1]), intDiv(a[1]*b[0]-a[0]*b[1],b[0]*b[0]+b[1]*b[1])]
+		SYSTEM.FRACTIONS, _: return M.floor(divide(a,b))
+
+## (a,b -> a % b)
+## has the sign of a (-5 % 3 = -2)
+func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
+	return sub(a,times(trunc(divide(a,b)),b))
+
+## (a,b -> (a % b + b) % b)
+## has the sign of b (remainder(-5, 3) = 1)
+## also known as posmod
+func remainder(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
+	return sub(a,times(floorDivide(a,b),b))
 
 ## a "along" the axes of b
 ## (a,b -> (r(a) * sign(r(b))) + (ir(a) * sign(ir(b)))i)
@@ -266,6 +276,18 @@ func cabs(n:PackedInt64Array) -> PackedInt64Array:
 ## the axes present in the number, ignoring sign
 func axibs(n:PackedInt64Array) -> PackedInt64Array: return cabs(axis(n))
 
+## truncates number
+func trunc(n:PackedInt64Array) -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return n
+		@warning_ignore("integer_division") SYSTEM.FRACTIONS, _: return [n[0]/n[2], n[1]/n[2], 1]
+
+## floors number
+func floor(n:PackedInt64Array) -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return n
+		SYSTEM.FRACTIONS, _: return [intDiv(n[0],n[2]), intDiv(n[1],n[2]), 1]
+
 # comparators
 
 ## (a,b -> a == b)
@@ -320,7 +342,7 @@ func clt(a:PackedInt64Array, b:PackedInt64Array) -> bool: return lt(a,b) && ilt(
 func clte(a:PackedInt64Array, b:PackedInt64Array) -> bool: return lte(a,b) && ilte(a,b)
 
 ## (a,b -> floor(a / b) == a / b)
-func divisibleBy(a:PackedInt64Array, b:PackedInt64Array) -> bool: return nex(modulo(a,b))
+func divisibleBy(a:PackedInt64Array, b:PackedInt64Array) -> bool: return nex(remainder(a,b))
 
 ## (a,b -> exists(r(a)) implies exists(r(b)) and exists(ir(a)) implies exists(ir(b)))
 func implies(a:PackedInt64Array, b:PackedInt64Array) -> bool:
@@ -440,3 +462,10 @@ func gcd(a:int, b:int) -> int:
 ## in both axes, keeps the magnitude of a greater than or equal to the magnitude of b, in the direction of b. if b doesnt exist in that axis, it will be unaffected
 func keepAbove(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
 	return along(M.max(along(a,orelse(b,a)), cabs(b)), orelse(b,a))
+
+## (a,b -> floor(a/b))
+func intDiv(a:int, b:int) -> int:
+	@warning_ignore("integer_division")
+	if a*b < 0 and a % b != 0: return a/b-1
+	@warning_ignore("integer_division")
+	return a/b

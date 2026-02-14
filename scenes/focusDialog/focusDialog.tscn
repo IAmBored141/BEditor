@@ -16,7 +16,6 @@
 [ext_resource type="Texture2D" uid="uid://ulo77sni12v" path="res://assets/ui/focusDialog/doorType/combo.png" id="11_jwt4y"]
 [ext_resource type="Texture2D" uid="uid://bowkgmjrwugjj" path="res://assets/ui/focusDialog/doorType/gate.png" id="12_qi8n2"]
 [ext_resource type="Texture2D" uid="uid://d2tw3epi1grlq" path="res://assets/ui/focusDialog/doorType/spend.png" id="13_jwt4y"]
-[ext_resource type="PackedScene" uid="uid://bkywonfg0bt0y" path="res://scenes/focusDialog/newNumberEdit.tscn" id="14_2wjug"]
 [ext_resource type="Texture2D" uid="uid://bxif3afno48fi" path="res://assets/ui/focusDialog/keySplitType/reciprocal.png" id="14_2wjug"]
 [ext_resource type="Script" uid="uid://d07pxhp1r6xex" path="res://scripts/nodes/focusDialog/lockHandler.gd" id="14_31m74"]
 [ext_resource type="Script" uid="uid://dbmpg02ass72r" path="res://scripts/nodes/focusDialog/spend.gd" id="14_e2stj"]
@@ -256,10 +255,6 @@ size_flags_horizontal = 4
 toggle_mode = true
 button_pressed = true
 icon = ExtResource("8_mscoq")
-
-[node name="newNumberEdit" parent="keyDialog/c/c/c" unique_id=231119399 instance=ExtResource("14_2wjug")]
-unique_name_in_owner = true
-layout_mode = 2
 
 [node name="keyReciprocal" type="Button" parent="keyDialog/c/c/c" unique_id=1374524677]
 unique_name_in_owner = true
