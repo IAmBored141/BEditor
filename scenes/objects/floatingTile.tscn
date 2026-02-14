@@ -10,6 +10,7 @@ script = ExtResource("1_f645u")
 metadata/_custom_type_script = "uid://bkp3fklu8mlnk"
 
 [node name="collision" type="StaticBody2D" parent="." unique_id=2069376020]
+collision_layer = 3
 
 [node name="shape" type="CollisionShape2D" parent="collision" unique_id=2058948395]
 unique_name_in_owner = true

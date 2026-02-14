@@ -131,6 +131,7 @@ shape = SubResource("RectangleShape2D_oprun")
 [node name="floor" type="Area2D" parent="." unique_id=549030064]
 unique_name_in_owner = true
 collision_layer = 0
+collision_mask = 2
 
 [node name="collision" type="CollisionShape2D" parent="floor" unique_id=211367368]
 position = Vector2(0, 9.5)
