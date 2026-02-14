@@ -15,6 +15,7 @@ script = ExtResource("1_yar34")
 
 [node name="collision" type="StaticBody2D" parent="." unique_id=808526111]
 unique_name_in_owner = true
+collision_layer = 3
 
 [node name="shape" type="CollisionShape2D" parent="collision" unique_id=1859440183]
 unique_name_in_owner = true
