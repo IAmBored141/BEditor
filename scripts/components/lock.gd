@@ -20,7 +20,7 @@ static func availableConfigurations(lockCount:PackedInt64Array, lockType:TYPE) -
 	# SpecificA/H first, then SpecificB/V
 	var available:Array[Array] = []
 	if lockType != TYPE.NORMAL and lockType != TYPE.EXACT: return available
-	var absCount:PackedInt64Array = M.acrabs(lockCount)
+	var absCount:PackedInt64Array = M.cabs(lockCount)
 	if M.isNonzeroReal(lockCount):
 		if M.eq(absCount, M.ONE): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
 		elif M.eq(absCount, M.N(2)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr2H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr2V])
@@ -466,8 +466,9 @@ static func getLockCanOpen(lock:GameComponent,player:Player) -> bool:
 	var glistCount:PackedInt64Array = player.glisten[lock.colorAfterAurabreaker()]
 	var lockCount:PackedInt64Array = lock.effectiveCount()
 	var lockDenominator:PackedInt64Array = lock.effectiveDenominator()
+	if M.isError(keyCount): return lock.negated
 	match lock.type:
-		TYPE.NORMAL: can = M.cgte(M.along(keyCount, lockCount), M.acrabs(lockCount))
+		TYPE.NORMAL: can = M.cgte(M.along(keyCount, lockCount), M.cabs(lockCount))
 		TYPE.BLANK: can = M.nex(keyCount)
 		TYPE.BLAST:
 			if M.nex(lockDenominator): can = false
@@ -484,8 +485,8 @@ static func getLockCanOpen(lock:GameComponent,player:Player) -> bool:
 			if M.nex(lockCount):
 				if lock.effectiveZeroI(): can = M.nex(M.i(keyCount))
 				else: can = M.nex(M.r(keyCount))
-			else: can = M.eq(M.along(keyCount, lockCount), M.acrabs(lockCount))
-		TYPE.GLISTENING: can = M.cgte(M.along(glistCount, lockCount), M.acrabs(lockCount))
+			else: can = M.eq(M.along(keyCount, lockCount), M.cabs(lockCount))
+		TYPE.GLISTENING: can = M.cgte(M.along(glistCount, lockCount), M.cabs(lockCount))
 	return can != lock.negated
 
 func getCost(player:Player, ipow:PackedInt64Array=parent.ipow()) -> PackedInt64Array: return getLockCost(self, player, ipow)

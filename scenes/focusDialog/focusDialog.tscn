@@ -230,7 +230,6 @@ expand_mode = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
-purpose = 1
 
 [node name="keyGlisteningToggle" type="Button" parent="keyDialog/c/c/c/c" unique_id=1657225081 groups=["explained"]]
 unique_name_in_owner = true
