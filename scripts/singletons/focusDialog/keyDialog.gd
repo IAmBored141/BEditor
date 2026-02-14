@@ -9,11 +9,15 @@ const CURSE_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/k
 
 func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	%keyColorSelector.setSelect(focused.color)
+	%keyAltColorSelector.setSelect(focused.altColor)
+	%keyAltColorSelector.visible = focused.type == KeyBulk.TYPE.OPERATOR
 	%keyTypeSelector.setSelect(focused.type)
 	%keyCountEdit.visible = focused.type in [KeyBulk.TYPE.NORMAL,KeyBulk.TYPE.EXACT]
 	%keyCountEdit.setValue(focused.count, true)
 	%keyInfiniteToggle.button_pressed = focused.infinite
 	%keyGlisteningToggle.button_pressed = focused.glistening
+	%keyOperationSelector.visible = focused.type == KeyBulk.TYPE.OPERATOR
+	%keyOperationSelector.setSelect(focused.mode)
 	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
 	%keyPartialInfiniteEdit.setValue(M.N(focused.infinite), true)
 	%keyRotorSelector.visible = focused.type == KeyBulk.TYPE.ROTOR
@@ -63,11 +67,21 @@ func _keyColorSelected(color:Game.COLOR) -> void:
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"color",color))
 	Changes.bufferSave()
 
+func _keyAltColorSelected(color:Game.COLOR) -> void:
+	if main.focused is not KeyBulk: return
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"altColor",color))
+	Changes.bufferSave()
+
 func _keyTypeSelected(type:KeyBulk.TYPE) -> void:
 	if main.focused is not KeyBulk: return
 	var beforeType:KeyBulk.TYPE = main.focused.type
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"type",type))
 	if beforeType != type and type == KeyBulk.TYPE.ROTOR: Changes.PropertyChange.new(main.focused,&"count",M.nONE)
+	Changes.bufferSave()
+
+func _keyOperationSelected(mode:KeyBulk.OPERATION) -> void:
+	if main.focused is not KeyBulk: return
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"mode",mode))
 	Changes.bufferSave()
 
 func _keyCountSet(count:PackedInt64Array) -> void:

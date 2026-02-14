@@ -47,6 +47,12 @@ var nI:PackedInt64Array:
 			SYSTEM.COMPLEX: return [0,-1]
 			SYSTEM.FRACTIONS, _: return [0,-1,1]
 
+
+var ERROR:PackedInt64Array:
+	get:
+		match system:
+			SYSTEM.COMPLEX:  assert(false); return ZERO
+			SYSTEM.FRACTIONS, _: return [0,0,0]
 # initialisers
 
 ## New number
@@ -140,7 +146,9 @@ func divide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [(a[0]*b[0]+a[1]*b[1])%(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])%(b[0]*b[0]+b[1]*b[1])]
-		SYSTEM.FRACTIONS, _: return simplify([((a[0]*b[0]+a[1]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), ((a[1]*b[0]-a[0]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), a[2]*b[2]])
+		SYSTEM.FRACTIONS, _: 
+			if b[1] == b[0] and b[0] == 0: return ERROR
+			else: return simplify([((a[0]*b[0]+a[1]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), ((a[1]*b[0]-a[0]*b[1])*b[2])%((b[0]*b[0]+b[1]*b[1])*a[2]), a[2]*b[2]])
 
 ## a "along" the axes of b
 ## (a,b -> (r(a) * sign(r(b))) + (ir(a) * sign(ir(b)))i)
@@ -181,7 +189,7 @@ func simplify(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
 		SYSTEM.FRACTIONS, _:
-			if n[2] == 0: return n # propagate error state
+			if n[2] == 0: return ERROR # propagate error state
 			var divisor:int = gcd(gcd(n[0], n[1]), n[2])
 			@warning_ignore("integer_division") return [n[0]/divisor, n[1]/divisor, n[2]/divisor]
 
@@ -414,7 +422,7 @@ func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 		else: iComponent += str(inum) + "i"
 	if system & SYSTEM.FRACTIONS:
 		var den:int = toInt(denom(n))
-		if den == 0: return "ERROR"
+		if den == 0 or n == ERROR: return "ERROR"
 		if den != 1: iComponent += "/" + str(den)
 	if !rnum and !inum: return "0"
 	return rComponent + iComponent

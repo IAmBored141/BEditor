@@ -202,6 +202,7 @@ func keyTypes() -> Array[KeyBulk.TYPE]:
 		KeyBulk.TYPE.ROTOR
 	]
 	if active(&"C5"): array.append(KeyBulk.TYPE.CURSE)
+	if active(&"Fractions"): array.append(KeyBulk.TYPE.OPERATOR)
 	return array
 
 func lockTypes() -> Array[Lock.TYPE]:
