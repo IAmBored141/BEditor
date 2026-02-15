@@ -144,8 +144,12 @@ func divide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 ## (a,b -> floor(a / b))
 func floorDivide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
-		SYSTEM.COMPLEX: return [intDiv(a[0]*b[0]+a[1]*b[1],b[0]*b[0]+b[1]*b[1]), intDiv(a[1]*b[0]-a[0]*b[1],b[0]*b[0]+b[1]*b[1])]
-		SYSTEM.FRACTIONS, _: return M.floor(divide(a,b))
+		SYSTEM.COMPLEX: 
+			if eq(b,ZERO): assert(false); return ZERO
+			return [intDiv(a[0]*b[0]+a[1]*b[1],b[0]*b[0]+b[1]*b[1]), intDiv(a[1]*b[0]-a[0]*b[1],b[0]*b[0]+b[1]*b[1])]
+		SYSTEM.FRACTIONS, _: 
+			if eq(b,ZERO): return ERROR
+			return M.floor(divide(a,b))
 
 ## (a,b -> a % b)
 ## has the sign of a (-5 % 3 = -2)
@@ -294,7 +298,16 @@ func floor(n:PackedInt64Array) -> PackedInt64Array:
 		SYSTEM.COMPLEX: return n
 		SYSTEM.FRACTIONS, _: return [intDiv(n[0],n[2]), intDiv(n[1],n[2]), 1]
 
-# comparators
+## ceils number maybe 
+func ceil(n:PackedInt64Array) -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return n
+		SYSTEM.FRACTIONS, _: 
+			var real:int = intDiv(n[0],n[2])
+			var imag:int = intDiv(n[1],n[2])
+			if M.neq([n[0],0,1], [real,0,1]): real += 1
+			if M.neq([n[0],0,1], [imag,0,1]): imag += 1
+			return [intDiv(n[0],n[2]), intDiv(n[1],n[2]), 1]
 
 ## (a,b -> a == b)
 func eq(a:PackedInt64Array, b:PackedInt64Array) -> bool: return a == b

@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://ulo77sni12v" path="res://assets/ui/focusDialog/doorType/combo.png" id="11_jwt4y"]
 [ext_resource type="Texture2D" uid="uid://bowkgmjrwugjj" path="res://assets/ui/focusDialog/doorType/gate.png" id="12_qi8n2"]
 [ext_resource type="Texture2D" uid="uid://d2tw3epi1grlq" path="res://assets/ui/focusDialog/doorType/spend.png" id="13_jwt4y"]
-[ext_resource type="Script" uid="uid://w6eu5yj3itkr" path="res://scripts/nodes/focusDialog/selector/keyOperationSelector.gd" id="13_rrq8c"]
+[ext_resource type="Script" path="res://scripts/nodes/focusDialog/selector/keyOperationSelector.gd" id="13_rrq8c"]
 [ext_resource type="Texture2D" uid="uid://bxif3afno48fi" path="res://assets/ui/focusDialog/keySplitType/reciprocal.png" id="14_2wjug"]
 [ext_resource type="Script" uid="uid://d07pxhp1r6xex" path="res://scripts/nodes/focusDialog/lockHandler.gd" id="14_31m74"]
 [ext_resource type="Script" uid="uid://dbmpg02ass72r" path="res://scripts/nodes/focusDialog/spend.gd" id="14_e2stj"]

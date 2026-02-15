@@ -18,7 +18,7 @@ func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	%keyGlisteningToggle.button_pressed = focused.glistening
 	%keyOperationSelector.visible = focused.type == KeyBulk.TYPE.OPERATOR
 	%keyOperationSelector.setSelect(focused.mode)
-	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
+	%keyPartialInfinite.visible = Mods.active(&"PartialInfKey") and (focused.infinite or main.interacted == %keyPartialInfiniteEdit)
 	%keyPartialInfiniteEdit.setValue(M.N(focused.infinite), true)
 	%keyRotorSelector.visible = focused.type == KeyBulk.TYPE.ROTOR
 	%keyUn.visible = focused.type in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE]
@@ -33,7 +33,7 @@ func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool) -> void:
 	else: main.deinteract()
 
 func receiveKey(event:InputEventKey) -> bool:
-	return %newNumberEdit.receiveKey(event)
+	# return %newNumberEdit.receiveKey(event)
 	if Editor.eventIs(event, &"focusKeyNormal"): _keyTypeSelected(KeyBulk.TYPE.NORMAL)
 	elif Editor.eventIs(event, &"focusKeyExact"): _keyTypeSelected(KeyBulk.TYPE.EXACT if main.focused.type != KeyBulk.TYPE.EXACT else KeyBulk.TYPE.NORMAL)
 	elif Editor.eventIs(event, &"focusKeyStar"):

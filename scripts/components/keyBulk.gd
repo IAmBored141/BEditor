@@ -40,6 +40,8 @@ const GLISTENING_SYMBOL:Texture2D = preload("res://assets/game/key/symbols/glist
 static var TEXTURE:KeyColorsTextureLoader = KeyColorsTextureLoader.new("res://assets/game/key/$c/$t.png", TEXTURE_COLORS, true, false, {capitalised=false})
 static var GLITCH:KeyColorsTextureLoader = KeyColorsTextureLoader.new("res://assets/game/key/$c/glitch$t.png", TEXTURE_COLORS, false, false, {capitalised=true})
 
+static var OPERATION_TEXTURE:operationColorsTextureLoader = operationColorsTextureLoader.new("res://assets/game/key/$c/operator/$t.png", TEXTURE_COLORS, true, false, {capitalised=false})
+
 const FKEYBULK:Font = preload("res://resources/fonts/fKeyBulk.fnt")
 
 const CREATE_PARAMETERS:Array[StringName] = [
@@ -181,14 +183,16 @@ static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID, keyOffset:Vector2,keyColo
 	var textureType:KeyTextureLoader.TYPE = keyTextureType(keyType, keyUn)
 	RenderingServer.canvas_item_set_modulate(keyDrawMain, Color(Color.WHITE, keyPartialInfiniteAlpha))
 	RenderingServer.canvas_item_set_modulate(keyDrawGlitch, Color(Color.WHITE, keyPartialInfiniteAlpha))
-	if keyColor in TEXTURE_COLORS and keyType != TYPE.OPERATOR: #band-aid fix
+	if keyColor in TEXTURE_COLORS:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,TEXTURE.current([keyColor,textureType]))
 	elif keyColor == Game.COLOR.GLITCH:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,FRAME_GLITCH.current([textureType]))
 		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,FILL.current([textureType]),false,Game.mainTone[keyColor])
 		if keyType == TYPE.CURSE: RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,CURSE_FILL_DARK,false,Game.darkTone[keyColor])
 		if keyGlitchMimic != Game.COLOR.GLITCH:
-			if keyGlitchMimic in TEXTURE_COLORS: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,GLITCH.current([keyGlitchMimic,textureType]))
+			if keyGlitchMimic in TEXTURE_COLORS: 
+				if keyType == TYPE.OPERATOR: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,TEXTURE.current([keyGlitchMimic,textureType]))
+				else: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,GLITCH.current([keyGlitchMimic,textureType]))
 			else: RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FILL_GLITCH.current([textureType]),false,Game.mainTone[keyGlitchMimic])
 	else:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawMain,rect,FRAME.current([textureType]))
@@ -198,13 +202,15 @@ static func drawKey(keyDrawGlitch:RID,keyDrawMain:RID, keyOffset:Vector2,keyColo
 static func drawOperationSymbol(keyDrawAdditonal:RID, keyDrawGlitch:RID, keyOffset:Vector2, partColor:Game.COLOR, keyMode:OPERATION=OPERATION.SET,keyGlitchMimic:Game.COLOR=Game.COLOR.GLITCH):
 	var rect:Rect2 = Rect2(keyOffset, Vector2(32,32))
 	var textureType:OperatorTextureLoader.TYPE = operationTextureType(keyMode)
-	if partColor == Game.COLOR.GLITCH:
+	if partColor in TEXTURE_COLORS:
+		RenderingServer.canvas_item_add_texture_rect(keyDrawAdditonal,rect,OPERATION_TEXTURE.current([partColor,textureType]))
+	elif partColor == Game.COLOR.GLITCH:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,OPERATOR_FRAME_GLITCH.current([textureType]))
 		RenderingServer.canvas_item_add_texture_rect(keyDrawGlitch,rect,OPERATOR_FILL.current([textureType]),false,Game.mainTone[partColor])
 		if keyGlitchMimic != Game.COLOR.GLITCH:
-			#if keyGlitchMimic in TEXTURE_COLORS: RenderingServer.canvas_item_add_texture_rect(keyDrawAdditonal,rect,GLITCH.current([keyGlitchMimic,textureType]))
-			#else: 
-			RenderingServer.canvas_item_add_texture_rect(keyDrawAdditonal,rect,OPERATOR_FILL.current([textureType]),false,Game.mainTone[keyGlitchMimic])
+			if keyGlitchMimic in TEXTURE_COLORS: RenderingServer.canvas_item_add_texture_rect(keyDrawAdditonal,rect,OPERATION_TEXTURE.current([keyGlitchMimic,textureType]))
+			else: 
+				RenderingServer.canvas_item_add_texture_rect(keyDrawAdditonal,rect,OPERATOR_FILL.current([textureType]),false,Game.mainTone[keyGlitchMimic])
 	else:
 		RenderingServer.canvas_item_add_texture_rect(keyDrawAdditonal,rect,OPERATOR_FRAME.current([textureType]))
 		RenderingServer.canvas_item_add_texture_rect(keyDrawAdditonal,rect,OPERATOR_FILL.current([textureType]),false,Game.mainTone[partColor])
@@ -276,7 +282,7 @@ func collect(player:Player) -> void:
 				OPERATION.SUBTRACT: player.changeKeys(collectColor, M.sub(player.key[collectColor], player.key[effectiveColor(altColor)]))
 				OPERATION.MULTIPLY: player.changeKeys(collectColor, M.times(player.key[collectColor], player.key[effectiveColor(altColor)]))
 				OPERATION.DIVIDE: player.changeKeys(collectColor, M.divide(player.key[collectColor], player.key[effectiveColor(altColor)]))
-				OPERATION.MODULO: player.changeKeys(collectColor, M.modulo(player.key[collectColor], player.key[effectiveColor(altColor)]))
+				OPERATION.MODULO: player.changeKeys(collectColor, M.remainder(player.key[collectColor], player.key[effectiveColor(altColor)]))
 	
 	if infinite:
 		flashAnimation()
