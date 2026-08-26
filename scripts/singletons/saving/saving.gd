@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 var editor:Editor
@@ -10,6 +11,9 @@ var confirmAction:ACTION
 var jsCallback:JavaScriptObject
 
 const FILE_FORMAT_VERSION:int = 3
+const FILE_VERSIONS_PATH:String = "res://resources/fileVersions/"
+var FILE_VERSIONS:Array[FileVersion] = []
+var FILE_VERSION:FileVersion
 
 # Okay.
 # Here's how we'll do it
@@ -28,8 +32,13 @@ const FILE_FORMAT_VERSION:int = 3
 # - tiles
 # - components
 # - objects
+# - notes
 
 func _ready() -> void:
+	if Engine.is_editor_hint(): return
+	for i in FILE_FORMAT_VERSION:
+		FILE_VERSIONS.append(load(FILE_VERSIONS_PATH + str(i+1) + ".tres"))
+	FILE_VERSION = FILE_VERSIONS[-1]
 	if OS.has_feature('web'):
 		JavaScriptBridge.eval("window.callbacks = {loadJs: null};")
 
@@ -109,10 +118,11 @@ func clear() -> void:
 		if editor.modsWindow: editor.modsWindow._close()
 		editor.quickSet.applyOrCancel()
 		editor.modes.setMode(Editor.MODE.SELECT)
-		editor.otherObjects.objectSelected(PlayerSpawn, true)
+		editor.modes.setView(Editor.VIEW.NORMAL)
+		editor.modes.otherObjects.objectSelected(PlayerSpawn, true)
 		editor.multiselect.deselect()
 		editor.multiselect.clipboard.clear()
-		editor.paste.disabled = true
+		editor.modes.paste.disabled = true
 	if Game.playState != Game.PLAY_STATE.EDIT: await Game.stopTest()
 	Game.latestSpawn = null
 	Game.levelStart = null
@@ -122,10 +132,13 @@ func clear() -> void:
 	Game.goldIndexFloat = 0
 	Game.objectIdIter = 0
 	Game.componentIdIter = 0
+	Game.noteIdIter = 0
 	for object in Game.objects.values(): object.queue_free()
 	Game.objects.clear()
 	for component in Game.components.values(): component.queue_free()
 	Game.components.clear()
+	for note in Game.notes.values(): note.queue_free()
+	Game.notes.clear()
 	Game.level = Level.new()
 	Game.anyChanges = false
 	Game.tiles.clear()
@@ -186,33 +199,28 @@ func save(path:String="") -> void:
 	# components
 	file.store_64(Game.componentIdIter)
 	file.store_64(len(Game.components))
-	for component in Game.components.values():
-		file.store_16(Game.COMPONENTS.find(component.get_script()))
-		for property in component.PROPERTIES:
-			file.store_var(component.get(property), true)
-		for array in component.ARRAYS.keys():
-			if arrayTypeIsComponent(component.ARRAYS[array]): file.store_var(componentArrayToIDs(component.get(array)))
-			else: file.store_var(component.get(array))
+	for component in Game.components.values(): storeComponent(file, component)
 	# objects
 	file.store_64(Game.objectIdIter)
 	file.store_64(len(Game.objects))
-	for object in Game.objects.values():
-		if object is PlaceholderObject: continue
-		file.store_16(Game.COMPONENTS.find(object.get_script()))
-		for property in object.PROPERTIES:
-			if object is PlayerSpawn and property == &"undoStack":
-				file.store_var(SerialisedUndoStack.new(object.undoStack) if object.undoStack else null, true)
-			else: file.store_var(object.get(property), true)
-		for array in object.ARRAYS.keys():
-			if arrayTypeIsComponent(object.ARRAYS[array]): file.store_var(componentArrayToIDs(object.get(array)))
-			else: file.store_var(object.get(array))
-		if object is Door: file.store_var(componentArrayToIDs(object.locks))
-		elif object is KeyCounter: file.store_var(componentArrayToIDs(object.elements))
+	for object in Game.objects.values(): storeComponent(file, object)
+	# notes
+	file.store_64(Game.noteIdIter)
+	file.store_64(len(Game.notes))
+	for note in Game.notes.values(): storeComponent(file, note)
 	file.close()
 	if OS.has_feature('web') and confirmAction != ACTION.SAVE_FOR_PLAY:
 		JavaScriptBridge.download_buffer(FileAccess.get_file_as_bytes(path),Game.level.name+".cedit")
 	
 	if confirmAction == ACTION.SAVE_FOR_PLAY: Game.playSaved()
+
+func storeComponent(file:FileAccess, component:GameComponent) -> void:
+	if component is PlaceholderObject: return
+	file.store_16(Game.COMPONENTS.find(component.get_script()))
+	var typeDef:ComponentTypeDef = FILE_VERSION.typeDefs[component.get_script()]
+	for property in typeDef.savedProperties: file.store_var(component.get(property), true)
+	for array in typeDef.savedArrays: file.store_var(component.get(array))
+	for array in typeDef.savedComponentArrays: file.store_var(componentArrayToIDs(component.get(array)))
 
 func arrayTypeIsComponent(arrayType) -> bool: return arrayType is GDScript and arrayType in Game.COMPONENTS
 
@@ -223,17 +231,20 @@ func IDArraytoComponents(type:GDScript,array:Array) -> Array:
 
 func loadFile(path:String, immediate:bool=false) -> OpenWindow:
 	var openWindow:OpenWindow = preload("res://scenes/openWindow.tscn").instantiate()
-	@warning_ignore("integer_division")
 	openWindow.path = path
 
 	if path.get_extension() != "cedit": errorPopup("Unrecognised file format"); return null
 
 	var file:FileAccess = FileAccess.open(path,FileAccess.ModeFlags.READ)
 
-	if file.get_pascal_string() != "IWLCEditorLevel": errorPopup("Unrecognised file format"); return null
+	var checkString:String = file.get_pascal_string()
+	if checkString != "IWLCEditorLevel":
+		if len(checkString) > 30: errorPopup("Unrecognised file format, check string was %s..." + checkString.substr(0, 30))
+		else: errorPopup("Unrecognised file format, check string was " + checkString)
+		return null
 	var formatVersion:int = file.get_32()
 	var editorVersion:String = file.get_pascal_string()
-	openWindow.formatVersion = formatVersion
+	openWindow.fileVersion = FILE_VERSIONS[formatVersion-1]
 	if formatVersion == 0:
 		openWindow.queue_free()
 		if formatVersion == 0: errorPopup("File version 0 is unrecognised")

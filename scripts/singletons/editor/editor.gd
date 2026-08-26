@@ -7,11 +7,10 @@ class_name Editor
 @onready var focusDialog:FocusDialog = %focusDialog
 @onready var quickSet:QuickSet = %quickSet
 @onready var multiselect:Multiselect = %multiselect
-@onready var paste:Button = %paste
-@onready var otherObjects:OtherObjects = %otherObjects
 @onready var topBar:TopBar = %topBar
 @onready var settingsMenu:SettingsMenu = %settingsMenu
 @onready var outline:Outline = %outline
+@onready var pda:PDA = %PDA
 var modsWindow:ModsWindow
 var exportWindow:ExportWindow
 var findProblems:FindProblems
@@ -35,7 +34,10 @@ var findProblems:FindProblems
 
 var previewComponents:Array[GameComponent] = []
 
-enum MODE {SELECT, TILE, KEY, DOOR, OTHER, PASTE}
+enum VIEW {NORMAL, NOTES, PLAYTEST}
+const VIEWS:int = 3
+var view:VIEW = VIEW.NORMAL
+enum MODE {SELECT, TILE, KEY, DOOR, OTHER, PASTE, PENCILMARK}
 var mode:MODE = MODE.SELECT
 
 var mouseWorldPosition:Vector2
@@ -46,6 +48,7 @@ var targetCameraZoom:float = 1
 var zoomPoint:Vector2 # the point where the latest zoom was targetted
 
 var objectHovered:GameObject
+var objectsHovered:Array[GameObject] = []
 var componentHovered:GameComponent # you can hover both a door and a lock at the same time so
 
 enum DRAG_MODE {POSITION, SIZE_DIAG, SIZE_VERT, SIZE_HORIZ}
@@ -67,8 +70,6 @@ var tileSize:Vector2i = Vector2i(32,32)
 var settingsOpen:bool = false
 
 var drawMain:RID
-var drawAutoRunGradient:RID
-var autoRunTimer:float = 2
 
 var screenshot:Image
 var drawThumbnail:RID
@@ -85,12 +86,9 @@ func _ready() -> void:
 	Saving.editor = self
 	Explainer.editor = self
 	drawMain = RenderingServer.canvas_item_create()
-	drawAutoRunGradient = RenderingServer.canvas_item_create()
 	drawThumbnail = RenderingServer.canvas_item_create()
-	RenderingServer.canvas_item_set_material(drawAutoRunGradient, Game.TEXT_GRADIENT_MATERIAL)
 	RenderingServer.canvas_item_set_z_index(drawThumbnail,1)
 	RenderingServer.canvas_item_set_parent(drawMain, %gameCont.get_canvas_item())
-	RenderingServer.canvas_item_set_parent(drawAutoRunGradient, %gameCont.get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawThumbnail, %thumbnail.get_canvas_item())
 	Game.setWorld(%world)
 	%settingsText.text = "IWLCEditor v" + ProjectSettings.get_setting("application/config/version")
@@ -107,6 +105,9 @@ func _ready() -> void:
 	playerObject.size = Vector2(12,21)
 	playerObject.id = -1
 	%screenshotViewportCont.visible = false
+	Game.pda = %PDA
+	%quickSwitcher.gameSettings = settingsMenu.gameSettings
+	%quickSwitcher.configFile = settingsMenu.configFile
 
 func _process(delta:float) -> void:
 	queue_redraw()
@@ -129,7 +130,6 @@ func _process(delta:float) -> void:
 	if Game.playState != Game.PLAY_STATE.PLAY and !focusDialog.focused and get_window().has_focus() and has_focus():
 		editorCamera.position += Vector2(Input.get_axis(&"editCameraLeft", &"editCameraRight"),Input.get_axis(&"editCameraUp", &"editCameraDown"))*delta/editorCamera.zoom*700
 
-
 	mouseWorldPosition = screenspaceToWorldspace(get_global_mouse_position())
 	mouseTilePosition = Vector2i(floor(mouseWorldPosition / Vector2(tileSize))) * tileSize
 	if Game.playState == Game.PLAY_STATE.PLAY or settingsOpen: %gameViewportDisplay.material.set_shader_parameter(&"mousePosition",Vector2(-1e7,-1e7)) # probably far away enough
@@ -142,12 +142,15 @@ func _process(delta:float) -> void:
 	%gameViewportDisplay.material.set_shader_parameter(&"tileSize", Vector2i(800, 608) if settingsOpen else tileSize)
 	componentHovered = null
 	if !componentDragged:
+		objectsHovered = []
 		objectHovered = null
+		var hoverZIndex:int = 0
 		if !Input.is_action_pressed(&"heldKeepMode") and !settingsOpen:
-			for object in Game.objectsParent.get_children():
-				if mode == MODE.SELECT or Game.playState == Game.PLAY_STATE.PLAY or (mode == MODE.KEY and object is KeyBulk) or (mode == MODE.DOOR and object is Door) or (mode == MODE.OTHER and object.get_script() == otherObjects.selected):
-					if Rect2(object.getDrawPosition(), object.size).has_point(mouseWorldPosition) and (Game.playState != Game.PLAY_STATE.PLAY or object.active):
-						objectHovered = object
+			for object in objectsInView():
+				if objectSelectable(object) and hoverZIndex <= object.z_index and Rect2(object.getDrawPosition(), object.size).has_point(mouseWorldPosition):
+					objectHovered = object
+					hoverZIndex = object.z_index
+					objectsHovered.append(object)
 			if focusDialog.focused is Door:
 				for lock in focusDialog.focused.locks:
 					if Rect2(lock.getDrawPosition(), lock.size).has_point(mouseWorldPosition):
@@ -156,13 +159,10 @@ func _process(delta:float) -> void:
 				for element in focusDialog.focused.elements:
 					if Rect2(element.getDrawPosition(), element.getHoverSize()).has_point(mouseWorldPosition):
 						componentHovered = element
-	%mouseover.describe(objectHovered if Game.playState == Game.PLAY_STATE.PLAY else null, %gameViewportDisplay.get_local_mouse_position(), %gameViewportDisplay.size)
+	if Game.playState == Game.PLAY_STATE.PLAY and !focusDialog.focused:
+		%mouseover.describe(objectsHovered, %gameViewportDisplay.get_local_mouse_position(), %gameViewportDisplay.size)
+	else: %mouseover.visible = false
 	Game.tiles.z_index = 3 if mode == MODE.TILE and Game.playState != Game.PLAY_STATE.PLAY else -3
-
-	if autoRunTimer < 2:
-		autoRunTimer += delta
-		queue_redraw()
-		if autoRunTimer >= 2: autoRunTimer = 2
 
 	%placePreviewWorld.visible = Game.playState != Game.PLAY_STATE.PLAY and !settingsOpen
 	placePreviewWorld.tiles.position = floor(mouseWorldPosition/32)*32
@@ -175,13 +175,55 @@ func _process(delta:float) -> void:
 		get_tree().call_group("modUI", "changedMods")
 		Mods.bufferedModsChanged = false
 
+func objectSelectable(object:GameObject) -> bool:
+	if Game.playState == Game.PLAY_STATE.PLAY: return object.active
+	match mode:
+		MODE.SELECT: return true
+		MODE.KEY: return object is KeyBulk
+		MODE.DOOR: return object is Door
+		MODE.OTHER: return object.get_script() == modes.otherObjects.selected
+		MODE.PENCILMARK: return object is Pencilmark
+		_: return false
+
+func objectsInView() -> Array:
+	match view:
+		VIEW.NORMAL: return Game.objects.values()
+		VIEW.NOTES: return Game.notes.values()
+		VIEW.PLAYTEST:
+			var array:Array = Game.objects.values()
+			array.append_array(Game.notes.values())
+			return array
+	assert(false)
+	return []
+
+func objectInView(object:GameObject) -> bool:
+	match view:
+		VIEW.NORMAL: return object is not GameNote
+		VIEW.NOTES: return object is GameNote
+		VIEW.PLAYTEST: return true
+	assert(false)
+	return true
+
+func tilesInView() -> bool:
+	match view:
+		VIEW.NORMAL: return true
+		VIEW.NOTES: return false
+		VIEW.PLAYTEST: return true
+	assert(false)
+	return true
+
+func inaccessibleViews() -> Array[VIEW]:
+	if Game.playState != Game.PLAY_STATE.PLAY: return [VIEW.PLAYTEST]
+	return []
+
 func _gui_input(event:InputEvent) -> void:
 	if !objectHovered: objectHovered = null
 	if !componentHovered: componentHovered = null
 	if event is InputEventMouse:
 		if Game.playState == Game.PLAY_STATE.PLAY:
 			mouse_default_cursor_shape = CURSOR_ARROW
-		else:
+			pencilmarkMouseActions(event)
+		if Game.playState != Game.PLAY_STATE.PLAY:
 			# move camera
 			if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
 				editorCamera.position -= event.relative / cameraZoom * Game.uiScale
@@ -189,137 +231,167 @@ func _gui_input(event:InputEvent) -> void:
 				match event.button_index:
 					MOUSE_BUTTON_WHEEL_UP: zoomCamera(1.25)
 					MOUSE_BUTTON_WHEEL_DOWN: zoomCamera(0.8)
-			# modes
-			if isLeftUnclick(event) or isRightUnclick(event):
-				if componentDragged: stopDrag()
-				Changes.bufferSave()
-			# set mouse cursor
-			match multiselect.state:
-				Multiselect.STATE.DRAGGING: mouse_default_cursor_shape = CURSOR_DRAG
-				Multiselect.STATE.SELECTING: mouse_default_cursor_shape = CURSOR_ARROW
-				Multiselect.STATE.HOLDING:
-					if componentDragged:
-						match dragMode:
-							DRAG_MODE.POSITION: mouse_default_cursor_shape = CURSOR_DRAG
-							DRAG_MODE.SIZE_DIAG:
-								var diffSign:Vector2 = rectSign(dragPivotRect, dragHandlePosition)
-								match diffSign:
-									Vector2(-1,-1), Vector2(1,1): mouse_default_cursor_shape = CURSOR_FDIAGSIZE
-									Vector2(-1,1), Vector2(1,-1): mouse_default_cursor_shape = CURSOR_BDIAGSIZE
-									Vector2(-1,0), Vector2(1,0): mouse_default_cursor_shape = CURSOR_HSIZE
-									Vector2(0,-1), Vector2(0,1): mouse_default_cursor_shape = CURSOR_VSIZE
-									Vector2(0,0): mouse_default_cursor_shape = CURSOR_MOVE
-							DRAG_MODE.SIZE_VERT: mouse_default_cursor_shape = CURSOR_VSIZE
-							DRAG_MODE.SIZE_HORIZ: mouse_default_cursor_shape = CURSOR_HSIZE
-					else: mouse_default_cursor_shape = CURSOR_ARROW
-			if settingsOpen:
-				settingsMenu.mouse_default_cursor_shape = mouse_default_cursor_shape
-				if componentDragged: return dragComponent()
-				return settingsMenu.receiveMouseInput(event)
-			# connection pulling
-			if connectionSource and isLeftClick(event):
-				if connectionSource is RemoteLock and objectHovered is Door: connectionSource._connectTo(objectHovered)
-				if connectionSource is Door and objectHovered is RemoteLock: objectHovered._connectTo(connectionSource)
-				focusDialog.focus(connectionSource)
-				connectionSource.queue_redraw()
-				connectionSource = null
-				return
-			# multiselect
+		# stop drag
+		if isLeftUnclick(event) or isRightUnclick(event):
+			if componentDragged: stopDrag()
+			Changes.bufferSave()
+		# set mouse cursor
+		match multiselect.state:
+			Multiselect.STATE.DRAGGING: mouse_default_cursor_shape = CURSOR_DRAG
+			Multiselect.STATE.SELECTING: mouse_default_cursor_shape = CURSOR_ARROW
+			Multiselect.STATE.HOLDING:
+				if componentDragged:
+					match dragMode:
+						DRAG_MODE.POSITION: mouse_default_cursor_shape = CURSOR_DRAG
+						DRAG_MODE.SIZE_DIAG:
+							var diffSign:Vector2 = rectSign(dragPivotRect, dragHandlePosition)
+							match diffSign:
+								Vector2(-1,-1), Vector2(1,1): mouse_default_cursor_shape = CURSOR_FDIAGSIZE
+								Vector2(-1,1), Vector2(1,-1): mouse_default_cursor_shape = CURSOR_BDIAGSIZE
+								Vector2(-1,0), Vector2(1,0): mouse_default_cursor_shape = CURSOR_HSIZE
+								Vector2(0,-1), Vector2(0,1): mouse_default_cursor_shape = CURSOR_VSIZE
+								Vector2(0,0): mouse_default_cursor_shape = CURSOR_MOVE
+						DRAG_MODE.SIZE_VERT: mouse_default_cursor_shape = CURSOR_VSIZE
+						DRAG_MODE.SIZE_HORIZ: mouse_default_cursor_shape = CURSOR_HSIZE
+				else: mouse_default_cursor_shape = CURSOR_ARROW
+		if settingsOpen:
+			settingsMenu.mouse_default_cursor_shape = mouse_default_cursor_shape
+			if componentDragged: return dragComponent()
+			return settingsMenu.receiveMouseInput(event)
+		# connection pulling
+		if connectionSource and isLeftClick(event):
+			if connectionSource is RemoteLock and objectHovered is Door: connectionSource._connectTo(objectHovered)
+			if connectionSource is Door and objectHovered is RemoteLock: objectHovered._connectTo(connectionSource)
+			focusDialog.focus(connectionSource)
+			connectionSource.queue_redraw()
+			connectionSource = null
+			return
+		# multiselect
+		if Game.playState != Game.PLAY_STATE.PLAY:
 			if multiselect.receiveMouseInput(event): return
 			elif multiselect.state == Multiselect.STATE.HOLDING:
 				if isLeftClick(event) or isRightClick(event): multiselect.deselect()
 			else: return
-			# size drag handles
-			if focusDialog.componentFocused is Lock and focusDialog.focused.type != Door.TYPE.SIMPLE:
-				if focusDialog.componentFocused.receiveMouseInput(event): return
-			elif objectHovered:
-				if objectHovered.receiveMouseInput(event): return
-			# dragging
-			if componentDragged: dragComponent(); return
-			# other
-			var inBounds:bool = Mods.active(&"OutOfBounds") or Game.levelBounds.has_point(mouseTilePosition)
-			match mode:
-				MODE.SELECT:
-					if isLeftClick(event): # if youre hovering something and you leftclick, focus it
-						if componentHovered:
-							focusDialog.focusComponent(componentHovered)
-						else: focusDialog.defocusComponent()
-						if componentHovered is Lock and componentHovered.parent.type != Door.TYPE.SIMPLE: startPositionDrag(componentHovered)
-						elif componentHovered is KeyCounterElement: startPositionDrag(componentHovered)
-						elif objectHovered: startPositionDrag(objectHovered)
-						else:
-							focusDialog.defocus()
-					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and event is InputEventMouseMotion and multiselect.state == Multiselect.STATE.HOLDING: multiselect.startSelect()
-				MODE.TILE:
-					if inBounds:
-						if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-							Changes.addChange(Changes.TileChange.new(floor(mouseWorldPosition/32),true))
-							focusDialog.defocus()
-						elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-							Changes.addChange(Changes.TileChange.new(floor(mouseWorldPosition/32),false))
-							focusDialog.defocus()
-				MODE.KEY:
-					if isLeftClick(event): # if youre hovering a key and you leftclick, focus it
-						if objectHovered is KeyBulk:
-							startPositionDrag(objectHovered)
-						else: focusDialog.defocus()
+		# size drag handles
+		if focusDialog.componentFocused is Lock and focusDialog.focused.type != Door.TYPE.SIMPLE:
+			if focusDialog.componentFocused.receiveMouseInput(event): return
+		elif objectHovered:
+			if objectHovered.receiveMouseInput(event): return
+		# dragging
+		if componentDragged: dragComponent(); return
+		# other
+		if Game.playState == Game.PLAY_STATE.PLAY: return
+		var inBounds:bool = Mods.active(&"OutOfBounds") or Game.levelBounds.has_point(mouseTilePosition)
+		match mode:
+			MODE.SELECT:
+				if isLeftClick(event): # if youre hovering something and you leftclick, focus it
+					if componentHovered:
+						focusDialog.focusComponent(componentHovered)
+					else: focusDialog.defocusComponent()
+					if componentHovered is Lock and componentHovered.parent.type != Door.TYPE.SIMPLE: startPositionDrag(componentHovered)
+					elif componentHovered is KeyCounterElement: startPositionDrag(componentHovered)
+					elif objectHovered: startPositionDrag(objectHovered)
+					else:
+						focusDialog.defocus()
+				if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and event is InputEventMouseMotion and multiselect.state == Multiselect.STATE.HOLDING: multiselect.startSelect()
+			MODE.TILE:
+				if inBounds:
 					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-						if objectHovered is not KeyBulk and inBounds:
-							var key:KeyBulk = Changes.addChange(Changes.CreateComponentChange.new(KeyBulk,{&"position":mouseTilePosition})).result
-							focusDialog.defocus()
-							if !Input.is_action_pressed(&"heldKeepMode"):
-								modes.setMode(MODE.SELECT)
-								startPositionDrag(key)
-					if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-						if objectHovered is KeyBulk:
-							Changes.addChange(Changes.DeleteComponentChange.new(objectHovered))
-							Changes.bufferSave()
-				MODE.DOOR:
-					if isLeftClick(event):
-						if componentHovered:
-							focusDialog.focusComponent(componentHovered)
-						else: focusDialog.defocusComponent()
-						if componentHovered is Lock: startPositionDrag(componentHovered)
-						elif objectHovered is Door: startPositionDrag(objectHovered)
-						else:
-							if objectHovered is not Door and inBounds:
-								var door:Door = Changes.addChange(Changes.CreateComponentChange.new(Door,{&"position":mouseTilePosition})).result
-								startSizeDrag(door)
-								Changes.addChange(Changes.CreateComponentChange.new(Lock,{&"position":Vector2.ZERO,&"parentId":door.id}))
-								if !Input.is_action_pressed(&"heldKeepMode"):
-									modes.setMode(MODE.SELECT)
-					if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-						if objectHovered is Door:
-							Changes.addChange(Changes.DeleteComponentChange.new(objectHovered))
-							Changes.bufferSave()
-				MODE.OTHER:
-					if isLeftClick(event):
-						if componentHovered is KeyCounterElement and otherObjects.selected == KeyCounter: startPositionDrag(componentHovered)
-						elif objectHovered and objectHovered.get_script() == otherObjects.selected:
-							startPositionDrag(objectHovered)
-						else: focusDialog.defocus()
-					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-						if (!objectHovered or objectHovered.get_script() != otherObjects.selected) and inBounds:
-							var object:GameObject = Changes.addChange(Changes.CreateComponentChange.new(otherObjects.selected,{&"position":mouseTilePosition})).result
-							focusDialog.defocus()
-							if otherObjects.selected == KeyCounter:
-								Changes.addChange(Changes.CreateComponentChange.new(KeyCounterElement,{&"position":Vector2(12,12),&"parentId":object.id}))
-							if !Input.is_action_pressed(&"heldKeepMode"):
-								modes.setMode(MODE.SELECT)
-								startPositionDrag(object)
-					if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-						if objectHovered and objectHovered.get_script() == otherObjects.selected:
-							Changes.addChange(Changes.DeleteComponentChange.new(objectHovered))
-							Changes.bufferSave()
-				MODE.PASTE:
-					if isLeftClick(event):
-						multiselect.paste()
+						Changes.addChange(Changes.TileChange.new(floor(mouseWorldPosition/32),true))
+						focusDialog.defocus()
+					elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+						Changes.addChange(Changes.TileChange.new(floor(mouseWorldPosition/32),false))
+						focusDialog.defocus()
+			MODE.KEY:
+				if isLeftClick(event): # if youre hovering a key and you leftclick, focus it
+					if objectHovered is KeyBulk:
+						startPositionDrag(objectHovered)
+					else: focusDialog.defocus()
+				if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					if objectHovered is not KeyBulk and inBounds:
+						var key:KeyBulk = Changes.addChange(Changes.CreateComponentChange.new(KeyBulk,{&"position":mouseTilePosition})).result
+						focusDialog.defocus()
 						if !Input.is_action_pressed(&"heldKeepMode"):
 							modes.setMode(MODE.SELECT)
+							startPositionDrag(key)
+				if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+					if objectHovered is KeyBulk:
+						Changes.addChange(Changes.DeleteComponentChange.new(objectHovered))
+						Changes.bufferSave()
+			MODE.DOOR:
+				if isLeftClick(event):
+					if componentHovered:
+						focusDialog.focusComponent(componentHovered)
+					else: focusDialog.defocusComponent()
+					if componentHovered is Lock: startPositionDrag(componentHovered)
+					elif objectHovered is Door: startPositionDrag(objectHovered)
+					else:
+						if objectHovered is not Door and inBounds:
+							var door:Door = Changes.addChange(Changes.CreateComponentChange.new(Door,{&"position":mouseTilePosition})).result
+							startSizeDrag(door)
+							Changes.addChange(Changes.CreateComponentChange.new(Lock,{&"position":Vector2.ZERO,&"parentId":door.id}))
+							if !Input.is_action_pressed(&"heldKeepMode"):
+								modes.setMode(MODE.SELECT)
+				if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+					if objectHovered is Door:
+						Changes.addChange(Changes.DeleteComponentChange.new(objectHovered))
+						Changes.bufferSave()
+			MODE.OTHER:
+				if isLeftClick(event):
+					if componentHovered is KeyCounterElement and modes.otherObjects.selected == KeyCounter: startPositionDrag(componentHovered)
+					elif objectHovered and objectHovered.get_script() == modes.otherObjects.selected:
+						startPositionDrag(objectHovered)
+					else: focusDialog.defocus()
+				if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					if (!objectHovered or objectHovered.get_script() != modes.otherObjects.selected) and inBounds:
+						var object:GameObject = Changes.addChange(Changes.CreateComponentChange.new(modes.otherObjects.selected,{&"position":mouseTilePosition})).result
+						focusDialog.defocus()
+						if modes.otherObjects.selected == KeyCounter:
+							Changes.addChange(Changes.CreateComponentChange.new(KeyCounterElement,{&"position":Vector2(12,12),&"parentId":object.id}))
+						if !Input.is_action_pressed(&"heldKeepMode"):
+							modes.setMode(MODE.SELECT)
+							startPositionDrag(object)
+				if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+					if objectHovered and objectHovered.get_script() == modes.otherObjects.selected:
+						Changes.addChange(Changes.DeleteComponentChange.new(objectHovered))
+						Changes.bufferSave()
+			MODE.PASTE:
+				if isLeftClick(event):
+					multiselect.paste()
+					if !Input.is_action_pressed(&"heldKeepMode"):
+						modes.setMode(MODE.SELECT)
+			MODE.PENCILMARK:
+				pencilmarkMouseActions(event)
+
+func pencilmarkMouseActions(event:InputEventMouse) -> void:
+	var playing:bool = Game.playState == Game.PLAY_STATE.PLAY
+	var justDefocused:bool = false
+	if isLeftClick(event):
+		if objectHovered is Pencilmark:
+			startPositionDrag(objectHovered)
+		elif focusDialog.focused:
+			focusDialog.defocus()
+			justDefocused = true
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		if objectHovered is not Pencilmark:
+			if playing and (justDefocused or !isLeftClick(event)): return
+			var pencilmark:Pencilmark = Changes.addChange(Changes.CreateComponentChange.new(Pencilmark,{&"position":mouseWorldPosition-Vector2(16,16)})).result
+			if playing: AudioManager.play(preload("res://resources/sounds/sndAddMark.wav"), 0.7, 1)
+			focusDialog.defocus()
+			if !Input.is_action_pressed(&"heldKeepMode") or playing:
+				if !playing: modes.setMode(MODE.SELECT)
+				startPositionDrag(pencilmark)
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		if objectHovered is Pencilmark:
+			if playing:
+				AudioManager.play(preload("res://resources/sounds/player/camera.wav"),0.55,1.5)
+			Changes.addChange(Changes.DeleteComponentChange.new(objectHovered))
+			Changes.bufferSave()
 
 func stopDrag() -> void:
 	if componentDragged == levelBoundsObject:
 		componentDragged = null
+		clampLevelBounds()
 		return
 	if sizeDragging():
 		if !Mods.active(&"MoreLockSizes") and componentDragged is Lock and componentDragged.parent.type != Door.TYPE.SIMPLE:
@@ -335,9 +407,15 @@ func stopDrag() -> void:
 			else: focusDialog.focus(componentDragged)
 	componentDragged = null
 
+func clampLevelBounds() -> void:
+	for tile in Game.world.tiles.get_used_cells():
+		if !Game.levelBounds.intersects(Rect2(Vector2(tile) * Vector2(32,32), Vector2(32,32))): Changes.addChange(Changes.TileChange.new(tile,false))
+	for object in Game.objects.values():
+		if !Game.levelBounds.intersects(Rect2(object.position, object.size)): Changes.addChange(Changes.DeleteComponentChange.new(object))
+
 static func convertLock(lock:Lock) -> RemoteLock:
 	var remoteLock = Changes.addChange(Changes.CreateComponentChange.new(RemoteLock,{&"position":lock.position+lock.parent.position})).result
-	for property in Lock.PROPERTIES:
+	for property in Saving.FILE_VERSION.typeDefs[lock.get_script()].savedProperties:
 		if property not in [&"id", &"position", &"parentId", &"index"]:
 			Changes.addChange(Changes.PropertyChange.new(remoteLock,property,lock.get(property)))
 	remoteLock._connectTo(lock.parent)
@@ -350,7 +428,8 @@ func startPositionDrag(component:GameComponent) -> void:
 	else: focusDialog.focusComponent(component)
 	componentDragged = component
 	dragMode = DRAG_MODE.POSITION
-	previousDragPosition = mouseTilePosition
+	if componentDragged is Pencilmark: previousDragPosition = mouseWorldPosition
+	else: previousDragPosition = mouseTilePosition
 
 func startSizeDrag(component:GameComponent, handle:Vector2=Vector2(1,1)) -> void:
 	focusDialog.defocus()
@@ -373,10 +452,13 @@ func startSizeDrag(component:GameComponent, handle:Vector2=Vector2(1,1)) -> void
 	previousDragPosition = snappedMousePosition
 	dragHandle = handle
 
-func dragComponent() -> void: # returns whether or not an object is being dragged, for laziness
+func dragComponent() -> void:
 	var snappedMousePosition:Vector2 = mouseWorldPosition.snapped(tileSize)
+	if componentDragged is Pencilmark: snappedMousePosition = mouseWorldPosition
 	var dragOffset:Vector2
-	if dragMode == DRAG_MODE.POSITION: dragOffset = Vector2(mouseTilePosition) - previousDragPosition
+	if dragMode == DRAG_MODE.POSITION:
+		dragOffset = Vector2(mouseTilePosition) - previousDragPosition
+		if componentDragged is Pencilmark: dragOffset = mouseWorldPosition - previousDragPosition
 	else: dragOffset = snappedMousePosition - previousDragPosition
 	lockBufferConvert = false # whether or not to buffer a conversion to remotelock
 	var bounds:Rect2
@@ -397,7 +479,7 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 			else:
 				var goingTo:Rect2 = Rect2(componentDragged.position + dragOffset, componentDragged.size)
 				if !bounds.intersects(goingTo):
-					if !allowOutOfBounds:
+					if !allowOutOfBounds and componentDragged.get_script() not in Game.NOTE_COMPONENTS:
 						dragOffset += snappedAway(Vector2.ZERO.max(innerBounds.position - goingTo.end) - Vector2.ZERO.max(goingTo.position - innerBounds.end), Vector2(tileSize))
 					elif componentDragged is Lock and Mods.active(&"RemoteLocks") and !Mods.active(&"DisconnectedLocks"): lockBufferConvert = true
 				previousDragPosition += dragOffset
@@ -448,36 +530,46 @@ func dragComponent() -> void: # returns whether or not an object is being dragge
 				Changes.addChange(Changes.PropertyChange.new(componentDragged,&"size",toRect.size))
 
 func _input(event:InputEvent) -> void:
+	if event is InputEventMouseMotion: Game.mouseMoveTimer = 0
+
 	if quickSet.component: quickSet.receiveInput(event); return
 	if event is InputEventKey and event.is_pressed():
 		if settingsOpen:
 			if !settingsMenu.has_focus(): return
 			if eventIs(event, &"editHome"): home()
+		elif isTextInput(get_viewport().gui_get_focus_owner()):
+			match event.keycode:
+				KEY_ESCAPE: grab_focus()
+				KEY_TAB: if get_viewport().gui_get_focus_owner() == modes.otherObjects.objectSearch: modes.otherObjects._searchSubmitted()
 		elif Game.playState == Game.PLAY_STATE.PLAY:
 			# IN PLAY
-			if eventIs(event, &"gameAutoRun", false): autoRun()
+			if focusDialog.interacted and focusDialog.interacted.receiveKey(event): return
+			elif focusDialog.focused and focusDialog.receiveKey(event): return
+			elif focusDialog.interacted and focusDialog.interacted.receiveUnhandledKey(event): return
+			elif eventIs(event, &"gameAutoRun", false): %quickSwitcher.toggleAutoRun()
+			elif eventIs(event, &"gameMixedFractionsSwitch", false) and Mods.active(&"Fractions"): %quickSwitcher.toggleMixedFractions()
+			elif eventIs(event, &"editDrag"):
+				if focusDialog.focused: startPositionDrag(focusDialog.focused)
 			match event.keycode:
 				KEY_ESCAPE: _toggleSettingsMenu(true)
 				_: Game.player.receiveKey(event)
 		else:
 			# IN EDIT
-			if otherObjects.objectSearch.has_focus():
-				match event.keycode:
-					KEY_ESCAPE: grab_focus()
-					KEY_TAB: otherObjects._searchSubmitted()
-				return
 			if focusDialog.interacted and focusDialog.interacted.receiveKey(event): return
 			elif focusDialog.focused and focusDialog.receiveKey(event): return
 			elif focusDialog.interacted and focusDialog.interacted.receiveUnhandledKey(event): return
 			elif eventIs(event, &"editStartPlaytest") and !topBar.play.disabled: await get_tree().process_frame; Game.playTest(Game.levelStart)
 			elif eventIs(event, &"editStartPlaytestFromState") and !topBar.play.disabled: await get_tree().process_frame; Game.playTest(Game.latestSpawn)
 			elif eventIs(event, &"editStopPlaytest") and Game.playState == Game.PLAY_STATE.PAUSED: Game.stopTest()
+			elif eventIs(event, &"editViewPrevious"): modes.previousView()
+			elif eventIs(event, &"editViewNext"): modes.nextView()
 			elif eventIs(event, &"editModeSelect"): modes.setMode(MODE.SELECT); focusDialog.defocus(); componentDragged = null; multiselect.deselect()
 			elif eventIs(event, &"editModeTile"): modes.setMode(MODE.TILE)
 			elif eventIs(event, &"editModeKey"): modes.setMode(MODE.KEY)
 			elif eventIs(event, &"editModeDoor"): modes.setMode(MODE.DOOR)
 			elif eventIs(event, &"editModeOther"): modes.setMode(MODE.OTHER)
-			elif eventIs(event, &"editObjectSearch"): otherObjects.objectSearch.grab_focus()
+			elif eventIs(event, &"editObjectSearch"): modes.otherObjects.objectSearch.grab_focus()
+			elif eventIs(event, &"editModePencilmark"): modes.setMode(MODE.PENCILMARK)
 			elif eventIs(event, &"editPipette"): pipette()
 			elif eventIs(event, &"editOpenSettings"): _toggleSettingsMenu(true)
 			elif eventIs(event, &"editNew"): fileMenu.optionPressed(0)
@@ -505,6 +597,8 @@ func _input(event:InputEvent) -> void:
 
 static func eventIs(event:InputEvent, action:StringName, exactMatch:bool=true) -> bool: return event.is_action_pressed(action, false, exactMatch)
 
+static func isTextInput(control:Control) -> bool: return control is LineEdit or control is TextEdit
+
 func home() -> void:
 	targetCameraZoom = 1
 	zoomPoint = levelStartCameraCenter(Vector2(800,608)) + Vector2(400,304)
@@ -523,7 +617,7 @@ func pipette() -> void:
 	if objectHovered:
 		multiselect.selectRect.position = objectHovered.position
 		multiselect.clipboard.assign([multiselect.createObjectCopy(objectHovered)])
-		paste.disabled = false
+		modes.paste.disabled = false
 		modes.setMode(MODE.PASTE)
 		@warning_ignore("integer_division")
 	elif Game.tiles.get_cell_source_id(mouseTilePosition/32) != -1: modes.setMode(MODE.TILE)
@@ -588,15 +682,6 @@ func _toggleSettingsMenu(toggled_on:bool) -> void:
 
 func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawMain)
-	RenderingServer.canvas_item_clear(drawAutoRunGradient)
-	var autoRunAlpha:float = abs(sin(autoRunTimer*PI))
-	if autoRunAlpha > 0:
-		TextDraw.outlinedGradient(Game.FMINIID,drawMain,drawAutoRunGradient,
-			"[%s] Auto-Run is " % Explainer.hotkeyMap(&"gameAutoRun") + ("on" if Game.autoRun else "off"),
-			Color(Color("#e6ffe6") if Game.autoRun else Color("#dcffe6"),autoRunAlpha),
-			Color(Color("#e6c896") if Game.autoRun else Color("#64dc8c"),autoRunAlpha),
-			Color(Color.BLACK,autoRunAlpha),12,Vector2(4,20)
-		)
 	if Game.playState == Game.PLAY_STATE.PLAY and Game.player.cameraAnimVal > 0:
 		var topLeft:Vector2 = - Vector2(8,8) + Vector2(16,16)*Game.player.cameraAnimVal
 		var bottomRight:Vector2 = gameCont.size + Vector2(8,8) - Vector2(16,16)*Game.player.cameraAnimVal
@@ -611,12 +696,11 @@ func _draw() -> void:
 		TextDraw.outlined(Game.FPRESENTS, drawMain, "[%s] to zoom" % Explainer.hotkeyMap(&"gameAction"),Color(Color.WHITE,Game.player.cameraAnimVal),Color(Color.BLACK,Game.player.cameraAnimVal),14,Vector2(11,gameCont.size.y-16))
 		TextDraw.outlined(Game.FPRESENTS, drawMain, "[%s] to exit" % Explainer.hotkeyMap(&"gameCamera"),Color(Color.WHITE,Game.player.cameraAnimVal),Color(Color.BLACK,Game.player.cameraAnimVal),14,gameCont.size+Vector2(-108,-16))
 
-func autoRun() -> void:
-	Game.autoRun = !Game.autoRun
-	AudioManager.play(preload("res://resources/sounds/autoRun.wav"), 1.0, 1.0 if Game.autoRun else 0.7)
-	autoRunTimer = 0
-	%settingsMenu.gameSettings.closed(%settingsMenu.configFile)
-	%settingsMenu.configFile.save("user://config.ini")
+static func scriptExtends(script:GDScript, base:GDScript) -> bool:
+	while script != null:
+		if script == base: return true
+		script = script.get_base_script()
+	return false
 
 func takeScreenshot() -> void:
 	%screenshotViewportCont.visible = true
@@ -668,4 +752,6 @@ func _gameViewportDisplayResized():
 	var newSize:Vector2 = %gameViewportDisplay.size * Game.uiScale
 	%gameViewport.size = newSize
 	%placePreviewViewport.size = newSize
+	%PDA.screenSize = newSize
+	%PDA.queue_redraw()
 	RenderingServer.global_shader_parameter_set(&"SCREEN_SIZE", newSize)

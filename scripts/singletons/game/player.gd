@@ -49,11 +49,11 @@ var glisten:Array[PackedInt64Array] = [] #your glistening count
 var cantSave:bool = false # cant save if near a door
 var cantSavePrevious = false
 
-var masterMode:PackedInt64Array = M.ZERO
+var masterMode:PackedInt64Array = M.ZERO()
 var masterCycle:int = 0 # 0 = None, 1 = Master, 2 = Silver, 3 = Cosmic
 const MASTER_CYCLE_COLORS:Array[C.olors] = [C.olors.WHITE, C.olors.MASTER, C.olors.QUICKSILVER, C.olors.COSMIC]
 
-var complexMode:PackedInt64Array = M.ONE # C(1,0) for real view, C(0,1) for i-view
+var complexMode:PackedInt64Array = M.ONE() # C(1,0) for real view, C(0,1) for i-view
 
 var drawDropShadow:RID
 
@@ -102,8 +102,8 @@ var bufferedCheckKeys:bool = false
 func _init() -> void:
 	for color in Colors.COLORS:
 		# if color == C.olors.STONE:
-		key.append(M.ZERO)
-		glisten.append(M.ZERO)
+		key.append(M.ZERO())
+		glisten.append(M.ZERO())
 		star.append(false)
 		curse.append(color == C.olors.BROWN)
 
@@ -167,7 +167,7 @@ func _physics_process(_delta:float) -> void:
 		if cameraAnimVal < 0.01:
 			cameraAnimVal = 0
 			if Game.playGame: Game.playGame.queue_redraw()
-		Game.camera.position = position
+		Game.camera.position = round(position)
 	var scaleFactor:float = (cameraZoomTarget*(Game.uiScale if Game.editor else 1.0)/Game.camera.zoom.x)**0.1
 	Game.camera.zoom *= scaleFactor
 
@@ -249,19 +249,26 @@ func _process(delta:float) -> void:
 	drawCurse.color = curseColor
 	drawCurse.queue_redraw()
 
+	if (Game.editor.focusDialog.focused if Game.editor else Game.playGame.playGameDialog.focused) is Pencilmark: return
+	if Input.is_action_pressed(&"gamePDA") and !paused(): Game.pda.open()
+	else: Game.pda.close()
+
 func convertNumbers(from:M.SYSTEM) -> void:
 	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"key"))
 	Changes.addChange(Changes.ConvertNumberChange.new(self, from, &"glisten"))
 
 func receiveKey(event:InputEventKey):
 	if paused(): return
+	if (Game.editor.focusDialog.focused if Game.editor else Game.playGame.playGameDialog.focused) is Pencilmark: return
 	if Editor.eventIs(event, &"editPausePlaytest") and Game.editor: Game.pauseTest()
 	elif Editor.eventIs(event, &"editStopPlaytest") and Game.editor: Game.stopTest()
 	elif Editor.eventIs(event, &"editSavestate") and Game.editor: Game.savestate()
 	elif Editor.eventIs(event, &"gameRestart", false): Game.restart()
 	elif Editor.eventIs(event, &"gameUndo", false) and !cameraMode and GameChanges.undo(): AudioManager.play(preload("res://resources/sounds/player/undo.wav"), 1, 0.6)
 	elif Editor.eventIs(event, &"gameAction", false):
-		if cameraMode:
+		if Game.pda.visible:
+			Game.pda.nextPage()
+		elif cameraMode:
 			if Game.levelBounds.size == Vector2i(800, 608): return
 			if cameraZoomTarget == 1:
 				AudioManager.play(preload("res://resources/sounds/player/camera.wav"),1,1.5)
@@ -343,7 +350,7 @@ func cycleMaster() -> void:
 	dropMaster()
 
 func dropMaster() -> void:
-	masterMode = M.ZERO
+	masterMode = M.ZERO()
 	masterCycle = 0
 
 func getArmamentImmunities() -> Array[C.olors]:
@@ -372,7 +379,7 @@ func checkKeys() -> void:
 	explodey = M.ex(key[C.olors.DYNAMITE]) and C.olors.DYNAMITE not in armamentImmunities
 
 	curseMode = 0
-	var highestSeen:PackedInt64Array = M.ZERO
+	var highestSeen:PackedInt64Array = M.ZERO()
 	if C.olors.PURE not in armamentImmunities:
 		for color in Colors.COLORS:
 			if !curse[color] or M.nex(M.r(key[color])) or color in armamentImmunities: continue
@@ -384,17 +391,17 @@ func checkKeys() -> void:
 				curseColor = color as C.olors
 
 func complexSwitch() -> void:
-	if M.eq(complexMode, M.ONE): complexMode = M.I
-	else: complexMode = M.ONE
+	if M.eq(complexMode, M.ONE()): complexMode = M.I()
+	else: complexMode = M.ONE()
 
 	AudioManager.play(preload("res://resources/sounds/player/camera.wav"))
 	AudioManager.play(preload("res://resources/sounds/key/signflip.wav"))
 	complexSwitchAnim = true
 	complexSwitchAngle = 0
 
-	if M.eq(complexMode, M.I) and masterCycle and M.ex(M.i(key[MASTER_CYCLE_COLORS[masterCycle]])):
+	if M.eq(complexMode, M.I()) and masterCycle and M.ex(M.i(key[MASTER_CYCLE_COLORS[masterCycle]])):
 		masterMode = M.axis(M.i(key[MASTER_CYCLE_COLORS[masterCycle]]))
-	elif M.eq(complexMode, M.ONE) and masterCycle and M.ex(M.r(key[MASTER_CYCLE_COLORS[masterCycle]])):
+	elif M.eq(complexMode, M.ONE()) and masterCycle and M.ex(M.r(key[MASTER_CYCLE_COLORS[masterCycle]])):
 		masterMode = M.axis(M.r(key[MASTER_CYCLE_COLORS[masterCycle]]))
 	elif masterCycle:
 		AudioManager.play(preload("res://resources/sounds/player/masterUnequip.wav"))
@@ -438,7 +445,7 @@ func _draw() -> void:
 		var masterDrawOpacity:Color = Color(Color.WHITE,masterShineScale*0.6)
 		RenderingServer.canvas_item_add_texture_rect(drawMasterShine,Rect2(Vector2(-32,-32)*masterShineScale,Vector2(64,64)*masterShineScale),HELD_SHINE,false,getMasterShineColor())
 		RenderingServer.canvas_item_add_texture_rect(drawMasterKey,Rect2(Vector2(-16,-16),Vector2(32,32)),getHeldKeySprite(),false,masterDrawOpacity)
-	if M.eq(complexMode, M.I):
+	if M.eq(complexMode, M.I()):
 		TextDraw.outlinedCentered(Game.FTALK,drawComplexModeText,"I-View",Color.from_hsv(Game.complexViewHue,0.4901960784,1),Color.BLACK,12,Vector2(0,-10))
 	# complex switch
 	if complexSwitchAnim:
@@ -453,13 +460,22 @@ func toggleCamera() -> void:
 	cameraZoomTarget = 1
 	AudioManager.play(preload("res://resources/sounds/player/camera.wav"))
 
-func changeKeys(color:C.olors, after:PackedInt64Array,override_star:bool=true) -> void:
-	if star[color] and not override_star: return
-	if star[color] and override_star:
-		GameChanges.addChange(GameChanges.KeyChange.new(color, after))
-	else:
-		GameChanges.addChange(GameChanges.KeyChange.new(color, M.keepAbove(after,glisten[color])))
+const KEYCHANGE_TYPES = 4
+enum KEYCHANGE_TYPE {NONE, NORMAL, STAR, ALL}
 
-func changeGlisten(color:C.olors, after:PackedInt64Array,override_star:bool=true) -> void:
-	if star[color] and not override_star: return
-	GameChanges.addChange(GameChanges.GlistenChange.new(color, after))
+func changeKeys(color:C.olors, after:PackedInt64Array, collectType:KEYCHANGE_TYPE=KEYCHANGE_TYPE.NORMAL) -> void:
+	match collectType:
+		KEYCHANGE_TYPE.NONE: return # ???
+		KEYCHANGE_TYPE.NORMAL: if star[color]: return
+		KEYCHANGE_TYPE.STAR: if !star[color]: return
+	if collectType in [KEYCHANGE_TYPE.STAR, KEYCHANGE_TYPE.ALL]:
+		GameChanges.applyChange(GameChanges.newColorChange(GameChanges.TYPE.KeyChange, color, after))
+	else: GameChanges.applyChange(GameChanges.newColorChange(GameChanges.TYPE.KeyChange, color, M.keepAbove(after,glisten[color])))
+
+func changeGlisten(color:C.olors, after:PackedInt64Array, collectType:KEYCHANGE_TYPE=KEYCHANGE_TYPE.NORMAL) -> void:
+	match collectType:
+		KEYCHANGE_TYPE.NONE: return # ???
+		KEYCHANGE_TYPE.NORMAL: if star[color]: return
+		KEYCHANGE_TYPE.STAR: if !star[color]: return
+	if star[color]: return
+	GameChanges.applyChange(GameChanges.newColorChange(GameChanges.TYPE.GlistenChange, color, after))

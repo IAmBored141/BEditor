@@ -25,7 +25,7 @@ static func availableConfigurations(lockCount:PackedInt64Array, lockType:TYPE) -
 	if lockType != TYPE.NORMAL and lockType != TYPE.EXACT: return available
 	var absCount:PackedInt64Array = M.cabs(lockCount)
 	if M.isNonzeroReal(lockCount):
-		if M.eq(absCount, M.ONE): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
+		if M.eq(absCount, M.ONE()): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
 		elif M.eq(absCount, M.N(2)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr2H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr2V])
 		elif M.eq(absCount, M.N(3)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr3H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr3V])
 		elif M.eq(absCount, M.N(4)): available.append([SIZE_TYPE.AnyM, CONFIGURATION.spr4A]); available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr4B])
@@ -43,7 +43,7 @@ static func availableConfigurations(lockCount:PackedInt64Array, lockType:TYPE) -
 			elif M.eq(absCount, M.N(11)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr11A])
 			elif M.eq(absCount, M.N(13)): available.append([SIZE_TYPE.AnyL, CONFIGURATION.spr13A])
 	elif M.isNonzeroImag(lockCount):
-		if M.eq(absCount, M.I): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
+		if M.eq(absCount, M.I()): available.append([SIZE_TYPE.AnyS, CONFIGURATION.spr1A])
 		elif M.eq(absCount, M.Ni(2)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr2H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr2V])
 		elif M.eq(absCount, M.Ni(3)): available.append([SIZE_TYPE.AnyH, CONFIGURATION.spr3H]); available.append([SIZE_TYPE.AnyV, CONFIGURATION.spr3V])
 	return available
@@ -89,6 +89,9 @@ const SYMBOL_GLISTENINGI = preload("res://assets/game/lock/symbols/glisteningi.p
 const SYMBOL_REMAINDER = preload("res://assets/game/lock/symbols/remainder.png")
 const SYMBOL_SIZE:Vector2 = Vector2(32,32)
 
+const PARTIAL_BLAST_HORIZONTAL = preload("res://assets/game/lock/symbols/partialBlastHorizontal.png")
+const PARTIAL_BLAST_HORIZONTAL_BIG = preload("res://assets/game/lock/symbols/partialBlastHorizontalBig.png")
+
 static var GLITCH_FILL:LockTextureLoader = LockTextureLoader.new("res://assets/game/lock/fill/$tglitch.png")
 static var GLITCH_FILL_TEXTURE:LockColorsTextureLoader = LockColorsTextureLoader.new("res://assets/game/lock/fill/$tglitch$c.png",false,true)
 
@@ -117,29 +120,25 @@ func getOffset() -> Vector2: return offsetFromType(sizeType)
 const CREATE_PARAMETERS:Array[StringName] = [
 	&"position", &"parentId"
 ]
-const PROPERTIES:Array[StringName] = [
-	&"id", &"position", &"size",
-	&"parentId", &"color", &"type", &"sizeType", &"count", &"configuration", &"zeroI", &"isPartial", &"denominator", &"negated", &"armament", &"spendType",
-	&"index", &"displayIndex" # implcit
-]
-static var ARRAYS:Dictionary[StringName,Variant] = {}
 
 var parent:Door
-var parentId:int
-var color:C.olors = C.olors.WHITE
-var type:TYPE = TYPE.NORMAL
-var configuration:CONFIGURATION = CONFIGURATION.spr1A
-var sizeType:SIZE_TYPE = SIZE_TYPE.AnyS
-var count:PackedInt64Array = M.ONE
-var zeroI:bool = false # if the count is zeroI, for exact locks
-var isPartial:bool = false # for partial blast
-var denominator:PackedInt64Array = M.ONE # for partial blast
-var negated:bool = false
-var armament:bool = false
-var index:int
-var displayIndex:int # split into armaments and nonarmaments
+@export_group("SavedProperties")
+@export var parentId:int
+@export var color:C.olors = C.olors.WHITE
+@export var type:TYPE = TYPE.NORMAL
+@export var configuration:CONFIGURATION = CONFIGURATION.spr1A
+@export var sizeType:SIZE_TYPE = SIZE_TYPE.AnyS
+@export var count:PackedInt64Array = M.ONE()
+@export var zeroI:bool = false # if the count is zeroI, for exact locks
+@export var isPartial:bool = false # for partial blast
+@export var denominator:PackedInt64Array = M.ONE() # for partial blast
+@export var partialBlastHorizontal:bool = false # for partial blast
+@export var negated:bool = false
+@export var armament:bool = false
+@export var index:int # implicit
+@export var displayIndex:int # implicit, split into armaments and nonarmaments
 # in my mind, two buttons to toggle "spends star" and "spends normal" is more intuitive than 4 buttons which toggle
-var spendType = SPEND_TYPE.NORMAL
+@export var spendType = SPEND_TYPE.NORMAL
 
 func getColors() -> Array[C.olors]: return [color]
 
@@ -149,6 +148,7 @@ var drawGlitch:RID
 var drawMain:RID
 var drawError:RID
 var drawConfiguration:RID
+var textDrawer:TextDrawer
 
 static func getConfigurationColor(_isNegative:bool) -> Color:
 	if _isNegative: return Color("#ebdfd3")
@@ -170,9 +170,16 @@ func _ready() -> void:
 	RenderingServer.canvas_item_set_parent(drawMain,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawError,get_canvas_item())
 	RenderingServer.canvas_item_set_parent(drawConfiguration,get_canvas_item())
+	textDrawer = TextDrawer.new(self, TextDrawer.SETTING.FTALK)
 	RenderingServer.canvas_item_set_self_modulate(drawError, "#ffffffaa")
 	RenderingServer.canvas_item_set_material(drawError,Game.ADDITIVE_MATERIAL)
-	Game.connect(&"goldIndexChanged",func(): if Colors.getDef(getColor(COLOR_STEP.DRAW_BASE)).doorTextureFrames > 1 or getColor(COLOR_STEP.BASE) == C.olors.ERROR: queue_redraw())
+	Game.connect(&"goldIndexChanged",func(): if animated(): queue_redraw())
+
+func animated() -> bool:
+	if Colors.getDef(getColor(COLOR_STEP.DRAW_BASE)).doorTextureFrames > 1: return true
+	if getColor(COLOR_STEP.BASE) == C.olors.ERROR: return true
+	if armament: return true
+	return false
 
 func _freed() -> void:
 	RenderingServer.free_rid(drawScaled)
@@ -193,9 +200,11 @@ func _draw() -> void:
 	RenderingServer.canvas_item_clear(drawMain)
 	RenderingServer.canvas_item_clear(drawError)
 	RenderingServer.canvas_item_clear(drawConfiguration)
-	if !parent.active and Game.playState == Game.PLAY_STATE.PLAY: return
-	drawLock(drawScaled,drawAuraBreaker,drawGlitch,drawMain,drawConfiguration,
-		size,getColor(COLOR_STEP.DRAW_BASE),getColor(COLOR_STEP.Glitch),type,effectiveConfiguration(),sizeType,effectiveCount(),effectiveZeroI(),isPartial,effectiveDenominator(),negated,armament,
+	if !parent.active and Game.playState == Game.PLAY_STATE.PLAY:
+		textDrawer.evaluate()
+		return
+	drawLock(drawScaled,drawAuraBreaker,drawGlitch,drawMain,drawConfiguration,textDrawer,
+		size,getColor(COLOR_STEP.DRAW_BASE),getColor(COLOR_STEP.Glitch),type,effectiveConfiguration(),sizeType,effectiveCount(),effectiveZeroI(),isPartial,effectiveDenominator(),partialBlastHorizontal,negated,armament,
 		getFrameHighColor(isNegative(), negated),
 		getFrameMainColor(isNegative(), negated),
 		getFrameDarkColor(isNegative(), negated),
@@ -207,7 +216,7 @@ func _draw() -> void:
 	if getColor(COLOR_STEP.BASE) == C.olors.ERROR:
 		RenderingServer.canvas_item_add_texture_rect(drawError,Rect2(-offsetFromType(sizeType), size),ERROR_FX.current([randi_range(0,2)]))
 
-static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch:RID, lockDrawMain:RID, lockDrawConfiguration:RID,
+static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch:RID, lockDrawMain:RID, lockDrawConfiguration:RID, lockTextDrawer:TextDrawer,
 	lockSize:Vector2,
 	lockBaseColor:C.olors, lockGlitchColor:C.olors,
 	lockType:TYPE,
@@ -216,7 +225,8 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 	lockCount:PackedInt64Array,
 	lockZeroI:bool,
 	lockIsPartial:bool,
-	lockDenominator,
+	lockDenominator:PackedInt64Array,
+	lockPartialBlastHorizontal:bool,
 	lockNegated:bool,
 	lockArmament:bool,
 	frameHigh:Color,frameMain:Color,frameDark:Color,
@@ -237,19 +247,19 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 			RenderingServer.canvas_item_add_texture_rect(lockDrawScaled,rect,Game.COLOR_TEXTURES.current([lockBaseColor]),tileTexture)
 		elif lockBaseColor == C.olors.GLITCH:
 			RenderingServer.canvas_item_set_material(lockDrawGlitch,Game.GLITCH_MATERIAL.get_rid())
-			RenderingServer.canvas_item_add_rect(lockDrawGlitch,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Game.mainTone[lockBaseColor])
+			RenderingServer.canvas_item_add_rect(lockDrawGlitch,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Colors.getMainTone(lockBaseColor))
 			if lockGlitchColor != C.olors.GLITCH:
 				if lockSizeType == SIZE_TYPE.ANY:
 					if Colors.getDef(lockGlitchColor).doorTexture: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,GLITCH_ANY_RECT,GLITCH_FILL_TEXTURE.current([lockGlitchColor,lockSizeType]),GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE)
-					else: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,GLITCH_ANY_RECT,GLITCH_FILL.current([lockSizeType]),GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Game.mainTone[lockGlitchColor])
+					else: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,GLITCH_ANY_RECT,GLITCH_FILL.current([lockSizeType]),GLITCH_CORNER_SIZE,GLITCH_CORNER_SIZE,TILE,TILE,true,Colors.getMainTone(lockGlitchColor))
 				elif Colors.getDef(lockGlitchColor).doorTexture: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,GLITCH_FILL_TEXTURE.current([lockGlitchColor,lockSizeType]))
-				else: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,GLITCH_FILL.current([lockSizeType]),false,Game.mainTone[lockGlitchColor])
+				else: RenderingServer.canvas_item_add_texture_rect(lockDrawMain,rect,GLITCH_FILL.current([lockSizeType]),false,Colors.getMainTone(lockGlitchColor))
 		elif lockBaseColor in [C.olors.ICE, C.olors.MUD, C.olors.GRAFFITI]:
 			RenderingServer.canvas_item_set_material(lockDrawScaled,Game.NO_MATERIAL.get_rid())
-			RenderingServer.canvas_item_add_rect(lockDrawScaled,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Game.mainTone[lockBaseColor])
+			RenderingServer.canvas_item_add_rect(lockDrawScaled,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Colors.getMainTone(lockBaseColor))
 			Door.drawAuras(lockDrawAuraBreaker,lockDrawAuraBreaker,lockDrawAuraBreaker,lockBaseColor==C.olors.ICE,lockBaseColor==C.olors.MUD,lockBaseColor==C.olors.GRAFFITI,rect)
 		else:
-			RenderingServer.canvas_item_add_rect(lockDrawMain,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Game.mainTone[lockBaseColor])
+			RenderingServer.canvas_item_add_rect(lockDrawMain,Rect2(rect.position+Vector2.ONE,rect.size-Vector2(2,2)),Colors.getMainTone(lockBaseColor))
 	# background (spend types)
 	var bgColor:Color
 	# lighter if negative, darker if positive
@@ -258,101 +268,117 @@ static func drawLock(lockDrawScaled:RID, lockDrawAuraBreaker:RID, lockDrawGlitch
 	if spendTypes == SPEND_TYPE.STAR: RenderingServer.canvas_item_add_texture_rect(lockDrawMain, rect, BACKGROUND_STARRY, true, bgColor)
 	if spendTypes == SPEND_TYPE.NONE: RenderingServer.canvas_item_add_texture_rect(lockDrawMain, rect, BACKGROUND_WEAK, true, bgColor)
 	if spendTypes == SPEND_TYPE.ALL: RenderingServer.canvas_item_add_texture_rect(lockDrawMain, rect, BACKGROUND_FORCEFUL, true, bgColor)
-	if noCopies: return # no copies in this direction; go away
+	if noCopies:
+		lockTextDrawer.evaluate()
+		return # no copies in this direction; go away
 	# frame
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_HIGH,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameHigh)
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_MAIN,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameMain)
 	RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ANY_RECT,FRAME_DARK,CORNER_SIZE,CORNER_SIZE,TILE,TILE,true,frameDark)
 	if lockArmament: RenderingServer.canvas_item_add_nine_patch(lockDrawMain,rect,ARMAMENT_RECT,ARMAMENT[Game.goldIndex%4],ARMAMENT_CORNER_SIZE,ARMAMENT_CORNER_SIZE,TILE,TILE,false)
 	# configuration
+	var center:Vector2 = rect.position+round(lockSize/2)
 	if lockConfiguration == CONFIGURATION.NONE:
 		match lockType:
 			TYPE.NORMAL,TYPE.EXACT,TYPE.GLISTENING,TYPE.REMAINDER:
-				var string:String = M.str(M.abs(lockCount))
-				if string == "1": string = ""
-				if M.isNonzeroImag(lockCount) and lockType == TYPE.NORMAL: string += "i"
-				var lockOffsetX:float = 0
-				var showLock:bool = (lockType in [TYPE.EXACT, TYPE.GLISTENING, TYPE.REMAINDER]) || (!M.isNonzeroImag(lockCount) && (lockSize != Vector2(18,18) || string == ""))
-				if lockType == TYPE.EXACT and !showLock: string = "=" + string
-				var vertical:bool = lockSize.x == 18 && lockSize.y != 18 && string != ""
-
-				var symbolLast:bool = (lockType == TYPE.EXACT or lockType == TYPE.GLISTENING) and (M.isNonzeroImag(lockCount) or lockZeroI) and !vertical
-				if showLock and !vertical:
-					if (lockType == TYPE.EXACT):
-						if symbolLast: lockOffsetX = 6
-						else: lockOffsetX = 12
-					elif lockType == TYPE.GLISTENING:
-						if symbolLast: lockOffsetX = 8
-						else: lockOffsetX = 12
-					else: lockOffsetX = 14
-
-				var strWidth:float = Game.FTALK.get_string_size(string,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x + lockOffsetX
-
-				var startX:int = round((lockSize.x - strWidth)/2)
-				var startY:int = round((lockSize.y+14)/2)
-				if showLock and vertical: startY -= 8
-				@warning_ignore("integer_division")
-				if showLock:
-					var lockRect:Rect2
-					if vertical:
-						var lockStartX:int = round((lockSize.x - lockOffsetX)/2)
-						lockRect = Rect2(Vector2(lockStartX+lockOffsetX/2,lockSize.y/2+11)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
-					elif symbolLast: lockRect = Rect2(Vector2(startX+strWidth-lockOffsetX/2,lockSize.y/2)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
-					else: lockRect = Rect2(Vector2(startX+lockOffsetX/2,lockSize.y/2)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
-					var lockSymbol:Texture2D
+				var drawColor:Color = getConfigurationColor(negative)
+				var noNumber:bool = M.eq(lockCount, M.ONE())
+				var noSymbol:bool = lockType == TYPE.NORMAL and (M.isNonzeroImag(lockCount) or (lockSize == Vector2(18,18) and !noNumber))
+				var vertical:bool = lockSize.x == 18 and lockSize.y != 18 and !noNumber
+				var symbolLast:bool = false
+				var symbol:Texture2D
+				var effectiveSymbolSize:Vector2 = Vector2.ZERO
+				if !noSymbol:
+					effectiveSymbolSize.y = 12
 					match lockType:
-						TYPE.NORMAL: lockSymbol = SYMBOL_NORMAL
-						TYPE.GLISTENING: lockSymbol = SYMBOL_GLISTENINGI if M.isNonzeroImag(lockCount) else SYMBOL_GLISTENING
-						TYPE.EXACT: lockSymbol = SYMBOL_EXACTI if M.isNonzeroImag(lockCount) or lockZeroI else SYMBOL_EXACT
-						TYPE.REMAINDER: lockSymbol = SYMBOL_REMAINDER
-					if lockNegated: lockRect = Rect2(lockSize-lockRect.position-lockRect.size-offsetFromType(lockSizeType)*2,lockRect.size)
-					RenderingServer.canvas_item_add_texture_rect(lockDrawConfiguration,lockRect,lockSymbol,false,getConfigurationColor(negative))
-				if symbolLast: Game.FTALK.draw_string(lockDrawMain,Vector2(startX,startY)-offsetFromType(lockSizeType),string,HORIZONTAL_ALIGNMENT_LEFT,-1,12,getConfigurationColor(negative))
-				else: Game.FTALK.draw_string(lockDrawMain,Vector2(startX+lockOffsetX,startY)-offsetFromType(lockSizeType),string,HORIZONTAL_ALIGNMENT_LEFT,-1,12,getConfigurationColor(negative))
+							TYPE.NORMAL:
+								symbol = SYMBOL_NORMAL
+								effectiveSymbolSize.x = 14
+							TYPE.EXACT:
+								if M.isNonzeroImag(lockCount) or lockZeroI:
+									symbol = SYMBOL_EXACTI
+									effectiveSymbolSize.x = 6
+									symbolLast = true
+								else:
+									symbol = SYMBOL_EXACT
+									effectiveSymbolSize.x = 12
+							TYPE.GLISTENING:
+								if M.isNonzeroImag(lockCount) or lockZeroI:
+									symbol = SYMBOL_GLISTENINGI
+									effectiveSymbolSize.x = 8
+									symbolLast = true
+								else:
+									symbol = SYMBOL_GLISTENING
+									effectiveSymbolSize.x = 12
+							TYPE.REMAINDER:
+								symbol = SYMBOL_REMAINDER
+								effectiveSymbolSize.x = 14
+				lockTextDrawer.addVerticalContext(center+Vector2(0,2) if vertical and M.isInteger(lockCount) else center, TextDrawer.VERTICAL_ALIGN.CENTER)
+				lockTextDrawer.addHorizontalContext(Vector2.ZERO, TextDrawer.HORIZONTAL_ALIGN.CENTER)
+				lockTextDrawer.addSpacing(2)
+				if vertical:
+					var gap:float = 7 if M.isInteger(lockCount) else 2
+					if !noNumber:
+						lockTextDrawer.addNumber(M.abs(lockCount), drawColor)
+					if lockType == TYPE.NORMAL and M.isNonzeroImag(lockCount):
+						lockTextDrawer.addNewline(gap,TextDrawer.HORIZONTAL_ALIGN.CENTER)
+						lockTextDrawer.addString("i", drawColor)
+					elif !noSymbol:
+						lockTextDrawer.addNewline(gap,TextDrawer.HORIZONTAL_ALIGN.CENTER)
+						lockTextDrawer.addImage(symbol, lockNegated, drawColor, effectiveSymbolSize)
+				else:
+					if symbolLast and !noNumber: lockTextDrawer.addNumber(M.abs(lockCount), drawColor)
+					if !noSymbol: lockTextDrawer.addImage(symbol, lockNegated, drawColor, effectiveSymbolSize)
+					if !symbolLast and !noNumber: lockTextDrawer.addNumber(M.abs(lockCount), drawColor)
 			TYPE.BLANK: pass # nothing really
 			TYPE.BLAST, TYPE.ALL:
-				var numerator:String
+				var drawColor:Color = getConfigurationColor(negative)
+				var numer:PackedInt64Array
+				var denom:PackedInt64Array
 				var ipow:int = 0
-				if M.isComplex(lockDenominator) or M.nex(lockDenominator): numerator = M.str(lockCount)
+				if M.isComplex(lockDenominator) or M.nex(lockDenominator) or M.isComplex(lockCount) or M.isError(lockDenominator):
+					numer = lockCount
+					denom = lockDenominator
 				else:
-					numerator = M.str(M.divide(lockCount, M.saxis(lockDenominator)))
+					numer = M.divide(lockCount, M.axis(lockDenominator))
+					denom = M.abs(lockDenominator)
 					ipow = M.toIpow(M.axis(lockDenominator))
-				if numerator == "1": numerator = ""
-				
-				const symbolOffsetX:float = 10
-				
-				var denom:String
-				if lockIsPartial:
-					if M.isComplex(lockDenominator) or M.nex(lockDenominator) or M.isComplex(lockCount):
-						numerator = M.str(lockCount)
-						denom = M.str(lockDenominator)
-						ipow = 0
-					else: denom = M.str(M.abs(lockDenominator))
-				
-				var strWidth:float = Game.FTALK.get_string_size(numerator,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x + symbolOffsetX
-				var startX:int = round((lockSize.x - strWidth)/2)
-				var startY:int = round((lockSize.y+14)/2)
-
-				if lockIsPartial:
-					var denomWidth:float = Game.FTALK.get_string_size(denom,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-					var denomStartX = round((lockSize.x - denomWidth)/2)
-					var denomStartY = startY + 10
-					startY -= 10
-					Game.FTALK.draw_string(lockDrawMain,Vector2(denomStartX, denomStartY)-offsetFromType(lockSizeType),denom,HORIZONTAL_ALIGNMENT_LEFT,-1,12,getConfigurationColor(negative))
-					
-					var lineWidth:float = max(strWidth,denomWidth)
-					RenderingServer.canvas_item_add_rect(lockDrawMain,Rect2(Vector2(round((lockSize.x - lineWidth)/2),startY+2)-offsetFromType(lockSizeType),Vector2(lineWidth,2)),getConfigurationColor(negative))
-
-				Game.FTALK.draw_string(lockDrawMain,Vector2(startX, startY)-offsetFromType(lockSizeType),numerator,HORIZONTAL_ALIGNMENT_LEFT,-1,12,getConfigurationColor(negative))
-
-				var symbolRect:Rect2 = Rect2(Vector2(startX+strWidth-symbolOffsetX/2,startY-7)-SYMBOL_SIZE/2-offsetFromType(lockSizeType),Vector2(32,32))
+				var noNumeratorNumber:bool = M.eq(numer, M.ONE())
 				var symbol:Texture2D
 				match ipow:
 					0, 2: symbol = SYMBOL_BLAST
 					1, 3: symbol = SYMBOL_BLASTI
 				if lockType == TYPE.ALL: symbol = SYMBOL_ALL
-				RenderingServer.canvas_item_add_texture_rect(lockDrawMain,symbolRect,symbol,false,getConfigurationColor(negative))
+
+				lockTextDrawer.addVerticalContext(center, TextDrawer.VERTICAL_ALIGN.CENTER)
+				lockTextDrawer.addHorizontalContext(Vector2.ZERO, TextDrawer.HORIZONTAL_ALIGN.CENTER)
+				if lockPartialBlastHorizontal:
+					if !noNumeratorNumber: lockTextDrawer.addNumber(numer, drawColor)
+					lockTextDrawer.addImage(symbol, lockNegated, drawColor, Vector2(10,12))
+					lockTextDrawer.addImage(PARTIAL_BLAST_HORIZONTAL if M.isInteger(numer) and M.isInteger(denom) else PARTIAL_BLAST_HORIZONTAL_BIG, lockNegated, drawColor, Vector2(8,12))
+					lockTextDrawer.addNumber(denom, drawColor)
+				else:
+					if !noNumeratorNumber: lockTextDrawer.addNumber(numer, drawColor)
+					lockTextDrawer.addImage(symbol, lockNegated, drawColor, Vector2(10,12))
+
+					if lockIsPartial:
+						var numeratorWidth:float = 10
+						if !noNumeratorNumber: numeratorWidth += lockTextDrawer.getNumberWidth(numer)
+						var denominatorWidth:float = lockTextDrawer.getNumberWidth(denom)
+						var maxWidth:float = max(numeratorWidth, denominatorWidth)
+						lockTextDrawer.addNewline(3, TextDrawer.HORIZONTAL_ALIGN.CENTER)
+						lockTextDrawer.addCustom(drawPartialBlastVerticalLine, [maxWidth, drawColor], 0, 0, 2)
+						lockTextDrawer.addNewline(3, TextDrawer.HORIZONTAL_ALIGN.CENTER)
+						lockTextDrawer.addSpacing(2)
+						lockTextDrawer.addNumber(denom, drawColor)
+				
 	else: RenderingServer.canvas_item_add_texture_rect(lockDrawConfiguration,rect,getPredefinedLockSprite(lockCount,lockType,lockConfiguration),false,getConfigurationColor(negative))
+	lockTextDrawer.evaluate()
+
+static func drawPartialBlastVerticalLine(lockDrawMain:RID, drawPosition:Vector2, params:Array) -> void:
+	var maxWidth:float = params[0]
+	var drawColor:Color = params[1]
+	RenderingServer.canvas_item_add_rect(lockDrawMain, Rect2(drawPosition-Vector2(round(maxWidth/2), 0), Vector2(maxWidth, 2)), drawColor)
 
 func getDrawPosition() -> Vector2: return position + parent.position - getOffset()
 
@@ -444,31 +470,34 @@ func propertyChangedInit(property:StringName) -> void:
 	if property in [&"count", &"sizeType", &"type"]: _setAutoConfiguration()
 	lockPropertyChangedInit(self, property)
 	if property in [&"color", &"type"] and editor.focusDialog.focused == parent: editor.focusDialog.doorDialog.lockHandler.redrawButton(index)
+	if property == &"armament" and armament:
+		parent._allowAurasCheck()
 
 static func lockPropertyChangedInit(lock:GameComponent, property:StringName) -> void:
 	if property == &"type":
-		if (lock.type == TYPE.BLANK or (lock.type == TYPE.ALL and !Mods.active(&"PartialBlastLocks"))) and M.neq(lock.count, M.ONE):
-			Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.ONE))
+		if (lock.type == TYPE.BLANK or (lock.type == TYPE.ALL and !Mods.active(&"PartialBlastLocks"))) and M.neq(lock.count, M.ONE()):
+			Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.ONE()))
 		if lock.type != TYPE.EXACT and lock.zeroI:
 			Changes.addChange(Changes.PropertyChange.new(lock,&"zeroI",false))
 		if lock.type == TYPE.BLAST:
 			if !Mods.active(&"PartialBlastLocks"):
-				if M.neq(M.abs(lock.count), M.ONE): Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.saxis(lock.count)))
+				if M.neq(M.abs(lock.count), M.ONE()): Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.saxis(lock.count)))
 				if M.neq(M.axis(lock.denominator), M.axis(lock.count)): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator", M.axis(lock.count)))
 		elif lock.type == TYPE.ALL:
-			if !lock.isPartial and M.neq(lock.denominator, M.ONE): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.ONE))
+			if !lock.isPartial and M.neq(lock.denominator, M.ONE()): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.ONE()))
 		else:
-			if M.neq(lock.denominator, M.ONE): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.ONE))
+			if M.neq(lock.denominator, M.ONE()): Changes.addChange(Changes.PropertyChange.new(lock,&"denominator",M.ONE()))
 			if lock.isPartial: Changes.addChange(Changes.PropertyChange.new(lock,&"isPartial",false))
 			if M.isComplex(lock.count):
 				Changes.addChange(Changes.PropertyChange.new(lock,&"count",M.r(lock.count)))
 
 	if property == &"isPartial" and !lock.isPartial:
-		Changes.addChange(Changes.PropertyChange.new(lock,&"denominator", M.ONE if M.isComplex(lock.count) or M.nex(lock.count) or lock.type == TYPE.ALL else M.axis(lock.count)))
- 
+		Changes.addChange(Changes.PropertyChange.new(lock,&"denominator", M.ONE() if M.isComplex(lock.count) or M.nex(lock.count) or lock.type == TYPE.ALL else M.axis(lock.count)))
+
 func propertyChangedDo(property:StringName) -> void:
 	if property in [&"count", &"denominator"] and parent: parent.queue_redraw()
 	if property == &"armament" and parent: parent.reindexLocks()
+	if property in [&"size", &"position"] and parent and parent.armament: parent.queue_redraw()
 
 # ==== PLAY ==== #
 var glitchMimic:C.olors = C.olors.GLITCH
@@ -514,7 +543,7 @@ func getColor(step:COLOR_STEP) -> C.olors:
 
 func effectiveConfiguration() -> CONFIGURATION:
 	if Game.simpleLocks: return CONFIGURATION.NONE
-	if M.neq(parent.ipow(), M.ONE):
+	if M.neq(parent.ipow(), M.ONE()):
 		if parent.type == Door.TYPE.SIMPLE: return getAutoConfiguration(self)
 		else: return CONFIGURATION.NONE
 	else: return configuration
@@ -537,7 +566,7 @@ static func getLockCanOpen(lock:GameComponent, player:Player, checkColor:C.olors
 			elif !M.simplies(lockDenominator, keyCount): can = false
 			elif lock.isPartial:
 				if !M.divisibleBy(M.alongbs(keyCount, lockDenominator), lockDenominator): can = false
-				elif M.neq(M.sign(M.divide(M.alongbs(keyCount, lockDenominator), lockDenominator)), M.ONE): can = false
+				elif M.neq(M.sign(M.divide(M.alongbs(keyCount, lockDenominator), lockDenominator)), M.ONE()): can = false
 		TYPE.ALL:
 			if M.nex(lockDenominator): can = false
 			elif M.nex(keyCount): can = false
@@ -549,7 +578,7 @@ static func getLockCanOpen(lock:GameComponent, player:Player, checkColor:C.olors
 				else: can = M.nex(M.r(keyCount))
 			else: can = M.eq(M.along(keyCount, lockCount), M.cabs(lockCount))
 		TYPE.GLISTENING: can = M.cgte(M.along(glistenCount, lockCount), M.cabs(lockCount))
-		TYPE.REMAINDER: can = M.neq(M.partialRemainder(keyCount, lockCount),M.ZERO)
+		TYPE.REMAINDER: can = M.neq(M.partialRemainder(keyCount, lockCount),M.ZERO())
 	return can != lock.negated
 
 func getCost(player:Player, airEffect:bool, ipow:PackedInt64Array=parent.ipow()) -> PackedInt64Array: return getLockCost(self, airEffect, player, ipow)
@@ -558,7 +587,7 @@ static func getLockCost(lock:GameComponent, airEffect:bool, player:Player, ipow:
 	var checkColor:C.olors
 	if airEffect and M.ex(player.key[C.olors.AIR]) and !lock.canOpen(player): checkColor = C.olors.AIR
 	else: checkColor = lock.getColor(COLOR_STEP.FINAL)
-	var cost:PackedInt64Array = M.ZERO
+	var cost:PackedInt64Array = M.ZERO()
 	var keyCount:PackedInt64Array = player.key[checkColor]
 	var lockCount:PackedInt64Array = lock.effectiveCount(ipow)
 	var lockDenominator:PackedInt64Array = lock.effectiveDenominator(ipow)

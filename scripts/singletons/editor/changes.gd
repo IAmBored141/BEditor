@@ -50,7 +50,7 @@ func redo() -> void:
 		stackPosition += 1
 
 func copy(value:Variant) -> Variant:
-	if value is Array or value is PackedInt64Array: return value.duplicate()
+	if value is Array: return value.duplicate()
 	else: return value
 
 @abstract class Change extends RefCounted:
@@ -107,13 +107,15 @@ class CreateComponentChange extends Change:
 	func _init(_type:GDScript,parameters:Dictionary[StringName, Variant]) -> void:
 		type = _type
 		
-		if type == Lock or type == KeyCounterElement: id = Game.componentIdIter; Game.componentIdIter += 1
+		if type in Game.NON_OBJECT_COMPONENTS: id = Game.componentIdIter; Game.componentIdIter += 1
+		elif type in Game.NOTE_COMPONENTS: id = Game.noteIdIter; Game.noteIdIter += 1
 		else: id = Game.objectIdIter; Game.objectIdIter += 1
 
 		for property in type.CREATE_PARAMETERS:
 			prop[property] = Changes.copy(parameters[property])
 		
 		if type in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif type in Game.NOTE_COMPONENTS: dictionary = Game.notes
 		else: dictionary = Game.objects
 
 		do()
@@ -124,7 +126,7 @@ class CreateComponentChange extends Change:
 
 	func do() -> void:
 		var component:GameComponent
-		var parent:Node = Game.objectsParent
+		var parent:Node = Game.notesParent if type in Game.NOTE_COMPONENTS else Game.objectsParent
 		if type in Game.NON_OBJECT_COMPONENTS: component = type.new()
 		else: component = type.SCENE.instantiate()
 
@@ -191,7 +193,8 @@ class DeleteComponentChange extends Change:
 	var type:GDScript
 	var prop:Dictionary[StringName, Variant] = {}
 	var dictionary:Dictionary
-	var arrays:Dictionary[StringName, Array] = {} # dictionary[property, array[type, array]]
+	var arrays:Dictionary[StringName, Array] = {} # dictionary[property, array]
+	var componentArrays:Dictionary[StringName, Array] = {} # dictionary[property, array]
 
 	func _init(component:GameComponent) -> void:
 		if component is PlayerPlaceholderObject:
@@ -200,18 +203,7 @@ class DeleteComponentChange extends Change:
 			return
 
 		type = component.get_script()
-		for property in component.PROPERTIES:
-			prop[property] = Changes.copy(component.get(property))
-		for array in component.ARRAYS.keys():
-			var copiedArray = []
-			for element in component.get(array):
-				if element is GameComponent: copiedArray.append(element.id)
-				else: copiedArray.append(Changes.copy(element))
-			arrays[array] = [component.ARRAYS[array], copiedArray]
 
-		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
-		else: dictionary = Game.objects
-		
 		if type == Door:
 			for lock in component.locks.duplicate():
 				Changes.addChange(DeleteComponentChange.new(lock))
@@ -219,6 +211,18 @@ class DeleteComponentChange extends Change:
 			for element in component.elements.duplicate():
 				Changes.addChange(DeleteComponentChange.new(element))
 		
+
+		for property in Saving.FILE_VERSION.typeDefs[type].savedProperties:
+			prop[property] = Changes.copy(component.get(property))
+		for array in Saving.FILE_VERSION.typeDefs[type].savedArrays:
+			arrays[array] = component.get(array).map(Changes.copy)
+		for array in Saving.FILE_VERSION.typeDefs[type].savedComponentArrays:
+			componentArrays[array] = Saving.componentArrayToIDs(component.get(array))
+
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif type in Game.NOTE_COMPONENTS: dictionary = Game.notes
+		else: dictionary = Game.objects
+
 		if type == PlayerSpawn and component == Game.levelStart:
 			Changes.addChange(GlobalObjectChange.new(Game,&"levelStart",null))
 		
@@ -253,24 +257,20 @@ class DeleteComponentChange extends Change:
 	
 	func undo() -> void:
 		var component:Variant
-		var parent:Variant = Game.objectsParent
+		var parent:Variant = Game.notesParent if type in Game.NOTE_COMPONENTS else Game.objectsParent
 		if type in Game.NON_OBJECT_COMPONENTS: component = type.new()
 		else: component = type.SCENE.instantiate()
 		
 		component.editor = Game.editor
 
-		for property in component.PROPERTIES:
+		for property in Saving.FILE_VERSION.typeDefs[type].savedProperties:
 			component.set(property, Changes.copy(prop[property]))
 			component.propertyChangedDo(property)
-		for array in component.ARRAYS.keys():
-			var componentArray = component.get(array)
-			componentArray.clear()
-			if arrays[array][0] in Game.COMPONENTS:
-				@warning_ignore("incompatible_ternary")
-				var arrayDictionary:Dictionary = Game.components if arrays[array][0] in Game.NON_OBJECT_COMPONENTS else Game.objects
-				for element in arrays[array][1]: componentArray.append(arrayDictionary[element])
-			else:
-				for element in arrays[array][1]: componentArray.append(Changes.copy(element))
+		for array in Saving.FILE_VERSION.typeDefs[type].savedArrays:
+			component.get(array).assign(arrays[array].map(Changes.copy))
+		for array in Saving.FILE_VERSION.typeDefs[type].savedComponentArrays:
+			var arrayType:GDScript = Saving.FILE_VERSION.typeDefs[type].savedComponentArrays[array]
+			component.get(array).assign(Saving.IDArraytoComponents(arrayType, componentArrays[array]))
 		dictionary[prop[&"id"]] = component
 		
 		if type == Lock:
@@ -304,7 +304,7 @@ class PropertyChange extends Change:
 	var after:Variant
 	var type:GDScript
 	
-	func _init(component:GameComponent,_property:StringName,_after:Variant) -> void:
+	func _init(component:GameComponent,_property:StringName,_after:Variant,fromInput:Control=null) -> void:
 		if component is PlayerPlaceholderObject:
 			component.set(_property, _after)
 			component.propertyChangedDo(_property)
@@ -318,6 +318,7 @@ class PropertyChange extends Change:
 		if before == after:
 			cancelled = true
 			return
+		if fromInput: Game.editor.focusDialog.bufferSkipInput = fromInput
 		do()
 		component.propertyChangedInit(property)
 
@@ -327,6 +328,7 @@ class PropertyChange extends Change:
 	func changeValue(value:Variant) -> void:
 		var component:GameComponent
 		if type in Game.NON_OBJECT_COMPONENTS: component = Game.components[id]
+		elif type in Game.NOTE_COMPONENTS: component = Game.notes[id]
 		else: component = Game.objects[id]
 		if value is Array: component.get(property).assign(value)
 		else: component.set(property, value)
@@ -416,6 +418,7 @@ class ArrayAppendChange extends Change:
 		after = _after
 		array = _array
 		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
 		else: dictionary = Game.objects
 		do()
 
@@ -434,7 +437,7 @@ class ArrayElementChange extends Change:
 	var after:Variant
 	var dictionary:Dictionary
 
-	func _init(component:GameComponent,_array:StringName,_index:int,_after:Variant) -> void:
+	func _init(component:GameComponent,_array:StringName,_index:int,_after:Variant,fromInput:Control=null) -> void:
 		id = component.id
 		index = _index
 		array = _array
@@ -444,7 +447,9 @@ class ArrayElementChange extends Change:
 			cancelled = true
 			return
 		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
 		else: dictionary = Game.objects
+		if fromInput: Game.editor.focusDialog.bufferSkipInput = fromInput
 		do()
 
 	func do() -> void: changeValue(after)
@@ -476,6 +481,7 @@ class ArrayPopAtChange extends Change:
 		index = _index
 		before = Changes.copy(component.get(array)[index])
 		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
 		else: dictionary = Game.objects
 		do()
 
@@ -501,8 +507,10 @@ class ComponentArrayAppendChange extends Change:
 		array = _array
 		elementType = after.get_script()
 		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
 		else: dictionary = Game.objects
 		if elementType in Game.NON_OBJECT_COMPONENTS: elementDictionary = Game.components
+		elif elementType in Game.NOTE_COMPONENTS: elementDictionary = Game.notes
 		else: elementDictionary = Game.objects
 		index = len(component.get(array))
 		do()
@@ -538,8 +546,10 @@ class ComponentArrayElementChange extends Change:
 		beforeId = component.get(array)[index].id
 		afterId = after.id
 		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
 		else: dictionary = Game.objects
 		if after.get_script() in Game.NON_OBJECT_COMPONENTS: elementDictionary = Game.components
+		elif after.get_script() in Game.NOTE_COMPONENTS: elementDictionary = Game.notes
 		else: elementDictionary = Game.objects
 		do()
 
@@ -566,8 +576,10 @@ class ComponentArrayPopAtChange extends Change:
 		beforeId = component.get(array)[index].id
 		elementType = component.get(array)[index].get_script()
 		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
 		else: dictionary = Game.objects
 		if elementType in Game.NON_OBJECT_COMPONENTS: elementDictionary = Game.components
+		elif elementType in Game.NOTE_COMPONENTS: elementDictionary = Game.notes
 		else: elementDictionary = Game.objects
 		do()
 
@@ -618,8 +630,9 @@ class ComponentConvertNumberChange extends Change:
 
 	func _init(component:GameComponent, _from:M.SYSTEM, _property:StringName) -> void:
 		id = component.id
-		if component is GameObject: dictionary = Game.objects
-		else: dictionary = Game.components
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
+		else: dictionary = Game.objects
 		from = _from
 		property = _property
 		before = Changes.copy(component.get(property))
@@ -640,8 +653,9 @@ class ComponentConvertNumberArrayChange extends Change:
 
 	func _init(component:GameComponent, _from:M.SYSTEM, _array:StringName) -> void:
 		id = component.id
-		if component is GameObject: dictionary = Game.objects
-		else: dictionary = Game.components
+		if component.get_script() in Game.NON_OBJECT_COMPONENTS: dictionary = Game.components
+		elif component.get_script() in Game.NOTE_COMPONENTS: dictionary = Game.notes
+		else: dictionary = Game.objects
 		from = _from
 		array = _array
 		before = Changes.copy(component.get(array))

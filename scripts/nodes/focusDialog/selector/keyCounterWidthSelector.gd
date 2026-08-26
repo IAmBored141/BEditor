@@ -2,11 +2,11 @@ extends Selector
 class_name KeyCounterWidthSelector
 
 const ICONS:Array[Texture2D] = [
-	preload("res://assets/ui/focusDialog/lockConfiguration/AnyS.png"),
-	preload("res://assets/ui/focusDialog/lockConfiguration/AnyM.png"),
-	preload("res://assets/ui/focusDialog/lockConfiguration/AnyL.png"),
-	preload("res://assets/ui/focusDialog/lockConfiguration/AnyXL.png"),
-	preload("res://assets/ui/focusDialog/lockConfiguration/AnyXXL.png"),
+	preload("res://assets/ui/focusDialog/door/lockConfiguration/AnyS.png"),
+	preload("res://assets/ui/focusDialog/door/lockConfiguration/AnyM.png"),
+	preload("res://assets/ui/focusDialog/door/lockConfiguration/AnyL.png"),
+	preload("res://assets/ui/focusDialog/door/lockConfiguration/AnyXL.png"),
+	preload("res://assets/ui/focusDialog/door/lockConfiguration/AnyXXL.png"),
 ]
 
 func _ready() -> void:
@@ -23,8 +23,6 @@ func changedMods() -> void:
 	columns = len(widths)
 
 class KeyCounterWidthSelectorButton extends SelectorButton:
-	var drawMain:RID
-
 	func _init(_value:KeyCounter.WIDTH, _selector:KeyCounterWidthSelector):
 		custom_minimum_size = Vector2(16,16)
 		z_index = 1

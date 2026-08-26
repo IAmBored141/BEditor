@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 enum SYSTEM {COMPLEX, FRACTIONS}
@@ -17,41 +18,35 @@ func convert(n:PackedInt64Array, from:SYSTEM) -> PackedInt64Array:
 			match from:
 				SYSTEM.COMPLEX, _: return [n[0], n[1], 1]
 
-var ZERO:PackedInt64Array:
-	get():
-		match system:
-			SYSTEM.COMPLEX: return [0,0]
-			SYSTEM.FRACTIONS, _: return [0,0,1]
+func ZERO() -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return [0,0]
+		SYSTEM.FRACTIONS, _: return [0,0,1]
 
-var ONE:PackedInt64Array:
-	get():
-		match system:
-			SYSTEM.COMPLEX: return [1,0]
-			SYSTEM.FRACTIONS, _: return [1,0,1]
+func ONE() -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return [1,0]
+		SYSTEM.FRACTIONS, _: return [1,0,1]
 
-var nONE:PackedInt64Array:
-	get():
-		match system:
-			SYSTEM.COMPLEX: return [-1,0]
-			SYSTEM.FRACTIONS, _: return [-1,0,1]
+func nONE() -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return [-1,0]
+		SYSTEM.FRACTIONS, _: return [-1,0,1]
 
-var I:PackedInt64Array:
-	get():
-		match system:
-			SYSTEM.COMPLEX: return [0,1]
-			SYSTEM.FRACTIONS, _: return [0,1,1]
+func I() -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return [0,1]
+		SYSTEM.FRACTIONS, _: return [0,1,1]
 
-var nI:PackedInt64Array:
-	get():
-		match system:
-			SYSTEM.COMPLEX: return [0,-1]
-			SYSTEM.FRACTIONS, _: return [0,-1,1]
+func nI() -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return [0,-1]
+		SYSTEM.FRACTIONS, _: return [0,-1,1]
 
-var ERROR:PackedInt64Array:
-	get():
-		match system:
-			SYSTEM.COMPLEX: assert(false); return [0,0] # complex system does not have an error state
-			SYSTEM.FRACTIONS, _: return [0,0,0]
+func ERROR() -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: assert(false); return [0,0] # complex system does not have an error state
+		SYSTEM.FRACTIONS, _: return [0,0,0]
 
 # initialisers
 
@@ -76,19 +71,19 @@ func Nc(a:int,b:int) -> PackedInt64Array:
 ## New fractional number
 func Nf(n:int,d:int) -> PackedInt64Array:
 	match system:
-		SYSTEM.COMPLEX: assert(false); return ZERO
+		SYSTEM.COMPLEX: assert(false); return ZERO()
 		SYSTEM.FRACTIONS, _: return [n,0,d]
 
 ## New fractional imaginary number
 func Nfi(n:int,d:int) -> PackedInt64Array:
 	match system:
-		SYSTEM.COMPLEX: assert(false); return ZERO
+		SYSTEM.COMPLEX: assert(false); return ZERO()
 		SYSTEM.FRACTIONS, _: return [0,n,d]
 
 ## New fractional complex number
 func Nfc(a:int,b:int,d:int) -> PackedInt64Array:
 	match system:
-		SYSTEM.COMPLEX: assert(false); return ZERO
+		SYSTEM.COMPLEX: assert(false); return ZERO()
 		SYSTEM.FRACTIONS, _: return [a,b,d]
 
 ## New Complex number from Numbers (a,b -> r(a) + r(b)i)
@@ -100,7 +95,7 @@ func Ncn(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
 ## New Fractional number from Numbers (a,b -> numer(a) / rnumer(b))
 func Nfn(a:PackedInt64Array,b:PackedInt64Array) -> PackedInt64Array:
 	match system:
-		SYSTEM.COMPLEX: assert(false); return ZERO
+		SYSTEM.COMPLEX: assert(false); return ZERO()
 		SYSTEM.FRACTIONS, _: return simplify([a[0],a[1],b[0]])
 
 func allAxes() -> PackedInt64Array:
@@ -139,7 +134,7 @@ func across(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 func divide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX:
-			if nex(b): return ZERO
+			if nex(b): return ZERO()
 			@warning_ignore("integer_division")
 			return [(a[0]*b[0]+a[1]*b[1])/(b[0]*b[0]+b[1]*b[1]), (a[1]*b[0]-a[0]*b[1])/(b[0]*b[0]+b[1]*b[1])]
 		SYSTEM.FRACTIONS, _: return simplify([(a[0]*b[0]+a[1]*b[1])*b[2], (a[1]*b[0]-a[0]*b[1])*b[2], (b[0]*b[0]+b[1]*b[1])*a[2]])
@@ -153,20 +148,20 @@ func floorDivide(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 ## (a,b -> a % b)
 ## has the sign of a (-5 % 3 = -2)
 func remainder(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
-	if nex(b): return ZERO
+	if nex(b): return ZERO()
 	return sub(a,times(trunc(divide(a,b)),b))
 
 ## (a,b -> (a % b + b) % b)
 ## has the sign of b (remainder(-5, 3) = 1)
 ## also known as posmod
 func modulo(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
-	if nex(b): return ZERO
+	if nex(b): return ZERO()
 	return sub(a,times(floorDivide(a,b),b))
 
 ## (a,b -> a p% b)
 ## Only subtracts real multiples of b 
 func partialRemainder(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
-	if nex(b): return ZERO
+	if nex(b): return ZERO()
 	return sub(a,times(r(trunc(divide(a,b))),b))
 
 ## a "along" the axes of b
@@ -190,6 +185,12 @@ func rotate(n:PackedInt64Array) -> PackedInt64Array:
 		SYSTEM.FRACTIONS, _: return [-n[1], n[0], n[2]]
 
 ## componentwise max
+func min(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return [min(a[0], b[0]), min(a[1], b[1])]
+		SYSTEM.FRACTIONS, _: return simplify([min(a[0]*b[2], b[0]*a[2]), min(a[1]*b[2], b[1]*a[2]), a[2]*b[2]])
+
+## componentwise max
 func max(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [max(a[0], b[0]), max(a[1], b[1])]
@@ -201,6 +202,12 @@ func orelse(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
 		SYSTEM.COMPLEX: return [a[0] if a[0] else b[0], a[1] if a[1] else b[1]]
 		SYSTEM.FRACTIONS, _: return simplify([a[0]*b[2] if a[0] else b[0]*a[2], a[1]*b[2] if a[1] else b[1]*a[2], a[2]*b[2]])
 
+## componentwise without
+func without(a:PackedInt64Array, b:PackedInt64Array) -> PackedInt64Array:
+	match system:
+		SYSTEM.COMPLEX: return [0 if b[0] else a[0], 0 if b[1] else a[1]]
+		SYSTEM.FRACTIONS, _: return simplify([0 if b[0] else a[0], 0 if b[1] else a[1], a[2]])
+
 # reducers
 
 ## (n -> n)
@@ -208,27 +215,28 @@ func simplify(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
 		SYSTEM.FRACTIONS, _:
-			if n[2] == 0: return ERROR # propagate error state
+			if n[2] == 0: return ERROR() # propagate error state
 			var divisor:int = gcd(gcd(n[0], n[1]), n[2])
-			@warning_ignore("integer_division") return [n[0]/divisor, n[1]/divisor, n[2]/divisor]
+			# abs so that even if it overflows its still valid
+			@warning_ignore("integer_division") return [n[0]/divisor, n[1]/divisor, abs(n[2]/divisor)]
 
 ## (n -> r(n))
 func r(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[0], 0]
-		SYSTEM.FRACTIONS, _: return [n[0], 0, n[2]]
+		SYSTEM.FRACTIONS, _: return simplify([n[0], 0, n[2]])
 
 ## (n -> i(n))
 func i(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [0, n[1]]
-		SYSTEM.FRACTIONS, _: return [0, n[1], n[2]]
+		SYSTEM.FRACTIONS, _: return simplify([0, n[1], n[2]])
 
 ## (n -> ir(n))
 func ir(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[1], 0]
-		SYSTEM.FRACTIONS, _: return [n[1], 0, n[2]]
+		SYSTEM.FRACTIONS, _: return simplify([n[1], 0, n[2]])
 
 ## (n -> r(n)*denom(n))
 func rnumer(n:PackedInt64Array) -> PackedInt64Array:
@@ -257,7 +265,7 @@ func numer(n:PackedInt64Array) -> PackedInt64Array:
 ## (n -> denom(n))
 func denom(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
-		SYSTEM.COMPLEX: return ONE
+		SYSTEM.COMPLEX: return ONE()
 		SYSTEM.FRACTIONS, _: return [n[2], 0, 1]
 
 ## (n -> sign(r(n)) + sign(ir(n)))
@@ -270,13 +278,13 @@ func sign(n:PackedInt64Array) -> PackedInt64Array:
 func abs(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [abs(n[0])+abs(n[1]), 0]
-		SYSTEM.FRACTIONS, _: return [abs(n[0])+abs(n[1]), 0, n[2]]
+		SYSTEM.FRACTIONS, _: return simplify([abs(n[0])+abs(n[1]), 0, n[2]])
 
 ## (n -> r(n) + ir(n))
 func reduce(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [n[0]+n[1], 0]
-		SYSTEM.FRACTIONS, _: return [n[0]+n[1], 0, n[2]]
+		SYSTEM.FRACTIONS, _: return simplify([n[0]+n[1], 0, n[2]])
 
 ## the axes present in the number
 ## (n -> sign(r(n)) + sign(ir(n))i)
@@ -287,32 +295,34 @@ func axis(n:PackedInt64Array) -> PackedInt64Array:
 
 ## the axes present in the number, but 0+0i counts as positive real
 ## (n -> 1 if n == 0 else axis(n))
-func saxis(n:PackedInt64Array) -> PackedInt64Array: return ONE if n == ZERO else axis(n)
+func saxis(n:PackedInt64Array) -> PackedInt64Array: return ONE() if n == ZERO() else axis(n)
 
 ## componentwise abs
 ## (n -> abs(r(n)) + abs(ir(n))i)
 func cabs(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return [abs(n[0]), abs(n[1])]
-		SYSTEM.FRACTIONS, _: return [abs(n[0]), abs(n[1]), n[2]]
+		SYSTEM.FRACTIONS, _: return simplify([abs(n[0]), abs(n[1]), n[2]])
 
 ## the axes present in the number, ignoring sign
 func axibs(n:PackedInt64Array) -> PackedInt64Array: return cabs(axis(n))
-## the axes present in the number, or 1 if zero, ignoring sign
+## the axes present in the number, or 1 if ZERO(), ignoring sign
 func saxibs(n:PackedInt64Array) -> PackedInt64Array: return cabs(saxis(n))
 
 ## truncates number
 func trunc(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
-		@warning_ignore("integer_division") SYSTEM.FRACTIONS, _: return [n[0]/n[2], n[1]/n[2], 1]
+		SYSTEM.FRACTIONS, _:
+			if isError(n): return ERROR()
+			@warning_ignore("integer_division") return [n[0]/n[2], n[1]/n[2], 1]
 
 ## floors number
 func floor(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
 		SYSTEM.FRACTIONS, _:
-			if isError(n): return ERROR
+			if isError(n): return ERROR()
 			return [intDiv(n[0],n[2]), intDiv(n[1],n[2]), 1]
 
 ## ceils number maybe 
@@ -320,7 +330,7 @@ func ceil(n:PackedInt64Array) -> PackedInt64Array:
 	match system:
 		SYSTEM.COMPLEX: return n
 		SYSTEM.FRACTIONS, _:
-			if isError(n): return ERROR
+			if isError(n): return ERROR()
 			var real:int = intDiv(n[0],n[2])
 			var imag:int = intDiv(n[1],n[2])
 			if M.neq([n[0],0,1], [real,0,1]): real += 1
@@ -394,10 +404,11 @@ func simplies(a:PackedInt64Array, b:PackedInt64Array) -> bool:
 
 ## "exists"
 func ex(n:PackedInt64Array) -> bool:
-	return neq(n, ZERO)
+	if M.isError(n): return false
+	return neq(n, ZERO())
 
 func nex(n:PackedInt64Array) -> bool:
-	return eq(n, ZERO)
+	return eq(n, ZERO())
 
 func isNonzeroReal(n:PackedInt64Array) -> bool:
 	return n[0] and !n[1]
@@ -456,20 +467,23 @@ func isError(n:PackedInt64Array) -> bool:
 
 # util
 
+func parts(n:PackedInt64Array) -> Array[PackedInt64Array]:
+	return [r(n), i(n)]
+
 func toIpow(n:PackedInt64Array) -> int:
-	if eq(n, ONE): return 0
-	elif eq(n, I): return 1
-	elif eq(n, nONE): return 2
-	elif eq(n, nI): return 3
+	if eq(n, ONE()): return 0
+	elif eq(n, I()): return 1
+	elif eq(n, nONE()): return 2
+	elif eq(n, nI()): return 3
 	else: assert(false); return 0
 
 ## only needs to work for real integers
 func toInt(n:PackedInt64Array) -> int:
 	return n[0]
 
-func str(n:PackedInt64Array) -> String: return strWithInf(n,ZERO)
+func str(n:PackedInt64Array) -> String: return strWithInf(n,ZERO())
 
-func strDistributeFraction(n:PackedInt64Array) -> String: return strWithInfDistributeFraction(n,ZERO)
+func strDistributeFraction(n:PackedInt64Array) -> String: return strWithInfDistributeFraction(n,ZERO())
 
 func strWithInf(n:PackedInt64Array,infAxes:PackedInt64Array) -> String:
 	var rComponent:String

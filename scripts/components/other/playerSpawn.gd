@@ -16,24 +16,15 @@ const SAVESTATE_ICON:Texture2D = preload("res://assets/game/playerSpawn/savestat
 const CREATE_PARAMETERS:Array[StringName] = [
 	&"position"
 ]
-const PROPERTIES:Array[StringName] = [
-	&"id", &"position", &"size",
-	&"undoStack", # undostack is a "property" and not an "array" because we wont ever interact with the elements; its basically just a selfcontained datum
-	&"saveBuffered"
-]
-static var ARRAYS:Dictionary[StringName,Variant] = {
-	&"key":TYPE_PACKED_INT64_ARRAY,
-	&"star":TYPE_BOOL,
-	&"curse":TYPE_BOOL,
-	&"glisten":TYPE_PACKED_INT64_ARRAY
-}
 
-var key:Array[PackedInt64Array] = []
-var star:Array[bool]
-var curse:Array[bool]
-var glisten:Array[PackedInt64Array] = []
-var undoStack:Array[RefCounted] = []
-var saveBuffered:bool = false
+@export_group("SavedArrays")
+@export var key:Array[PackedInt64Array] = []
+@export var star:Array[bool]
+@export var curse:Array[bool]
+@export var glisten:Array[PackedInt64Array] = []
+@export_group("SavedProperties")
+@export var undoStack:Array[Array] = []
+@export var saveBuffered:bool = false
 
 var drawMain:RID
 
@@ -41,20 +32,20 @@ func _init() -> void:
 	size = Vector2(32,32)
 	for color in Colors.COLORS:
 		# if color == C.olors.STONE:
-		key.append(M.ZERO)
+		key.append(M.ZERO())
 		star.append(false)
 		curse.append(color == C.olors.BROWN)
-		glisten.append(M.ZERO)
+		glisten.append(M.ZERO())
 
 func resetColors() -> void:
 	for color in Colors.COLORS:
 		resetColor(color)
 
 func resetColor(color:C.olors) -> void:
-	Changes.addChange(Changes.ArrayElementChange.new(self,&"key",color,M.ZERO))
+	Changes.addChange(Changes.ArrayElementChange.new(self,&"key",color,M.ZERO()))
 	Changes.addChange(Changes.ArrayElementChange.new(self,&"star",color,false))
 	Changes.addChange(Changes.ArrayElementChange.new(self,&"curse",color,false))
-	Changes.addChange(Changes.ArrayElementChange.new(self,&"glisten",color,M.ZERO))
+	Changes.addChange(Changes.ArrayElementChange.new(self,&"glisten",color,M.ZERO()))
 
 var forceDrawStart:bool = false
 

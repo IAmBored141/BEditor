@@ -27,14 +27,11 @@ const TILE:RenderingServer.NinePatchAxisMode = RenderingServer.NinePatchAxisMode
 const CREATE_PARAMETERS:Array[StringName] = [
 	&"position"
 ]
-const PROPERTIES:Array[StringName] = [
-	&"id", &"position", &"size",
-]
-static var ARRAYS:Dictionary[StringName,Variant] = {}
 
 var drawMain:RID
 
-var elements:Array[KeyCounterElement] = []
+@export_group("SavedComponentArrays")
+@export var elements:Array[KeyCounterElement] = []
 
 func _init() -> void :
 	size = Vector2(WIDTH_AMOUNT[WIDTH.SHORT],63)

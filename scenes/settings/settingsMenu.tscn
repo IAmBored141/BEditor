@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://uojm0pynavni"]
+
+[ext_resource type="Theme" uid="uid://bvfthh0vm4fbp" path="res://resources/uiTheme.tres" id="1_c8k7n"]
+[ext_resource type="Script" uid="uid://cp1r75v1n7qs1" path="res://scripts/singletons/settings/settingsMenu.gd" id="2_onm7i"]
+[ext_resource type="PackedScene" uid="uid://qrdba8qjtdip" path="res://scenes/settings/levelSettings.tscn" id="3_kt0xa"]
+[ext_resource type="PackedScene" uid="uid://k2lktliankr8" path="res://scenes/settings/editorSettings.tscn" id="4_ofqr2"]
+[ext_resource type="PackedScene" uid="uid://cudl265jx2hk6" path="res://scenes/settings/gameSettings.tscn" id="6_tyaol"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a5etv"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.8)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_egwj7"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 3.0
+color = Color(0.5, 0.5, 0.5, 1)
+thickness = 2
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_0t5ct"]
+
+[node name="settingsMenu" type="PanelContainer" unique_id=1534647259]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 1
+theme = ExtResource("1_c8k7n")
+theme_override_styles/panel = SubResource("StyleBoxFlat_a5etv")
+script = ExtResource("2_onm7i")
+
+[node name="c" type="VBoxContainer" parent="." unique_id=2023479286]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="c" unique_id=204010922]
+z_index = 2
+layout_mode = 2
+theme_override_constants/separation = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_egwj7")
+
+[node name="levelSettings" parent="c" unique_id=1360193335 instance=ExtResource("3_kt0xa")]
+unique_name_in_owner = true
+visible = true
+layout_mode = 2
+
+[node name="editorSettings" parent="c" unique_id=919030709 instance=ExtResource("4_ofqr2")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="gameSettings" parent="c" unique_id=2039076092 instance=ExtResource("6_tyaol")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+toneButtonGroup = SubResource("ButtonGroup_0t5ct")

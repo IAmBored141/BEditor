@@ -1,31 +1,29 @@
-extends Control
+extends SubDialog
 class_name KeyDialog
 
-@onready var main:FocusDialog = get_parent()
+const STAR_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/key/type/star/star.png"), preload("res://assets/ui/focusDialog/key/type/star/unstar.png") ]
+const CURSE_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/key/type/curse/curse.png"), preload("res://assets/ui/focusDialog/key/type/curse/uncurse.png") ]
 
-const STAR_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/keySplitType/star.png"), preload("res://assets/ui/focusDialog/keySplitType/unstar.png") ]
-const CURSE_UN_ICONS:Array[Texture2D] = [ preload("res://assets/ui/focusDialog/keySplitType/curse.png"), preload("res://assets/ui/focusDialog/keySplitType/uncurse.png") ]
-
-func focus(focused:KeyBulk, new:bool, _dontRedirect:bool) -> void:
+func focus(focused:KeyBulk, _new:bool, _dontRedirect:bool, skipInput:Control) -> void:
 	%keyColorSelector.setSelect(focused.color)
 	%keyAltColorSelector.setSelect(focused.altColor)
 	%keyAltColorSelector.visible = focused.type == KeyBulk.TYPE.OPERATOR
 	%keyTypeSelector.setSelect(focused.type)
 	%keyCountEdit.visible = focused.type in [KeyBulk.TYPE.NORMAL,KeyBulk.TYPE.EXACT]
-	if new: %keyCountEdit.setValue(focused.count)
+	if skipInput != %keyCountEdit: %keyCountEdit.setValue(focused.count)
 	%keyInfiniteToggle.button_pressed = focused.infinite
 	%keyGlisteningToggle.button_pressed = focused.glistening
 	%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and focused.infinite
-	if new: %keyPartialInfiniteEdit.setValue(M.N(focused.infinite))
+	if skipInput != %keyPartialInfiniteEdit: %keyPartialInfiniteEdit.setValue(M.N(focused.infinite))
 	%keyOperationSelector.visible = focused.type == KeyBulk.TYPE.OPERATOR
 	%keyOperationSelector.setSelect(focused.operation)
 	%keyRotorSelector.visible = focused.type == KeyBulk.TYPE.ROTOR
-	%keyBoolSelector.visible = focused.type in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE]
-	%keyBoolSelector.setSelect(focused.boolType)
+	%keyBoolTypeSelector.visible = focused.type in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE]
+	%keyBoolTypeSelector.setSelect(focused.boolType)
 	%keyCollectTypeSelector.visible = focused.type not in [KeyBulk.TYPE.STAR, KeyBulk.TYPE.CURSE] && Mods.active(&"StarryWeakForceful")
-	%keyCollectTypeSelector.setSelect(focused.collectType) # GODOT IT DOES EXIST AHH
+	%keyCollectTypeSelector.setSelect(focused.collectType)
 	%keyRotorSelector.setup(focused)
-	%keyBoolSelector.setup()
+	%keyBoolTypeSelector.setup()
 	%keyReciprocal.visible = focused.type == KeyBulk.TYPE.ROTOR && Mods.active(&"OperatorKeys")
 	if focused.type == KeyBulk.TYPE.ROTOR: %keyRotorSelector.setValue(focused.count)
 	if main.interacted and !main.interacted.is_visible_in_tree(): main.deinteract()
@@ -51,9 +49,9 @@ func receiveKey(event:InputEventKey) -> bool:
 		else: _keyTypeSelected(KeyBulk.TYPE.STAR)
 	elif Editor.eventIs(event, &"focusKeyRotor"):
 		if main.focused.type != KeyBulk.TYPE.ROTOR: _keyTypeSelected(KeyBulk.TYPE.ROTOR)
-		elif M.eq(main.focused.count, M.nONE): _keyCountSet(M.I)
-		elif M.eq(main.focused.count, M.I): _keyCountSet(M.nI)
-		elif M.eq(main.focused.count, M.nI): _keyTypeSelected(KeyBulk.TYPE.NORMAL); _keyCountSet(M.ONE)
+		elif M.eq(main.focused.count, M.nONE()): _keyCountSet(M.I())
+		elif M.eq(main.focused.count, M.I()): _keyCountSet(M.nI())
+		elif M.eq(main.focused.count, M.nI()): _keyTypeSelected(KeyBulk.TYPE.NORMAL); _keyCountSet(M.ONE())
 	elif Editor.eventIs(event, &"focusKeyCurse") and Mods.active(&"CurseKeys"):
 			if main.focused.type == KeyBulk.TYPE.CURSE: Changes.PropertyChange.new(main.focused,&"boolType",main.focused.value)
 			else: _keyTypeSelected(KeyBulk.TYPE.CURSE)
@@ -65,7 +63,7 @@ func receiveKey(event:InputEventKey) -> bool:
 	return true
 
 func changedMods() -> void:
-	%keyBoolSelector.setup()
+	%keyBoolTypeSelector.setup()
 	%keyGlisteningToggle.visible = Mods.active(&"Glistening")
 	if main.focused is KeyBulk:
 		%keyPartialInfinite.visible = Mods.active(&"PartialInfKeys") and main.focused.infinite
@@ -86,7 +84,7 @@ func _keyTypeSelected(type:KeyBulk.TYPE) -> void:
 	if main.focused is not KeyBulk: return
 	var beforeType:KeyBulk.TYPE = main.focused.type
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"type",type))
-	if beforeType != type and type == KeyBulk.TYPE.ROTOR: Changes.PropertyChange.new(main.focused,&"count",M.nONE)
+	if beforeType != type and type == KeyBulk.TYPE.ROTOR: Changes.PropertyChange.new(main.focused,&"count",M.nONE())
 	Changes.bufferSave()
 
 func _keyOperationSelected(operation:KeyBulk.OPERATION) -> void:
@@ -96,7 +94,7 @@ func _keyOperationSelected(operation:KeyBulk.OPERATION) -> void:
 
 func _keyCountSet(value:PackedInt64Array) -> void:
 	if main.focused is not KeyBulk: return
-	Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",value))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",value,%keyCountEdit))
 	Changes.bufferSave()
 
 func _keyInfiniteToggled(value:bool) -> void:
@@ -115,25 +113,25 @@ func _keyGlisteningToggled(value:bool) -> void:
 func _keyRotorSelected(value:KeyRotorSelector.VALUE):
 	if main.focused is not KeyBulk: return
 	match value:
-		KeyRotorSelector.VALUE.NOROTATE: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.ONE))
-		KeyRotorSelector.VALUE.SIGNFLIP: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nONE))
-		KeyRotorSelector.VALUE.POSROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.I))
-		KeyRotorSelector.VALUE.NEGROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nI))
+		KeyRotorSelector.VALUE.NOROTATE: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.ONE()))
+		KeyRotorSelector.VALUE.SIGNFLIP: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nONE()))
+		KeyRotorSelector.VALUE.POSROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.I()))
+		KeyRotorSelector.VALUE.NEGROTOR: Changes.addChange(Changes.PropertyChange.new(main.focused,&"count",M.nI()))
 	Changes.bufferSave()
 
-func _keyBoolSelected(value:KeyBulk.BOOL_TYPE):
+func _keyBoolTypeSelected(value:KeyBulk.BOOL_TYPE) -> void:
 	if main.focused is not KeyBulk: return
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"boolType",value))
 	Changes.bufferSave()
 
-func _keyCollectTypeSelected(value:KeyBulk.COLLECT_TYPE):
+func _keyCollectTypeSelected(value:Player.KEYCHANGE_TYPE) -> void:
 	if main.focused is not KeyBulk: return
 	Changes.addChange(Changes.PropertyChange.new(main.focused,&"collectType",value))
 	Changes.bufferSave()
 
 func _keyPartialInfiniteSet(value:PackedInt64Array) -> void:
 	if main.focused is not KeyBulk: return
-	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infinite",M.toInt(value)))
+	Changes.addChange(Changes.PropertyChange.new(main.focused,&"infinite",M.toInt(value),%keyPartialInfiniteEdit))
 	Changes.bufferSave()
 
 func _keyReciprocalToggled(value:bool) -> void:

@@ -34,7 +34,7 @@ func setup() -> void:
 	for mod in Mods.mods.keys():
 		problemDisplays[mod] = {}
 		for problemType in Mods.mods[mod].problems.keys():
-			problemDisplays[mod][problemType] = preload("res://scenes/problemDisplay.tscn").instantiate().setup(mod,problemType,self)
+			problemDisplays[mod][problemType] = preload("res://scenes/mods/problemDisplay.tscn").instantiate().setup(mod,problemType,self)
 	
 	for object in Game.objects.values():
 		object.problems.clear()
@@ -42,6 +42,9 @@ func setup() -> void:
 	for component in Game.components.values():
 		component.problems.clear()
 		findProblems(component)
+	for note in Game.notes.values():
+		note.problems.clear()
+		findProblems(note)
 	for mod in Mods.mods.keys():
 		if mod in modsWindow.modsAdded: %modsAdded.add_child(ModSelectButton.new(self,mod))
 		elif mod in modsWindow.modsRemoved: %modsRemoved.add_child(ModSelectButton.new(self,mod))
@@ -67,7 +70,7 @@ func findProblems(component:GameComponent) -> void:
 			var problem:Mods.Problem = mod.problems[problemName]
 			match problem.get_script():
 				Mods.ComponentProblem:
-					if component.get_script() in problem.components or (component is GameObject and GameObject in problem.components) or GameComponent in problem.components:
+					if component.get_script() in problem.types or (component is GameObject and GameObject in problem.types) or GameComponent in problem.types:
 						noteProblem(modName, problemName, component, problem.checker.call(component))
 				Mods.ColorProblem:
 					for color in component.getColors():

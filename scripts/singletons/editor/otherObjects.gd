@@ -7,8 +7,14 @@ var selected:GDScript = PlayerSpawn
 var objects:Array[GDScript] = [Goal, KeyCounter, PlayerSpawn, FloatingTile, RemoteLock]
 var firstResult:GDScript
 
+func _ready() -> void:
+	await item_rect_changed
+	%results.size.x = size.x
+	%results.position = position + %clip.position + Vector2(0, size.y)
+
 func _searchFocused() -> void:
 	Game.editor.focusDialog.defocus()
+	Game.editor.modes.setView(Editor.VIEW.NORMAL)
 	await get_tree().process_frame
 	objectSearch.text = ""
 	_updateSearch()

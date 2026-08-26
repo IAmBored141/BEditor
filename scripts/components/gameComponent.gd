@@ -3,15 +3,17 @@ extends Node2D
 class_name GameComponent
 # game objects and also door locks
 
-var id:int
-var size:Vector2
+@export_group("SavedProperties")
+@export var id:int
+@export var size:Vector2
 var problems:Array[Array] = [] # array[array[mod, problemtype]]
 
 var isReady:bool = false
 
 var editor:Editor
 
-func getDrawPosition() -> Vector2: return position
+func getOffset() -> Vector2: return Vector2.ZERO
+func getDrawPosition() -> Vector2: return position - getOffset()
 func getDrawSize() -> Vector2: return size
 
 func receiveMouseInput(_event:InputEventMouse) -> bool: return false

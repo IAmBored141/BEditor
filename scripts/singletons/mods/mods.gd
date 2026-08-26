@@ -79,7 +79,7 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Adds the Partial Blast type for Locks from world 3 of IWL:C",
 		{&"PartialBlastLock": ComponentProblem.new([Lock, RemoteLock], func(component:GameComponent) -> bool: \
 			return component.type == Lock.TYPE.BLAST and (component.isPartial or M.neq(component.count, component.denominator)) \
-				or component.type == Lock.TYPE.ALL and (component.isPartial or M.neq(component.count, M.ONE) or M.neq(component.denominator, M.ONE))
+				or component.type == Lock.TYPE.ALL and (component.isPartial or M.neq(component.count, M.ONE()) or M.neq(component.denominator, M.ONE()))
 		, "Partial Blast Lock")}
 	),
 	&"ExactLocks": Mod.new(
@@ -111,7 +111,10 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Adds Armaments from world 5 of IWL:C",
 		{&"LockArmament": ComponentProblem.new([Lock, RemoteLock], func(component:GameComponent) -> bool: \
 			return component.armament
-		, "Lock Armament")}
+		, "Lock Armament"),
+		&"DoorArmament": ComponentProblem.new([Door], func(component:GameComponent) -> bool: \
+			return component.armament
+		, "Door Armament")}
 	),
 	&"RemainderLocks": Mod.new(
 		"Remainder Locks",
@@ -144,7 +147,9 @@ static var mods:Dictionary[StringName, Mod] = {
 	&"Fractions": Mod.new(
 		"Fractions",
 		"The fractional number type",
-		{}
+		{&"DoorOscillate": ComponentProblem.new([Door], func(component:GameComponent) -> bool: \
+			return component.oscillate
+		, "Door Oscillate")}
 	),
 	&"Glistening": Mod.new(
 		"Glistening",
@@ -182,7 +187,7 @@ static var mods:Dictionary[StringName, Mod] = {
 		"Starry, Weak and Forceful",
 		"Adds the Starry, Weak and Forceful properties to keys and doors. Added by Bored, original idea by MathCookie.",
 		{&"StarryWeakForceful": ComponentProblem.new([KeyBulk], func(component:GameComponent) -> bool: \
-			return component.collectType != KeyBulk.COLLECT_TYPE.NORMAL
+			return component.collectType != Player.KEYCHANGE_TYPE.NORMAL
 		, "Starry, Weak and Forceful")} #cant figure it out
 	),
 	&"Boolflip": Mod.new(
@@ -301,7 +306,7 @@ func colors() -> Array[C.olors]:
 	if active(&"DynamiteColor"): array.append(C.olors.DYNAMITE)
 	if active(&"QuicksilverColor"): array.append(C.olors.QUICKSILVER)
 	if active(&"DarkAuraColors"): array.append_array([C.olors.MAROON, C.olors.FOREST, C.olors.NAVY])
-	if active( &"AuraBreakerColors"): array.append_array([C.olors.ICE, C.olors.MUD, C.olors.GRAFFITI])
+	if active(&"AuraBreakerColors"): array.append_array([C.olors.ICE, C.olors.MUD, C.olors.GRAFFITI])
 	if active(&"NoneColor"): array.append(C.olors.NONE)
 	if active(&"CosmicColor"): array.append(C.olors.COSMIC)
 	if active(&"ErrorColor"): array.append(C.olors.ERROR)
@@ -317,6 +322,29 @@ func nextColor(color:C.olors) -> C.olors:
 func previousColor(color:C.olors) -> C.olors:
 	var colorsArray:Array[C.olors] = colors()
 	return colorsArray[posmod(colorsArray.find(color) - 1, len(colorsArray))]
+
+func pdaColors() -> Array[C.olors]:
+	var array:Array[C.olors]
+	# none is a placeholder for an empty slot (convenient)
+	if active(&"DynamiteColor") and active(&"QuicksilverColor") and active(&"DarkAuraColors") and active(&"AuraBreakerColors"):
+		array = [
+			C.olors.WHITE, C.olors.ORANGE, C.olors.PURPLE, C.olors.PINK, C.olors.CYAN, C.olors.BLACK, C.olors.STONE,
+			C.olors.MASTER, C.olors.PURE, C.olors.BROWN, C.olors.GLITCH, C.olors.QUICKSILVER, C.olors.DYNAMITE, C.olors.NONE,
+			C.olors.RED, C.olors.GREEN, C.olors.BLUE, C.olors.ICE, C.olors.MUD, C.olors.GRAFFITI, C.olors.NONE,
+			C.olors.MAROON, C.olors.FOREST, C.olors.NAVY
+		]
+	else:
+		array = [
+			C.olors.WHITE, C.olors.ORANGE, C.olors.PURPLE, C.olors.PINK, C.olors.CYAN, C.olors.BLACK, C.olors.STONE,
+			C.olors.MASTER, C.olors.PURE, C.olors.BROWN, C.olors.RED, C.olors.GREEN, C.olors.BLUE, C.olors.GLITCH
+		]
+	for color in colors():
+		if color == C.olors.NONE: continue
+		if color not in array:
+			var emptyIndex:int = array.find(C.olors.NONE)
+			if emptyIndex == -1: array.append(color)
+			else: array[emptyIndex] = color
+	return array
 
 func keyTypes() -> Array[KeyBulk.TYPE]:
 	var array:Array[KeyBulk.TYPE] = [

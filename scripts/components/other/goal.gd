@@ -26,16 +26,12 @@ const KEY_PARTICLE_2_COLOR:Color = Color("#ffffb4")
 const CREATE_PARAMETERS:Array[StringName] = [
 	&"position"
 ]
-const PROPERTIES:Array[StringName] = [
-	&"id", &"position", &"size",
-	&"type"
-]
-static var ARRAYS:Dictionary[StringName,Variant] = {}
 
 const TYPES:int = 3
 enum TYPE {NORMAL, STAR, OMEGA}
 
-var type:TYPE = TYPE.NORMAL
+@export_group("SavedProperties")
+@export var type:TYPE = TYPE.NORMAL
 
 var drawMain:RID
 var drawStar:RID
@@ -54,7 +50,6 @@ func win() -> void:
 		for particle in %particles.get_children(): particle.hue = particleHue()
 	for i in 80: Game.particlesParent.add_child(KeyParticle.new(Game.player.position+Vector2(randf_range(-8,8),randf_range(-8,8)), i, KEY_PARTICLE_COLOR, 1))
 	for i in 60: Game.particlesParent.add_child(KeyParticle.new(Game.player.position+Vector2(randf_range(-8,8),randf_range(-8,8)), i, KEY_PARTICLE_2_COLOR, 0.6))
-	
 
 func _physics_process(delta:float):
 	particleSpawnTimer += delta
