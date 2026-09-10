@@ -340,7 +340,7 @@ func cycleMaster() -> void:
 			AudioManager.play(preload("res://resources/sounds/player/quicksilverEquip.wav"),2)
 			return
 	if masterCycle < 3 and C.olors.COSMIC not in armamentImmunities: # COSMIC
-		var relevantCount:PackedInt64Array = M.across(M.r(key[C.olors.COSMIC]), complexMode)
+		var relevantCount:PackedInt64Array = M.across(key[C.olors.COSMIC], complexMode)
 		if M.ex(relevantCount):
 			masterCycle = 3
 			masterMode = M.axis(relevantCount)

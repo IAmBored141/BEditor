@@ -58,7 +58,7 @@ func _physics_process(delta:float):
 		var particle:Particle = Particle.new(particleHue())
 		%particles.add_child(particle)
 		%particles.move_child(particle, 0)
-		return particle
+		#return particle
 		
 
 func _process(delta:float):

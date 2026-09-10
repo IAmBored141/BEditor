@@ -40,6 +40,7 @@ const GLITCH_DARK:Texture2D = preload("res://assets/game/door/glitch/dark.png")
 
 const STARRED_SYMBOL_ON:Texture2D = preload("res://assets/game/door/symbols/starOn.png")
 const STARRED_SYMBOL_OFF:Texture2D = preload("res://assets/game/door/symbols/starOff.png")
+const STARRED_STATE_FROZEN:Texture2D = preload("res://assets/game/door/symbols/stateFrozen.png")
 const OSCILLATE_SYMBOL:Texture2D = preload("res://assets/game/door/symbols/oscillate.png")
 const OSCILLATE_MATERIAL:ShaderMaterial = preload("res://resources/materials/oscillateDrawMaterial.tres")
 
@@ -211,9 +212,19 @@ func _draw() -> void:
 	else:
 		if M.neq(copies, M.ONE()) or M.ex(infCopies): TextDraw.outlinedCentered(Game.FKEYX,drawSymbols,"×"+M.strWithInf(copies,infCopies),COPIES_COLOR,COPIES_OUTLINE_COLOR,20,Vector2(size.x/2,-8))
 	# symbols
-	match starred:
-		STAR_STATE.STARRED_UNLOCKED: RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-12,size.y-12),Vector2(24,24)),STARRED_SYMBOL_ON)
-		STAR_STATE.STARRED_LOCKED: RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-12,size.y-12),Vector2(24,24)),STARRED_SYMBOL_OFF)
+	if not starredStateFrozen:
+		match starred:
+			STAR_STATE.STARRED_UNLOCKED: RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-12,size.y-12),Vector2(24,24)),STARRED_SYMBOL_ON)
+			STAR_STATE.STARRED_LOCKED: RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-12,size.y-12),Vector2(24,24)),STARRED_SYMBOL_OFF)
+	else:
+		match starred:
+			STAR_STATE.UNSTARRED: RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-12,size.y-12),Vector2(24,24)),STARRED_STATE_FROZEN)
+			STAR_STATE.STARRED_UNLOCKED: 
+				RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-18,size.y-12),Vector2(24,24)),STARRED_STATE_FROZEN)
+				RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-6,size.y-12),Vector2(24,24)),STARRED_SYMBOL_ON)
+			STAR_STATE.STARRED_LOCKED: 
+				RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-18,size.y-12),Vector2(24,24)),STARRED_STATE_FROZEN)
+				RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x/2-6,size.y-12),Vector2(24,24)),STARRED_SYMBOL_OFF)
 	if oscillate:
 		# RenderingServer.canvas_item_add_texture_rect(drawSymbols,Rect2(Vector2(size.x-10,-6),Vector2(16,16)),OSCILLATE_SYMBOL)
 		RenderingServer.canvas_item_add_rect(drawOscillate,rect,Color(1/rect.size.x, 1/rect.size.y, 1))
@@ -465,6 +476,7 @@ var errorMimic:C.olors = C.olors.ERROR
 var curseMimic:C.olors = C.olors.GLITCH
 
 enum STAR_STATE {UNSTARRED, STARRED_UNLOCKED, STARRED_LOCKED}
+var starredStateFrozen:bool = false
 var starred:STAR_STATE = STAR_STATE.UNSTARRED
 var starredColor:C.olors = C.olors.WHITE 
 var starredIpow:PackedInt64Array = M.ONE()
@@ -575,6 +587,7 @@ func stop() -> void:
 	starredColor = C.olors.WHITE
 	starredIpow = M.ONE()
 	starredOpenMultiplier = M.ONE()
+	starredStateFrozen = false
 	super()
 
 # for fractional open
@@ -673,7 +686,7 @@ func applyCosts(player:Player, multiplier:PackedInt64Array=M.ONE(), costIpow:Pac
 	var pure:bool = hasEffectiveColor(C.olors.PURE)
 	# DECIDE: should armaments be immune to air?
 	# DECIDE: should pure doors/gates be immune to the other elemental colors?
-	if starred != STAR_STATE.UNSTARRED:
+	if starred != STAR_STATE.UNSTARRED and not armament:
 		var waterGlistenArmamentCost = calculateCosts(player, pure, multiplier, func(lock): return lock.type == Lock.TYPE.GLISTENING and lock.getColor(Lock.COLOR_STEP.FINAL) == C.olors.WATER and lock.armament, costIpow)
 		var waterArmamentCost = calculateCosts(player, pure, multiplier, func(lock): return lock.type != Lock.TYPE.GLISTENING and lock.getColor(Lock.COLOR_STEP.FINAL) == C.olors.WATER and lock.armament, costIpow)
 		player.changeGlisten(starredColor, M.sub(player.glisten[starredColor], M.add(starredSpendGlisten,
@@ -732,7 +745,7 @@ func tryDynamiteOpen(player:Player) -> bool:
 func tryCosmicOpen(player:Player) -> bool:
 	if hasEffectiveColor(C.olors.COSMIC): return false
 	if hasEffectiveColor(C.olors.PURE): return false
-	if starred == STAR_STATE.UNSTARRED and player.masterMode == M.ONE():
+	if starred == STAR_STATE.UNSTARRED and player.masterMode == M.I():
 		player.changeKeys(C.olors.COSMIC, M.sub(player.key[C.olors.COSMIC], player.masterMode))
 		if checkCanOpen(player, func(lock): return !lock.armament): GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starred", STAR_STATE.STARRED_UNLOCKED))
 		else: GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starred", STAR_STATE.STARRED_LOCKED))
@@ -745,9 +758,15 @@ func tryCosmicOpen(player:Player) -> bool:
 		GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starredColor", getColor(COLOR_STEP.FINAL)))
 		GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starredIpow", ipow()))
 		GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starredOpenMultiplier", multiplier))
-	elif starred != STAR_STATE.UNSTARRED and player.masterMode == M.nONE():
+	elif starred != STAR_STATE.UNSTARRED and player.masterMode == M.nI():
 		player.changeKeys(C.olors.COSMIC, M.sub(player.key[C.olors.COSMIC], player.masterMode))
 		GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starred", STAR_STATE.UNSTARRED))
+	elif !starredStateFrozen and player.masterMode == M.ONE():
+		player.changeKeys(C.olors.COSMIC, M.sub(player.key[C.olors.COSMIC], player.masterMode))
+		GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starredStateFrozen", true))
+	elif starredStateFrozen and player.masterMode == M.nONE():
+		player.changeKeys(C.olors.COSMIC, M.sub(player.key[C.olors.COSMIC], player.masterMode))
+		GameChanges.applyChange(GameChanges.newPropertyChange(self, &"starredStateFrozen", false))
 	else: return false
 	relockAnimation()
 	player.dropMaster()
@@ -858,7 +877,7 @@ func gateCheck(player:Player, starting:bool=false) -> void:
 func auraCheck(player:Player) -> void:
 	if type == TYPE.GATE: return
 	if animState != ANIM_STATE.IDLE: return
-	if starred != STAR_STATE.UNSTARRED: return
+	if starredStateFrozen: return
 	if !allowAuras(): return
 	var playSound:bool = false
 	if player.auraRed and gameFrozen and !hasEffectiveColor(C.olors.MAROON):
@@ -896,7 +915,7 @@ func isAllInitialColor(color:C.olors) -> bool:
 
 func curseCheck(player:Player) -> void:
 	if type == TYPE.GATE: return
-	if starred != STAR_STATE.UNSTARRED: return
+	if starredStateFrozen: return
 	if animState != ANIM_STATE.IDLE: return
 	if hasEffectiveColor(C.olors.PURE): return
 	var willCurse:bool = player.curseMode > 0 and (!cursed or (curseColor != player.curseColor and curseColor != C.olors.PURE))
@@ -975,12 +994,12 @@ func setMimic(mimicType:C.olors, setColor:C.olors) -> void:
 	match mimicType:
 		C.olors.GLITCH: property = &"glitchMimic"
 		C.olors.ERROR: property = &"errorMimic"
-	if starred == STAR_STATE.UNSTARRED:
+	if not starredStateFrozen:
 		if curseUnaffected():
 			if hasInitialColor(mimicType): GameChanges.applyChange(GameChanges.newPropertyChange(self, property, setColor))
 		elif curseColor == mimicType: GameChanges.applyChange(GameChanges.newPropertyChange(self, &"curseMimic", setColor))
 	for lock in locks:
-		if ((curseUnaffected() and starred == STAR_STATE.UNSTARRED) or lock.armament) and lock.color == mimicType: GameChanges.applyChange(GameChanges.newPropertyChange(lock, property, setColor))
+		if ((curseUnaffected() and not starredStateFrozen) or lock.armament) and lock.color == mimicType: GameChanges.applyChange(GameChanges.newPropertyChange(lock, property, setColor))
 		lock.queue_redraw()
 	queue_redraw()
 	if type == TYPE.GATE:

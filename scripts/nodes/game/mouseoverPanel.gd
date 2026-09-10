@@ -108,7 +108,7 @@ func lockCost(lock:GameComponent) -> String:
 	var string:String = ""
 	if lock.negated: string += "Not "
 	match lock.type:
-		Lock.TYPE.NORMAL: string += M.str(lock.count) if M.ex(lock.count) else "None"
+		Lock.TYPE.NORMAL: string += "ERROR" if M.isError(lock.count) else M.str(lock.count) if M.ex(lock.count) else "None"
 		Lock.TYPE.BLANK: string += "None"
 		Lock.TYPE.BLAST, Lock.TYPE.ALL:
 			string += "["
@@ -143,11 +143,12 @@ func effects(object:GameObject) -> String:
 	if object.gameCrumbled: string += "\nEroded! (5xGreen)"
 	if object.gamePainted: string += "\nPainted! (3xBlue)"
 	if object is Door:
+		if object.starredStateFrozen: string += "\nStarred!"
 		match object.starred:
-			Door.STAR_STATE.STARRED_UNLOCKED: string += "\nStarred! (Unlocked,"
-			Door.STAR_STATE.STARRED_LOCKED: string += "\nStarred! (Locked,"
-		if object.starred != Door.STAR_STATE.UNSTARRED:
-			string += "\nSpends " + M.str(object.starredSpendKey)
+			Door.STAR_STATE.STARRED_UNLOCKED: string += "\nUnlocked!"
+			Door.STAR_STATE.STARRED_LOCKED: string += "\nLocked..."
+		if object.starred != Door.STAR_STATE.UNSTARRED and not object.armament:
+			string += " (Spends " + M.str(object.starredSpendKey)
 			if M.ex(object.starredSpendGlisten):
 				string += "(" + M.str(object.starredSpendGlisten) + ")"
 			if object.hasArmamentLocks(): string += " (+ Armament locks)"
