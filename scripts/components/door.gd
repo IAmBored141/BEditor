@@ -405,7 +405,7 @@ func propertyChangedDo(property:StringName) -> void:
 		for remoteLock in remoteLocks: remoteLock.queue_redraw()
 
 func addLock() -> void:
-	if len(locks) == 1: locks[0]._comboDoorConfigurationChanged(Lock.SIZE_TYPE.AnyS)
+	if len(locks) == 1 and (locks[0].size+Vector2(14,14) == size): locks[0]._comboDoorConfigurationChanged(Lock.SIZE_TYPE.AnyS)
 	Changes.addChange(Changes.CreateComponentChange.new(Lock,{&"position":getFirstFreePosition(),&"parentId":id}))
 	if len(locks) == 1 and type != Door.TYPE.GATE: Changes.addChange(Changes.PropertyChange.new(self,&"type",TYPE.SIMPLE))
 	elif type == Door.TYPE.SIMPLE: Changes.addChange(Changes.PropertyChange.new(self,&"type",TYPE.COMBO))
@@ -624,6 +624,8 @@ func tryOpen(player:Player) -> void:
 			STAR_STATE.UNSTARRED: if !checkCanOpen(player): return
 		var multiplier:PackedInt64Array = getOpenMultiplier() if starred == STAR_STATE.UNSTARRED else starredOpenMultiplier
 		applyCosts(player, multiplier)
+		# Reduce Sulphur keys after door open
+		player.changeKeys(C.olors.SULPHUR, M.sub(player.key[C.olors.SULPHUR], M.denomclamp(player.key[C.olors.SULPHUR])))
 		GameChanges.applyChange(GameChanges.newPropertyChange(self, &"gameCopies", M.sub(gameCopies, M.without(M.times(ipow() if starred == STAR_STATE.UNSTARRED else starredIpow, multiplier), infCopies))))
 	
 	if gameFrozen or gameCrumbled or gamePainted: AudioManager.play(preload("res://resources/sounds/door/deaura.wav"))
